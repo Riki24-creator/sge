@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SGE — Gestione Soccorso Grandi Eventi</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#0b1220; --bg2:#0f1726; --panel:#131d2e; --panel2:#1a2639; --panel3:#22304a;
+  --line:#26344b; --txt:#e7eef9; --muted:#8ba0bf; --accent:#3d9bff;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+  background:var(--bg); color:var(--txt); overflow:hidden; font-size:14px;}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+.hidden{display:none !important}
+.muted{color:var(--muted)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2b3a55;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#3b4f70}
+.topbar{height:56px;display:flex;align-items:center;gap:16px;padding:0 16px;
+  background:linear-gradient(180deg,#152034,#101828);
+  border-bottom:1px solid var(--line);position:relative;z-index:1200;}
+.brand{display:flex;align-items:center;gap:8px;font-size:15px;letter-spacing:.3px;flex-shrink:0}
+.brand b{color:#fff;font-size:17px}
+.brand span{color:var(--muted);font-size:12px}
+.tabs{display:flex;gap:6px;margin-left:8px;flex-shrink:0}
+.tabs button{background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:600;transition:.15s;}
+.tabs button:hover{background:#1c2942;color:var(--txt)}
+.tabs button.active{background:var(--accent);color:#04101f;border-color:var(--accent)}
+.topbar .spacer{flex:1}
+.top-colorbar{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:2px 0;
+  scrollbar-width:none}
+.top-colorbar::-webkit-scrollbar{display:none}
+.tcbtn{display:flex;align-items:center;gap:5px;background:#1a2740;border:1px solid var(--line);
+  color:var(--txt);padding:5px 10px;border-radius:8px;cursor:pointer;font-weight:800;font-size:12px;
+  transition:.15s;flex-shrink:0;user-select:none}
+.tcbtn:hover{background:#25354f}
+.tcbtn.on{background:var(--c);color:#04101f;border-color:var(--c);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--c) 45%, transparent)}
+.tcbtn.on .tc-n{background:rgba(0,0,0,.28);color:#fff}
+.tc-dot{width:9px;height:9px;border-radius:50%;background:var(--c);border:1px solid rgba(255,255,255,.4)}
+.tc-n{background:#0d1728;padding:1px 6px;border-radius:20px;font-size:11px;color:var(--muted);
+  min-width:20px;text-align:center;font-weight:800}
+.sol-sync-dot{font-size:11.5px;color:#8ba0bf;font-weight:700;white-space:nowrap;
+  display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);flex-shrink:0}
+.clock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;flex-shrink:0}
+.view{height:calc(100vh - 56px)}
+.app{display:flex;height:100%}
+.sidebar{width:410px;flex-shrink:0;overflow-y:auto;overflow-x:hidden;
+  background:var(--bg2);border-right:1px solid var(--line);padding:10px;}
+.map-wrap{flex:1;position:relative;min-width:0}
+#map{position:absolute;inset:0;background:#0a0f18}
+.leaflet-div-icon{background:transparent !important;border:none !important}
+.leaflet-container{font-family:inherit;background:#0a0f18}
+.acc{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:9px;overflow:hidden}
+.acc-head{width:100%;display:flex;align-items:center;gap:8px;background:transparent;border:none;
+  color:var(--txt);padding:12px 13px;cursor:pointer;font-weight:700;font-size:13.5px;text-align:left;}
+.acc-head:hover{background:#1a2740}
+.acc-head .chev{margin-left:auto;color:var(--muted);transition:.2s;font-size:11px}
+.acc.open .acc-head .chev{transform:rotate(180deg)}
+.acc-head .badge{background:var(--accent);color:#04101f;font-size:11px;font-weight:800;
+  padding:1px 7px;border-radius:20px;margin-left:6px;}
+.acc-body{display:none;padding:0 13px 13px}
+.acc.open .acc-body{display:block}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);margin-bottom:5px;font-weight:700}
+input[type=text],input[type=tel],select,textarea{
+  width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  padding:9px 10px;border-radius:9px;outline:none;transition:.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,155,255,.15)}
+textarea{resize:vertical;min-height:44px}
+.btn{background:var(--panel3);border:1px solid var(--line);color:var(--txt);
+  padding:9px 13px;border-radius:9px;cursor:pointer;font-weight:600;transition:.15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:hover{background:#2c3d5c}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#04101f}
+.btn.primary:hover{background:#5aabff}
+.btn.danger{background:#3a1b1e;border-color:#6d2b2f;color:#ff8b8b}
+.btn.danger:hover{background:#4d2226}
+.btn.ghost{background:transparent}
+.btn.block{width:100%}
+.btn.mini{padding:4px 8px;font-size:12px;border-radius:7px}
+.row{display:flex;gap:8px;margin-bottom:10px}
+.row>*{flex:1}
+.warn{background:#3a2f0d;border:1px solid #6d5a17;color:#ffd45e;
+  padding:8px 10px;border-radius:9px;font-size:12.5px;margin-top:6px;line-height:1.4;}
+.info{background:#0d2838;border:1px solid #1b4d68;color:#9fd0ff;
+  padding:8px 10px;border-radius:9px;font-size:12.5px;margin-top:6px;line-height:1.4;}
+.search-wrap{position:relative}
+.sugg{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px;max-height:270px;overflow-y:auto;
+  z-index:900;box-shadow:0 14px 34px rgba(0,0,0,.55);}
+.sugg-item{padding:9px 11px;cursor:pointer;border-bottom:1px solid #1e2b42;line-height:1.35}
+.sugg-item:last-child{border-bottom:none}
+.sugg-item:hover,.sugg-item.sel{background:#25354f}
+.sugg-item .s1{font-weight:600;font-size:13px}
+.sugg-item .s2{font-size:11.5px;color:var(--muted)}
+.sugg-empty{padding:10px 12px;color:var(--muted);font-size:12.5px}
+.geo-status{font-size:11px;color:var(--muted);margin-top:4px;min-height:14px;
+  font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.geo-status .ok{color:#6ee7a8}
+.geo-status .bad{color:#ff8b8b}
+.geo-status .loading{color:#9fd0ff}
+.draft{display:flex;align-items:center;gap:8px;font-size:12.5px;background:var(--panel2);
+  border:1px dashed var(--line);border-radius:9px;padding:8px 10px;color:var(--muted);}
+.draft.ok{border-style:solid;border-color:var(--accent);color:var(--txt)}
+.draft b{color:var(--accent)}
+.code-preview{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;min-height:22px}
+.chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:var(--panel3);color:var(--muted);border:1px solid var(--line);}
+.chip.on{background:#1e3a5c;color:#9fd0ff;border-color:#2f5a8a}
+.chip.col{color:#fff;border:none}
+.code-bad{color:#ff8b8b;font-size:12px;margin-top:6px}
+.colorbar{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.cbtn{display:flex;align-items:center;gap:6px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px;padding:9px 9px;cursor:pointer;
+  color:var(--txt);font-weight:700;font-size:12.5px;transition:.15s;}
+.cbtn:hover{transform:translateY(-1px)}
+.cbtn.on{border-color:var(--c);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+.cb-dot{width:13px;height:13px;border-radius:50%;background:var(--c);flex-shrink:0;
+  border:1px solid rgba(255,255,255,.35)}
+.cb-lab{flex:1;text-align:left}
+.cb-n{background:#0d1728;border-radius:20px;padding:1px 7px;font-size:11.5px;color:var(--muted)}
+.cbtn.all{background:var(--panel2)}
+.cbtn.all .cb-dot{background:linear-gradient(135deg,#e53935,#f2c200,#2fa84f,#f2f2f2,#1c1c1c)}
+.ops-item{display:flex;align-items:stretch;gap:0;background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;margin-bottom:7px;cursor:pointer;overflow:hidden;transition:.15s;}
+.ops-item:hover{border-color:#3b5480;transform:translateX(2px)}
+.ops-stripe{width:6px;flex-shrink:0;background:var(--c,#444)}
+.ops-main{flex:1;padding:9px 11px;min-width:0}
+.ops-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ops-name{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ops-code{font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.4px;}
+.crew-badge{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;
+  letter-spacing:.5px;color:#fff;}
+.ops-sub{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ops-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+  padding:8px 10px;gap:3px;flex-shrink:0}
+.pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.disp-section{margin-bottom:14px}
+.disp-section h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--muted);font-weight:800;}
+.disp-card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+  padding:10px 12px;margin-bottom:8px}
+.disp-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.disp-ico2{font-size:18px;flex-shrink:0}
+.disp-name2{flex:1;font-weight:700;font-size:13.5px}
+.disp-tot{background:#0d1728;color:var(--muted);font-size:11.5px;font-weight:800;
+  padding:2px 8px;border-radius:20px}
+.disp-bar{display:flex;gap:2px;height:8px;border-radius:6px;overflow:hidden;
+  background:#0d1728;margin-bottom:7px}
+.disp-seg{height:100%;transition:.25s}
+.disp-seg.disp{background:#2fa84f}
+.disp-seg.busy{background:#e53935}
+.disp-seg.noop{background:#6b7280}
+.disp-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+.disp-leg{display:flex;align-items:center;gap:5px}
+.disp-leg b{color:var(--txt);font-weight:800;font-size:12.5px}
+.disp-leg.disp b{color:#6ee7a8}
+.disp-leg.busy b{color:#ff8b8b}
+.disp-leg.noop b{color:#a0aab8}
+.disp-leg::before{content:'';width:8px;height:8px;border-radius:2px;display:inline-block}
+.disp-leg.disp::before{background:#2fa84f}
+.disp-leg.busy::before{background:#e53935}
+.disp-leg.noop::before{background:#6b7280}
+.tm-admin{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:9px 11px;margin-bottom:7px;}
+.tm-ico{font-size:19px;width:26px;text-align:center;flex-shrink:0}
+.tm-info{flex:1;min-width:0}
+.tm-name{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-sub{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:middle}
+.poi-item{display:flex;align-items:center;gap:9px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.poi-ico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;background:var(--panel3)}
+.poi-name{font-weight:600;font-size:13px}
+.poi-cat{font-size:11px;color:var(--muted)}
+.map-tools{position:absolute;top:12px;right:12px;z-index:800;display:flex;gap:6px;flex-direction:column;}
+.map-tools button{background:rgba(19,29,46,.94);border:1px solid var(--line);color:var(--muted);
+  padding:7px 11px;border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:600;
+  backdrop-filter:blur(6px);text-align:left;}
+.map-tools button.on{color:var(--txt);border-color:var(--accent);background:rgba(30,58,92,.95)}
+.map-provider{position:absolute;top:12px;left:60px;z-index:800;
+  background:rgba(19,29,46,.94);border:1px solid var(--line);border-radius:9px;
+  padding:7px 11px;font-size:12px;color:var(--muted);backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:8px;}
+.map-provider select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  padding:4px 8px;border-radius:7px;font-size:12px;cursor:pointer;outline:none;}
+.map-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:800;
+  background:rgba(19,29,46,.94);border:1px solid var(--line);padding:7px 15px;border-radius:20px;
+  font-size:12.5px;color:var(--muted);backdrop-filter:blur(6px);pointer-events:none;}
+.map-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:40px;color:var(--muted);line-height:1.6}
+.mk-pin{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12.5px;letter-spacing:.3px;position:relative;
+  border:2.5px solid rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(0,0,0,.6);
+  background:var(--c);color:var(--f);}
+.mk-pin.closed{opacity:.4;filter:grayscale(.7);border-style:dashed}
+.mk-pin.pulse{animation:pulse 1.9s infinite}
+.mk-pin.pending{border:3px dashed #ff9d00;background:rgba(255,157,0,.28);
+  color:#ffb84d;animation:pending-pulse 1.5s ease-in-out infinite;}
+.mk-pin .mk-badge{position:absolute;top:-8px;right:-9px;width:20px;height:20px;border-radius:50%;
+  background:#ff9d00;color:#1a1200;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;border:2px solid #0b1220;}
+.mk-pin .mk-count{position:absolute;bottom:-8px;right:-9px;min-width:20px;height:20px;border-radius:50%;
+  background:#3d9bff;color:#04101f;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;border:2px solid #0b1220;padding:0 5px;}
+@keyframes pulse{0%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,.5)}
+  70%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 13px rgba(255,255,255,0)}
+  100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}}
+@keyframes pending-pulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,157,0,.7)}
+  50%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 12px rgba(255,157,0,0)}}
+.team-pin{width:40px;height:40px;border-radius:50%;background:#101a2b;position:relative;
+  border:3px solid var(--c);display:flex;align-items:center;justify-content:center;
+  font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.65);}
+.tp-badge{position:absolute;top:-9px;right:-13px;font-size:9.5px;font-weight:800;
+  padding:2px 5px;border-radius:20px;color:#fff;border:1.5px solid #0b1220;letter-spacing:.3px;}
+.tp-crew{position:absolute;bottom:-7px;left:-7px;width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;
+  color:#fff;border:2px solid #0b1220;}
+.poi-pin{width:30px;height:30px;border-radius:9px 9px 9px 3px;transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;background:var(--c);
+  border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 10px rgba(0,0,0,.6);}
+.poi-pin span{transform:rotate(45deg);font-size:13px;line-height:1}
+.draft-pin{width:22px;height:22px;border-radius:50%;border:3px dashed #3d9bff;background:rgba(61,155,255,.2);}
+.leaflet-popup-content-wrapper{background:var(--panel2);color:var(--txt);border-radius:11px;
+  box-shadow:0 14px 38px rgba(0,0,0,.65);border:1px solid var(--line)}
+.leaflet-popup-tip{background:var(--panel2);border:1px solid var(--line)}
+.leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.5;min-width:190px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted);padding:6px 8px 0 0}
+.pp-title{font-weight:800;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pp-code{font-size:12px;font-weight:800;padding:2px 9px;border-radius:20px}
+.pp-row{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:2px 0}
+.pp-row span:first-child{color:var(--muted)}
+.pp-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.pp-pending{background:#3a2a00;border:1px solid #6d4c00;color:#ffc65c;
+  padding:6px 9px;border-radius:8px;font-size:12px;margin-top:6px;}
+.pp-teams{margin-top:8px;border-top:1px solid var(--line);padding-top:8px}
+.pp-teams-t{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;
+  font-weight:800;margin-bottom:5px}
+.pp-team-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;
+  cursor:pointer;transition:.15s;font-size:12.5px}
+.pp-team-row:hover{background:#25354f}
+.pp-team-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal{position:fixed;inset:0;background:rgba(4,8,16,.72);z-index:2000;
+  display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 30px 70px rgba(0,0,0,.7)}
+.modal-head{display:flex;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-size:16px;flex:1}
+.modal-head button{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px}
+.modal-head button:hover{color:var(--txt)}
+.modal-body{padding:18px;overflow-y:auto}
+.mt-head{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.mt-ico{font-size:27px;width:50px;height:50px;border-radius:14px;background:var(--panel2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mt-name{font-weight:800;font-size:16px}
+.mt-sub{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:3px}
+.mt-status{margin-left:auto;font-size:11px;font-weight:800;padding:5px 11px;border-radius:20px;color:#08111d}
+.mission-card{display:flex;gap:12px;align-items:center;background:var(--panel2);
+  border-radius:11px;padding:12px;margin-bottom:12px}
+.mc-code{font-size:15px;font-weight:800;padding:8px 13px;border-radius:10px;letter-spacing:.6px}
+.mc-info{font-size:12.5px;line-height:1.55;min-width:0}
+.hist{max-height:210px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.hist-row{display:flex;gap:10px;padding:8px 11px;border-bottom:1px solid #1e2b42;font-size:12.5px}
+.hist-row:last-child{border-bottom:none}
+.hist-row .h-t{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;width:96px}
+.empty{text-align:center;color:var(--muted);padding:22px 10px;font-size:13px}
+#view-squadre{overflow-y:auto;background:var(--bg)}
+.mobile{max-width:520px;margin:0 auto;padding:16px 14px 50px}
+.m-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:13px}
+.m-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+  font-weight:800;margin-bottom:10px}
+.m-status-big{display:flex;align-items:center;gap:12px;border-radius:14px;padding:16px;
+  font-weight:800;font-size:17px;color:#08111d;margin-bottom:13px}
+.m-status-big .sb-ico{font-size:26px}
+.m-mission{border-left:6px solid var(--c,#555);display:flex;gap:12px;align-items:center}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.status-grid .btn{padding:12px 8px;flex-direction:column;gap:3px;font-size:12.5px}
+.status-grid .btn .big{font-size:18px}
+.phase-badge{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;
+  letter-spacing:.3px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">⛑️ <b>SGE</b> <span>Grandi Eventi</span></div>
+  <nav class="tabs">
+    <button data-view="sala" class="active">🖥️ Sala Operativa</button>
+    <button data-view="squadre">🚑 Squadre</button>
+  </nav>
+  <div class="top-colorbar" id="topColorBar" title="Filtra la mappa per codice colore"></div>
+  <div class="spacer"></div>
+  <span class="sol-sync-dot" id="solSyncDot" title="Stato connessione pagina Equipaggio">
+    ○ Equipaggio offline
+  </span>
+  <span class="clock" id="clock"></span>
+  <button class="btn ghost mini" id="resetBtn">↺ Demo</button>
+</header>
+
+<section id="view-sala" class="view">
+  <div class="app">
+    <aside class="sidebar">
+
+      <div class="acc open" id="accMission">
+        <button class="acc-head">🚨 Nuovo Target / Invio Missione <span class="chev">▾</span></button>
+        <div class="acc-body">
+          <div class="field">
+            <label>Indirizzo / luogo</label>
+            <div class="search-wrap">
+              <input type="text" id="addrInput" placeholder="Scrivi una via, o clicca sulla mappa…" autocomplete="off">
+              <div id="addrSugg" class="sugg hidden"></div>
+            </div>
+            <div class="geo-status" id="geoStatus"></div>
+          </div>
+          <div class="draft" id="draftBox"><span>📍</span><span id="draftText">Nessun punto selezionato</span></div>
+          <div class="field" style="margin-top:10px">
+            <label>Codice intervento</label>
+            <input type="text" id="codeInput" placeholder="es. K2R" maxlength="4" autocomplete="off">
+            <div class="code-preview" id="codePreview"></div>
+            <div class="code-bad hidden" id="codeBad"></div>
+          </div>
+          <div class="field">
+            <label>Assegnazione squadra</label>
+            <select id="teamSelect"></select>
+            <div class="warn hidden" id="teamWarn"></div>
+          </div>
+          <div class="field">
+            <label>Note per l'equipaggio</label>
+            <textarea id="missionNote" rows="2" placeholder="Dettagli, accessi, riferimenti…"></textarea>
+          </div>
+          <button class="btn primary block" id="sendMission">📡 Invia</button>
+          <div class="info" style="margin-top:8px">
+            💡 Per inviare <b>più mezzi sullo stesso intervento</b>: clicca il target sulla mappa
+            e usa <b>👥 Aggiungi squadra</b>.
+          </div>
+        </div>
+      </div>
+
+      <div class="acc open" id="accOps">
+        <button class="acc-head">📊 Stati Operativi <span class="badge" id="opsBadge">0</span><span class="chev">▾</span></button>
+        <div class="acc-body">
+          <div class="colorbar" id="colorBar"></div>
+          <div class="row">
+            <select id="sortMode">
+              <option value="cron">Ordinamento: cronologico</option>
+              <option value="nome">Ordinamento: nome</option>
+              <option value="grav">Ordinamento: gravità codice</option>
+            </select>
+          </div>
+          <div id="opsList"></div>
+        </div>
+      </div>
+
+      <div class="acc" id="accDisp">
+        <button class="acc-head">📦 Disponibilità per tipo <span class="chev">▾</span></button>
+        <div class="acc-body">
+          <div class="disp-section"><h4>Per tipo di mezzo</h4><div id="dispVeicoli"></div></div>
+          <div class="disp-section" style="margin-bottom:0"><h4>Per tipo di equipaggio</h4><div id="dispEquipaggi"></div></div>
+        </div>
+      </div>
+
+      <div class="acc" id="accTeams">
+        <button class="acc-head">🧑‍🚒 Gestionale Squadre <span class="chev">▾</span></button>
+        <div class="acc-body">
+          <button class="btn primary block" id="addTeamBtn" style="margin-bottom:10px">+ Aggiungi squadra</button>
+          <div id="teamAdminList"></div>
+        </div>
+      </div>
+
+      <div class="acc" id="accPoi">
+        <button class="acc-head">📌 Punti Chiave <span class="chev">▾</span></button>
+        <div class="acc-body">
+          <form id="poiForm">
+            <div class="field"><label>Categoria</label><select id="poiCat"></select></div>
+            <div class="field"><label>Nome</label>
+              <input type="text" id="poiName" placeholder="es. PMA Nord" required></div>
+            <div class="field"><label>Note</label>
+              <input type="text" id="poiNote" placeholder="facoltativo"></div>
+            <div class="warn" id="poiCoordWarn" style="margin-bottom:10px">
+              Nessun punto selezionato: clicca sulla mappa per scegliere la posizione.</div>
+            <button class="btn primary block" type="submit">Aggiungi punto</button>
+          </form>
+          <div id="poiList" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div class="acc" id="accLegend">
+        <button class="acc-head">📖 Legenda Codici <span class="chev">▾</span></button>
+        <div class="acc-body" id="legendBody"></div>
+      </div>
+
+    </aside>
+
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="map-provider" id="providerBar">
+        <span>🗺️</span>
+        <select id="providerSelect"></select>
+        <span id="providerStatus" style="font-size:11px"></span>
+      </div>
+      <div class="map-tools">
+        <button data-layer="targets" class="on">🎯 Target</button>
+        <button data-layer="teams" class="on">🚑 Squadre</button>
+        <button data-layer="pois" class="on">📌 Punti chiave</button>
+      </div>
+      <div class="map-hint">Clicca sulla mappa per scegliere il punto · clicca un target/squadra per collegarli</div>
+    </div>
+  </div>
+</section>
+
+<section id="view-squadre" class="view hidden">
+  <div class="mobile">
+    <div class="m-card">
+      <div class="m-title">Seleziona equipaggio</div>
+      <select id="myTeam"></select>
+    </div>
+    <div id="sqStatus"></div>
+    <div id="sqMission"></div>
+    <div class="m-card hidden" id="sqPhaseCard">
+      <div class="m-title">Fase missione</div>
+      <div class="status-grid" id="sqPhaseGrid"></div>
+    </div>
+    <div class="m-card">
+      <div class="m-title">Disponibilità</div>
+      <div class="status-grid" id="sqAvailGrid"></div>
+    </div>
+    <div class="m-card">
+      <div class="m-title">Posizione GPS</div>
+      <div id="sqGps" class="muted" style="font-size:12.5px;margin-bottom:10px"></div>
+      <button class="btn ghost block" id="gpsBtn">📡 Aggiorna posizione</button>
+    </div>
+    <div class="m-card">
+      <div class="m-title">Cronologia stati</div>
+      <div id="sqHistory"></div>
+    </div>
+  </div>
+</section>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Dettagli</h3>
+      <button id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   1. COSTANTI
+   ========================================================= */
+const KEY = 'sge_v4';
+
+const COLORS = {
+  R:{key:'R',label:'Rosso', hex:'#e53935',fg:'#ffffff',sev:5},
+  G:{key:'G',label:'Giallo',hex:'#f2c200',fg:'#2a2200',sev:4},
+  V:{key:'V',label:'Verde', hex:'#2fa84f',fg:'#ffffff',sev:3},
+  B:{key:'B',label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a',sev:2},
+  N:{key:'N',label:'Nero',  hex:'#1c1c1c',fg:'#ffffff',sev:1}
+};
+const COLOR_ORDER = ['R','G','V','B','N'];
+
+const ENV = {
+  K:'Casa — eventi in edifici adibiti ad abitazione',
+  S:'Strada — eventi sulla viabilità pubblica o privata',
+  P:'Uffici ed esercizi pubblici — negozi, bar, uffici',
+  Y:'Impianti sportivi — palestre, stadi, campi sportivi',
+  L:'Impianti lavorativi — fabbriche, cantieri, luoghi di lavoro'
+};
+
+const PAT = {
+  '1':'Traumatica — incidenti domestici, cadute, fratture, ferite',
+  '2':'Cardiocircolatoria — dolori toracici, infarti, aritmie',
+  '3':'Respiratoria — insufficienza respiratoria, asma, soffocamento',
+  '4':'Neurologica — ictus, ischemie, convulsioni, perdita di coscienza',
+  '5':'Psichiatrica — crisi d\'ansia, agitazione psicomotoria, tentato suicidio',
+  '6':'Neoplastica — complicazioni legate a tumori',
+  '7':'Tossicologica — avvelenamenti, intossicazioni da farmaci, alcol o droghe',
+  '8':'Metabolica — crisi glicemiche, problemi endocrini o renali',
+  '9':'Altra patologia / Gastrointestinale — dolori addominali, febbrri alte o sintomi non classificabili'
+};
+
+const TEAM_TYPES = {
+  piedi:    {key:'piedi',    label:'A piedi',  icon:'🚶'},
+  moto:     {key:'moto',     label:'Moto',     icon:'🏍️'},
+  auto:     {key:'auto',     label:'Auto',     icon:'🚗'},
+  ambulanza:{key:'ambulanza',label:'Ambulanza',icon:'🚑'}
+};
+
+const CREW_TYPES = {
+  bravo:{key:'bravo', label:'Bravo', short:'B', color:'#8b5cf6'},
+  india:{key:'india', label:'India', short:'I', color:'#06b6d4'},
+  mike: {key:'mike',  label:'Mike',  short:'M', color:'#f59e0b'}
+};
+
+const POI_CATS = {
+  soccorso:{key:'soccorso',label:'Punti di soccorso', icon:'⛑️', color:'#00c2a8'},
+  chiusura:{key:'chiusura',label:'Strade chiuse',     icon:'⛔', color:'#ff7043'},
+  centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢', color:'#7c8cff'},
+  info:    {key:'info',    label:'Altre informazioni',icon:'ℹ️', color:'#9aa7b8'}
+};
+
+/* ---- Fasi della missione ---- */
+const MISSION_STATES = [
+  {key:'Partenza',                       icon:'🚔', color:'#3d9bff', short:'Partenza'},
+  {key:'Sul Posto',                      icon:'📍', color:'#f2c200', short:'Sul Posto'},
+  {key:'Verso l\'Ospedale',              icon:'🚑', color:'#e53935', short:'Verso Ospedale'},
+  {key:'Intervento Chiuso sul Posto',    icon:'✅', color:'#2fa84f', short:'Chiuso sul Posto'},
+  {key:'In Ospedale',                    icon:'🏥', color:'#8b5cf6', short:'In Ospedale'},
+  {key:'In rientro',                     icon:'↩️', color:'#06b6d4', short:'In rientro'},
+  {key:'Arrivo in Sede / Fine Missione', icon:'🏁', color:'#2fa84f', short:'Fine Missione', terminal:true}
+];
+const MISSION_STATE_MAP = {};
+MISSION_STATES.forEach(s=>{ MISSION_STATE_MAP[s.key] = s; });
+const MISSION_STATE_KEYS = MISSION_STATES.map(s=>s.key);
+
+/* ---- Stati di disponibilità (fuori missione) ---- */
+const AVAIL_STATES = ['Disponibile','In pausa','Non operativa'];
+const STATUS_LIST  = AVAIL_STATES.concat(MISSION_STATE_KEYS);
+
+/* ---- Codici di rientro (condivisi con Equipaggio) ---- */
+const RETURN_CODES = {
+  0:{label:'Non trasportato / Rifiuto', icon:'🚫', color:'#6b7280'},
+  1:{label:'Trasporto codice verde',    icon:'🟢', color:'#2fa84f'},
+  2:{label:'Trasporto codice giallo',   icon:'🟡', color:'#f2c200'},
+  3:{label:'Trasporto codice rosso',    icon:'🔴', color:'#e53935'},
+  4:{label:'Altro / Trasferimento',     icon:'🔀', color:'#8b5cf6'}
+};
+
+function stateShort(s){ const m = MISSION_STATE_MAP[s]; return m ? m.short : s; }
+function stateIcon(s){  const m = MISSION_STATE_MAP[s]; return m ? m.icon  : ''; }
+
+/* =========================================================
+   2. PROVIDER TILE — nessuna API key
+   ========================================================= */
+const TILE_PROVIDERS = {
+  esri: {
+    label: 'Esri Street',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri'
+  },
+  esriSat: {
+    label: 'Esri Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri'
+  },
+  opentopo: {
+    label: 'OpenTopoMap',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    subdomains: 'abc',
+    maxZoom: 17,
+    attribution: '&copy; OpenTopoMap'
+  },
+  osmDE: {
+    label: 'OSM Germania',
+    url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap DE'
+  },
+  osm: {
+    label: 'OpenStreetMap',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }
+};
+const PROVIDER_ORDER = ['esri','esriSat','opentopo','osmDE','osm'];
+
+/* =========================================================
+   3. UTILITÀ
+   ========================================================= */
+function uid(p){ return (p||'id')+'-'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function parseCode(raw){
+  const src = String(raw==null?'':raw).toUpperCase();
+  let env=null, pat=null, color=null;
+  for(let i=0;i<src.length;i++){
+    const ch = src[i];
+    if(!env && ENV[ch]){ env=ch; continue; }
+    if(!pat && PAT[ch]){ pat=ch; continue; }
+    if(!color && COLORS[ch]){ color=ch; continue; }
+  }
+  return { env, pat, color, label:(env||'')+(pat||'')+(color||''),
+    colorInfo: color?COLORS[color]:null, valid: !!color };
+}
+function describeCode(code){
+  const p = parseCode(code); const out=[];
+  if(p.env) out.push(ENV[p.env].split('—')[0].trim());
+  if(p.pat) out.push(PAT[p.pat].split('—')[0].trim());
+  if(p.color) out.push('Codice '+COLORS[p.color].label);
+  return out.join(' · ');
+}
+function fmtTime(ts){
+  if(!ts) return '—';
+  return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtDateTime(ts){
+  if(!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})+' '+fmtTime(ts);
+}
+function elapsed(ts){
+  if(!ts) return '—';
+  const s = Math.max(0, Math.floor((Date.now()-ts)/1000));
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  if(h>0) return h+'h '+String(m).padStart(2,'0')+'m';
+  return m+'m';
+}
+function crewOf(t){ return CREW_TYPES[t.crew] ? t.crew : 'bravo'; }
+function crewInfo(t){ return CREW_TYPES[crewOf(t)]; }
+function statusColor(t){
+  const ms = MISSION_STATE_MAP[t.status];
+  if(t.mission){
+    if(ms) return ms.color;
+    const c = COLORS[parseCode(t.mission.code).color];
+    return c ? c.hex : '#e53935';
+  }
+  if(ms) return ms.color;
+  if(!t.operational) return '#6b7280';
+  switch(t.status){
+    case 'Disponibile': return '#2fa84f';
+    case 'In pausa':    return '#f2c200';
+    case 'Non operativa': return '#6b7280';
+  }
+  return '#6b7280';
+}
+function statusIcon(t){
+  const ms = MISSION_STATE_MAP[t.status];
+  if(t.mission) return ms ? ms.icon : '🚨';
+  if(ms) return ms.icon;
+  if(!t.operational) return '⛔';
+  switch(t.status){
+    case 'Disponibile': return '✅';
+    case 'In pausa':    return '⏸️';
+    case 'Non operativa': return '⛔';
+  }
+  return '•';
+}
+
+function targetTeams(tg){
+  if(!tg || !Array.isArray(tg.teamIds)) return [];
+  return tg.teamIds.map(id => S.teams.find(x=>x.id===id)).filter(Boolean);
+}
+function targetTeamNames(tg){
+  return targetTeams(tg).map(t => t.name);
+}
+
+/* =========================================================
+   4. STATO
+   ========================================================= */
+function defaultState(){
+  const C = {lat:45.5195, lng:9.0784};
+  const now = Date.now();
+  function mkTeam(name,type,crew,dLat,dLng,status){
+    return { id: uid('tm'), name, type, crew,
+      operational: status!=='Non operativa', status,
+      lat:+(C.lat+dLat).toFixed(6), lng:+(C.lng+dLng).toFixed(6),
+      gpsAt: now-30000, phone:'', note:'', mission:null,
+      history:[{ts:now-7200000, status, note:'Squadra creata'}],
+      updatedAt: now };
+  }
+  const t1 = mkTeam('Squadra 1 — Auto','auto','bravo', 0.0038, 0.0042,'Disponibile');
+  const t2 = mkTeam('Squadra 2 — Ambulanza','ambulanza','india',-0.0026,0.0055,'Disponibile');
+  const t3 = mkTeam('Squadra 3 — Moto','moto','mike', 0.0055,-0.0032,'Disponibile');
+  const t4 = mkTeam('Squadra 4 — A piedi','piedi','bravo',-0.0042,-0.0048,'Disponibile');
+  const t5 = mkTeam('Squadra 5 — Ambulanza','ambulanza','mike',0.0008,-0.0060,'Non operativa');
+  const teams = [t1,t2,t3,t4,t5];
+
+  function mkTarget(code,address,dLat,dLng,teamRefs,minAgo,pending){
+    const p = parseCode(code);
+    const ids = (teamRefs||[]).map(t=>t.id);
+    return { id: uid('tg'), code:p.label, env:p.env, pat:p.pat, color:p.color,
+      lat:+(C.lat+dLat).toFixed(6), lng:+(C.lng+dLng).toFixed(6),
+      address, note:'', activatedAt: now-minAgo*60000,
+      assignedAt: pending ? null : now-minAgo*60000,
+      teamIds: ids, teamName: ids.length ? (teamRefs[0]&&teamRefs[0].name) : null,
+      status: pending ? 'in_attesa' : 'aperto', closedAt:null, closeNote:'',
+      returnCode: null };
+  }
+  const targets = [
+    mkTarget('K2R','Via Demo 12 — Palazzina A', 0.0062, 0.0021, [t1], 12, false),
+    mkTarget('S4G','Viale dell\'Evento — km 3',-0.0031, 0.0068, [t2], 6, false),
+    mkTarget('P9G','Piazza Centrale — angolo Corso', 0.0095, -0.0082, [], 3, true)
+  ];
+  /* Secondo mezzo sullo stesso target del primo */
+  targets[0].teamIds.push(t3.id);
+  if(targets[0].teamIds.length) targets[0].teamName = t1.name;
+
+  targets.forEach(tg=>{
+    if(!tg.teamIds.length) return;
+    tg.teamIds.forEach(tid=>{
+      const tm = teams.find(x=>x.id===tid);
+      if(!tm) return;
+      tm.mission = { targetId:tg.id, code:tg.code, lat:tg.lat, lng:tg.lng,
+                     address:tg.address, activatedAt:tg.activatedAt, note:'' };
+      tm.status = (now - tg.activatedAt) > 8*60000 ? 'Sul Posto' : 'Partenza';
+      tm.history.unshift({ts:tg.activatedAt, status:tm.status, note:'Missione '+tg.code});
+    });
+  });
+
+  const pois = [
+    {id:uid('poi'),cat:'centrale',name:'Centrale Operativa',lat:C.lat-0.0010,lng:C.lng-0.0010,note:'Sala operativa principale'},
+    {id:uid('poi'),cat:'soccorso',name:'PMA — Punto Medicazione Avanzata',lat:C.lat+0.0020,lng:C.lng-0.0035,note:'2 posti letto'},
+    {id:uid('poi'),cat:'soccorso',name:'Postazione Sanitaria Nord',lat:C.lat+0.0075,lng:C.lng+0.0010,note:''},
+    {id:uid('poi'),cat:'chiusura',name:'Via Chiusa — Varco 4',lat:C.lat-0.0050,lng:C.lng+0.0025,note:'Transennata'},
+    {id:uid('poi'),cat:'info',name:'Eliporto',lat:C.lat+0.0090,lng:C.lng-0.0060,note:'Atterraggio H24'}
+  ];
+  return { center:C, teams, targets, pois, log:[{ts:now,text:'Sistema inizializzato'}] };
+}
+
+let S;
+try{
+  const raw = localStorage.getItem(KEY);
+  S = raw ? JSON.parse(raw) : defaultState();
+  S.teams = S.teams||[]; S.targets = S.targets||[];
+  S.pois = S.pois||[]; S.log = S.log||[];
+  if(!S.center) S.center = {lat:45.5195,lng:9.0784};
+  S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
+  S.targets.forEach(tg=>{
+    if(!tg.status) tg.status = (tg.teamIds&&tg.teamIds.length) || tg.teamId ? 'aperto' : 'in_attesa';
+    if(!Array.isArray(tg.teamIds)){
+      tg.teamIds = tg.teamId ? [tg.teamId] : [];
+      delete tg.teamId;
+    }
+  });
+  S.teams.forEach(t=>{
+    if(t.status === 'In missione') t.status = t.mission ? 'Partenza' : 'Disponibile';
+    if(t.status === 'Rientro')     t.status = t.mission ? 'In rientro' : 'Disponibile';
+  });
+}catch(e){ S = defaultState(); }
+
+/* =========================================================
+   5. SYNC CON PAGINA EQUIPAGGIO
+   ========================================================= */
+const MY_PAGE_ID = 'sol_' + Math.random().toString(36).slice(2,10);
+let _solBc = null;
+try { _solBc = new BroadcastChannel('sge_sync'); } catch(e){}
+let _solLastRev = 0;
+let _solSkipPublish = false;
+if(S._rev) _solLastRev = S._rev;
+
+function save(){
+  if(_solSkipPublish){
+    try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+    return;
+  }
+  const rev = Date.now() + Math.random();
+  S._rev = rev;
+  S._writer = MY_PAGE_ID;
+  _solLastRev = rev;
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+  if(_solBc) try { _solBc.postMessage({type:'sync', rev}); } catch(e){}
+  updateSolSyncDot();
+}
+
+function applyRemoteState(incoming){
+  if(!incoming || !incoming._rev) return;
+  if(incoming._rev <= _solLastRev) return;
+  if(incoming._writer === MY_PAGE_ID) return;
+  _solLastRev = incoming._rev;
+  _solSkipPublish = true;
+  try{
+    S = incoming;
+    S.teams = S.teams||[]; S.targets = S.targets||[]; S.pois = S.pois||[]; S.log = S.log||[];
+    if(!S.center) S.center = {lat:45.5195,lng:9.0784};
+    S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
+    S.targets.forEach(tg=>{
+      if(!Array.isArray(tg.teamIds)){
+        tg.teamIds = tg.teamId ? [tg.teamId] : [];
+        delete tg.teamId;
+      }
+    });
+    render();
+  } finally {
+    _solSkipPublish = false;
+  }
+  updateSolSyncDot();
+}
+
+function initSolSync(){
+  window.addEventListener('storage', e => {
+    if(e.key === KEY && e.newValue){
+      try { applyRemoteState(JSON.parse(e.newValue)); } catch(err){}
+    }
+  });
+  if(_solBc){
+    _solBc.onmessage = e => {
+      if(e.data && e.data.type === 'sync'){
+        const v = localStorage.getItem(KEY);
+        if(v) try { applyRemoteState(JSON.parse(v)); } catch(err){}
+      }
+    };
+  }
+  setInterval(() => {
+    const v = localStorage.getItem(KEY);
+    if(!v) return;
+    try {
+      const p = JSON.parse(v);
+      if(p._rev && p._rev > _solLastRev) applyRemoteState(p);
+    } catch(err){}
+  }, 1000);
+  setInterval(updateSolSyncDot, 2000);
+}
+
+function updateSolSyncDot(){
+  const el = document.getElementById('solSyncDot');
+  if(!el) return;
+  const ts = S._lastEqTs || 0;
+  const age = Date.now() - ts;
+  if(age < 8000){
+    el.style.color = '#6ee7a8';
+    el.innerHTML = '● Equipaggio online';
+  } else {
+    el.style.color = '#8ba0bf';
+    el.innerHTML = '○ Equipaggio offline';
+  }
+}
+
+/* =========================================================
+   6. STATO UI
+   ========================================================= */
+let draft = null;
+let filterColor = null;
+let sortMode = 'cron';
+let myTeamId = localStorage.getItem('sge_myteam') || null;
+const layerVis = { targets:true, teams:true, pois:true };
+let selection = null;
+
+/* =========================================================
+   7. MAPPA + PROVIDER
+   ========================================================= */
+let map = null;
+let currentTileLayer = null;
+let currentProvider = localStorage.getItem('sge_provider') || 'esri';
+let tileErrorCount = 0;
+let consecutiveErrors = 0;
+let triedProviders = {};
+const groups = {};
+
+function buildTileLayer(key){
+  const p = TILE_PROVIDERS[key];
+  if(!p) return null;
+  const opts = { maxZoom: p.maxZoom, attribution: p.attribution };
+  if(p.subdomains) opts.subdomains = p.subdomains;
+  return L.tileLayer(p.url, opts);
+}
+
+function setProvider(key, reason){
+  if(!TILE_PROVIDERS[key]) key = 'esri';
+  if(currentTileLayer){
+    try{ map.removeLayer(currentTileLayer); }catch(e){}
+    currentTileLayer = null;
+  }
+  currentProvider = key;
+  tileErrorCount = 0;
+  consecutiveErrors = 0;
+  triedProviders[key] = true;
+
+  currentTileLayer = buildTileLayer(key);
+  currentTileLayer.on('tileerror', onTileError);
+  currentTileLayer.on('tileload', ()=>{ consecutiveErrors = 0; });
+  currentTileLayer.addTo(map);
+
+  localStorage.setItem('sge_provider', key);
+  const sel = document.getElementById('providerSelect');
+  if(sel) sel.value = key;
+  updateProviderStatus(reason);
+}
+
+function onTileError(){
+  tileErrorCount++;
+  consecutiveErrors++;
+  updateProviderStatus();
+
+  if(consecutiveErrors >= 4){
+    const idx = PROVIDER_ORDER.indexOf(currentProvider);
+    for(let i=1; i<=PROVIDER_ORDER.length; i++){
+      const next = PROVIDER_ORDER[(idx + i) % PROVIDER_ORDER.length];
+      if(!triedProviders[next]){
+        console.warn('[map] provider "'+currentProvider+'" fallisce → provo "'+next+'"');
+        setProvider(next, 'auto-fallback');
+        return;
+      }
+    }
+    console.warn('[map] tutti i provider testati hanno dato errori');
+    updateProviderStatus('all-failed');
+  }
+}
+
+function updateProviderStatus(reason){
+  const el = document.getElementById('providerStatus');
+  if(!el) return;
+  if(reason === 'all-failed'){
+    el.textContent = '⚠️ tutti offline';
+    el.style.color = '#ff8b8b';
+    return;
+  }
+  if(tileErrorCount === 0){ el.textContent = ''; return; }
+  el.textContent = '⚠️ '+tileErrorCount+' err';
+  el.style.color = '#ffb84d';
+}
+
+function initMap(){
+  if(typeof L === 'undefined'){
+    document.getElementById('map').innerHTML =
+      '<div class="map-fallback">⚠️ Libreria mappa non disponibile (offline).<br>' +
+      'I dati e i pannelli laterali restano pienamente funzionanti.</div>';
+    return;
+  }
+  map = L.map('map', {zoomControl:true, attributionControl:true})
+         .setView([S.center.lat, S.center.lng], 15);
+
+  const sel = document.getElementById('providerSelect');
+  sel.innerHTML = PROVIDER_ORDER.map(k=>
+    '<option value="'+k+'">'+TILE_PROVIDERS[k].label+'</option>').join('');
+  sel.value = currentProvider;
+  sel.onchange = ()=>{ triedProviders = {}; setProvider(sel.value, 'manual'); };
+
+  groups.targets = L.layerGroup().addTo(map);
+  groups.teams   = L.layerGroup().addTo(map);
+  groups.pois    = L.layerGroup().addTo(map);
+  groups.draft   = L.layerGroup().addTo(map);
+  groups.links   = L.layerGroup().addTo(map);
+
+  map.on('click', function(e){ setDraft(e.latlng.lat, e.latlng.lng, ''); });
+
+  map.on('popupopen', function(e){
+    const m = e.popup && e.popup._source;
+    if(m && m.options && m.options.sgeType && m.options.sgeId){
+      selection = {type: m.options.sgeType, id: m.options.sgeId};
+      drawSelectionLines();
+    }
+  });
+  map.on('popupclose', function(){
+    selection = null;
+    drawSelectionLines();
+  });
+
+  setProvider(currentProvider, 'init');
+}
+
+function setDraft(lat,lng,address){
+  draft = {lat:+lat.toFixed(6), lng:+lng.toFixed(6), address:address||''};
+  updateDraftUI();
+  renderDraftMarker();
+  if(address){
+    const inp = document.getElementById('addrInput');
+    if(inp) inp.value = address;
+  } else {
+    reverseGeocode(lat,lng);
+  }
+}
+
+function renderDraftMarker(){
+  if(!map) return;
+  groups.draft.clearLayers();
+  if(!draft) return;
+  L.marker([draft.lat,draft.lng], {
+    icon: L.divIcon({className:'', html:'<div class="draft-pin"></div>', iconSize:[22,22], iconAnchor:[11,11]}),
+    zIndexOffset: 900
+  }).addTo(groups.draft);
+}
+
+function targetIcon(tg){
+  const pending = tg.status === 'in_attesa';
+  const closed  = tg.status === 'chiuso';
+  if(pending){
+    return L.divIcon({className:'',
+      html:'<div class="mk-pin pending"><span class="mk-badge">⏳</span></div>',
+      iconSize:[42,42], iconAnchor:[21,21], popupAnchor:[0,-24]});
+  }
+  const c = COLORS[tg.color] || {hex:'#8899aa', fg:'#fff'};
+  const cls = (closed?'closed ':'') + (!closed?'pulse':'');
+  const n = (tg.teamIds||[]).length;
+  const countBadge = n > 1 ? '<span class="mk-count">'+n+'</span>' : '';
+  return L.divIcon({className:'',
+    html:'<div class="mk-pin '+cls+'" style="--c:'+c.hex+';--f:'+c.fg+'">'+esc(tg.code||'?')+countBadge+'</div>',
+    iconSize:[42,42], iconAnchor:[21,21], popupAnchor:[0,-24]});
+}
+function teamIcon(t){
+  const col = statusColor(t);
+  const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  let badge = '';
+  if(t.mission){
+    const cc = COLORS[parseCode(t.mission.code).color] || {hex:'#888'};
+    badge = '<span class="tp-badge" style="background:'+cc.hex+'">'+esc(t.mission.code)+'</span>';
+  }
+  const crewTag = '<span class="tp-crew" style="background:'+crew.color+'">'+crew.short+'</span>';
+  return L.divIcon({className:'',
+    html:'<div class="team-pin" style="--c:'+col+'">'+type.icon+badge+crewTag+'</div>',
+    iconSize:[40,40], iconAnchor:[20,20], popupAnchor:[0,-23]});
+}
+function poiIcon(p){
+  const c = POI_CATS[p.cat] || POI_CATS.info;
+  return L.divIcon({className:'',
+    html:'<div class="poi-pin" style="--c:'+c.color+'"><span>'+c.icon+'</span></div>',
+    iconSize:[30,30], iconAnchor:[15,24], popupAnchor:[0,-24]});
+}
+
+function targetPopup(tg){
+  const pending = tg.status === 'in_attesa';
+  const closed  = tg.status === 'chiuso';
+  let h = '';
+  if(pending){
+    h += '<div class="pp-title">⏳ Target in attesa</div>';
+    h += '<div class="pp-pending">Nessuna squadra assegnata</div>';
+  } else {
+    const c = COLORS[tg.color] || {hex:'#889',fg:'#fff'};
+    h += '<div class="pp-title">🎯 Target <span class="pp-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(tg.code)+'</span></div>';
+    h += '<div class="muted" style="font-size:11.5px;margin-bottom:7px">'+esc(describeCode(tg.code))+'</div>';
+  }
+  h += '<div class="pp-row"><span>Indirizzo</span><b>'+esc(tg.address||'—')+'</b></div>';
+  h += '<div class="pp-row"><span>Attivazione</span><b>'+fmtTime(tg.activatedAt)+' · '+elapsed(tg.activatedAt)+'</b></div>';
+  if(tg.assignedAt) h += '<div class="pp-row"><span>Assegnato</span><b>'+fmtTime(tg.assignedAt)+'</b></div>';
+  h += '<div class="pp-row"><span>Stato</span><b>'+(closed?'⚪ Chiuso':(pending?'🟠 In attesa':'🟢 Aperto'))+'</b></div>';
+  if(tg.returnCode != null){
+    const rc = RETURN_CODES[tg.returnCode];
+    h += '<div class="pp-row"><span>Cod. rientro</span><b>'+rc.icon+' '+tg.returnCode+' — '+esc(rc.label)+'</b></div>';
+  }
+  if(tg.note) h += '<div class="pp-row"><span>Note</span><b>'+esc(tg.note)+'</b></div>';
+
+  const teams = targetTeams(tg);
+  if(teams.length){
+    h += '<div class="pp-teams"><div class="pp-teams-t">🚑 Squadre assegnate ('+teams.length+')</div>'+
+      teams.map(t => {
+        const crew = crewInfo(t);
+        return '<div class="pp-team-row" onclick="SGE.openTeam(\''+t.id+'\')">'+
+          '<span class="pp-team-name">'+esc(t.name)+'</span>'+
+          '<span class="crew-badge" style="background:'+crew.color+'">'+crew.short+'</span>'+
+        '</div>';
+      }).join('')+'</div>';
+  } else if(!pending && !closed){
+    h += '<div class="muted" style="margin:6px 0;font-size:12px">Nessuna squadra assegnata</div>';
+  }
+
+  h += '<div class="pp-actions">';
+  if(!closed) h += '<button class="btn mini primary" onclick="SGE.openAssign(\''+tg.id+'\')">👥 '+(teams.length?'Aggiungi squadra':'Assegna squadra')+'</button>';
+  h += '<button class="btn mini ghost" onclick="SGE.focusTarget(\''+tg.id+'\')">🔍 Centra</button></div>';
+  return h;
+}
+function teamPopup(t){
+  const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  let h = '<div class="pp-title">'+type.icon+' '+esc(t.name)+' <span class="crew-badge" style="background:'+crew.color+'">'+crew.label+'</span></div>';
+  h += '<div class="pp-row"><span>Stato</span><b>'+statusIcon(t)+' '+esc(stateShort(t.status))+'</b></div>';
+  h += '<div class="pp-row"><span>Tipo</span><b>'+type.label+'</b></div>';
+  h += '<div class="pp-row"><span>Equipaggio</span><b>'+crew.label+'</b></div>';
+  if(t.mission){
+    const c = COLORS[parseCode(t.mission.code).color] || {hex:'#888',fg:'#fff'};
+    h += '<div style="margin:7px 0 4px"><span class="pp-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</span></div>';
+    h += '<div class="pp-row"><span>Attivazione</span><b>'+fmtTime(t.mission.activatedAt)+' · '+elapsed(t.mission.activatedAt)+'</b></div>';
+    h += '<div class="pp-row"><span>Luogo</span><b>'+esc(t.mission.address||'—')+'</b></div>';
+    const ms = MISSION_STATE_MAP[t.status];
+    if(ms) h += '<div class="pp-row"><span>Fase</span><b>'+ms.icon+' '+esc(ms.short)+'</b></div>';
+  } else {
+    h += '<div class="muted" style="margin:6px 0">Nessuna missione attiva</div>';
+  }
+  h += '<div class="pp-row"><span>GPS</span><b>'+fmtTime(t.gpsAt)+'</b></div>';
+  h += '<div class="pp-actions"><button class="btn mini" onclick="SGE.openTeam(\''+t.id+'\')">⚙ Dettagli</button>';
+  h += '<button class="btn mini ghost" onclick="SGE.focusTeam(\''+t.id+'\')">🔍 Centra</button>';
+  if(t.mission) h += '<button class="btn mini ghost" onclick="SGE.focusTarget(\''+t.mission.targetId+'\')">🎯 Target</button>';
+  h += '</div>';
+  return h;
+}
+function poiPopup(p){
+  const c = POI_CATS[p.cat] || POI_CATS.info;
+  let h = '<div class="pp-title">'+c.icon+' '+esc(p.name)+'</div>';
+  h += '<div class="pp-row"><span>Categoria</span><b>'+esc(c.label)+'</b></div>';
+  if(p.note) h += '<div class="pp-row"><span>Note</span><b>'+esc(p.note)+'</b></div>';
+  h += '<div class="pp-actions"><button class="btn mini danger" onclick="SGE.removePoi(\''+p.id+'\')">🗑 Elimina</button></div>';
+  return h;
+}
+
+function drawSelectionLines(){
+  if(!map || !groups.links) return;
+  groups.links.clearLayers();
+  if(!selection) return;
+
+  let tg = null, teamIds = [];
+  if(selection.type === 'target'){
+    tg = S.targets.find(x=>x.id===selection.id);
+    if(!tg) return;
+    teamIds = (tg.teamIds||[]).slice();
+  } else if(selection.type === 'team'){
+    const t = S.teams.find(x=>x.id===selection.id);
+    if(!t || !t.mission) return;
+    tg = S.targets.find(x=>x.id===t.mission.targetId);
+    if(!tg) return;
+    teamIds = (tg.teamIds||[]).slice();
+  } else return;
+
+  const tgColor = (COLORS[tg.color] && COLORS[tg.color].hex) || '#3d9bff';
+
+  teamIds.forEach(tid=>{
+    const t = S.teams.find(x=>x.id===tid);
+    if(!t) return;
+    const isFocus = selection.type === 'team' ? (selection.id === tid) : true;
+    const col = isFocus ? tgColor : '#7c8cff';
+    L.polyline([[tg.lat,tg.lng],[t.lat,t.lng]], {
+      color: col, weight: isFocus ? 3 : 2, opacity: .9, dashArray:'8,8',
+      lineCap:'round'
+    }).addTo(groups.links);
+    L.circleMarker([t.lat,t.lng], {radius:4, color:col, fillColor:'#0b1220', fillOpacity:1, weight:2})
+      .addTo(groups.links);
+  });
+  L.circleMarker([tg.lat,tg.lng], {radius:5, color:tgColor, fillColor:'#0b1220', fillOpacity:1, weight:2})
+    .addTo(groups.links);
+}
+
+function renderMap(){
+  if(!map) return;
+  groups.targets.clearLayers();
+  groups.teams.clearLayers();
+  groups.pois.clearLayers();
+  groups.links.clearLayers();
+
+  const matchColor = (code) => {
+    if(!filterColor) return true;
+    const p = parseCode(code);
+    return p.color === filterColor;
+  };
+
+  if(layerVis.targets){
+    S.targets.forEach(tg=>{
+      if(filterColor && tg.color !== filterColor) return;
+      const marker = L.marker([tg.lat,tg.lng], {
+        icon: targetIcon(tg),
+        zIndexOffset: tg.status==='in_attesa'?650:(tg.status==='aperto'?500:0),
+        sgeType:'target', sgeId: tg.id
+      });
+      marker.bindPopup(targetPopup(tg), {maxWidth:300});
+      marker.addTo(groups.targets);
+    });
+  }
+  if(layerVis.pois){
+    S.pois.forEach(p=>{
+      const marker = L.marker([p.lat,p.lng], {icon:poiIcon(p), sgeType:'poi', sgeId:p.id});
+      marker.bindPopup(poiPopup(p), {maxWidth:280});
+      marker.addTo(groups.pois);
+    });
+  }
+  if(layerVis.teams){
+    S.teams.forEach(t=>{
+      if(filterColor){
+        if(!t.mission) return;
+        if(!matchColor(t.mission.code)) return;
+      }
+      const marker = L.marker([t.lat,t.lng], {
+        icon: teamIcon(t), zIndexOffset:600,
+        sgeType:'team', sgeId:t.id
+      });
+      marker.bindPopup(teamPopup(t), {maxWidth:300});
+      marker.addTo(groups.teams);
+    });
+  }
+  renderDraftMarker();
+  drawSelectionLines();
+}
+
+/* =========================================================
+   8. RENDER LISTE
+   ========================================================= */
+function counts(){
+  const c = {R:0,G:0,V:0,B:0,N:0,tot:0};
+  S.teams.forEach(t=>{
+    if(t.mission){
+      const col = parseCode(t.mission.code).color;
+      if(col){ c[col]++; c.tot++; }
+    }
+  });
+  return c;
+}
+
+function renderTopColorBar(){
+  const el = document.getElementById('topColorBar');
+  if(!el) return;
+  const c = counts();
+  el.innerHTML = COLOR_ORDER.map(k=>{
+    const col = COLORS[k];
+    const on = filterColor === k;
+    return '<button class="tcbtn '+(on?'on':'')+'" data-c="'+k+'" style="--c:'+col.hex+'" '+
+      'title="'+col.label+' — '+c[k]+' equipaggi impegnati">'+
+      '<span class="tc-dot"></span>'+col.label+'<span class="tc-n">'+c[k]+'</span></button>';
+  }).join('');
+  el.querySelectorAll('.tcbtn').forEach(b=>{
+    b.onclick = ()=>{
+      const v = b.getAttribute('data-c');
+      filterColor = (filterColor === v) ? null : v;
+      render();
+    };
+  });
+}
+
+function renderColorBar(){
+  const el = document.getElementById('colorBar');
+  const c = counts();
+  let h = '<button class="cbtn all '+(filterColor===null?'on':'')+'" data-c="">' +
+          '<span class="cb-dot"></span><span class="cb-lab">Tutti</span>' +
+          '<span class="cb-n">'+c.tot+'</span></button>';
+  h += COLOR_ORDER.map(k=>{
+    const col = COLORS[k];
+    return '<button class="cbtn '+(filterColor===k?'on':'')+'" data-c="'+k+'" style="--c:'+col.hex+'">'+
+      '<span class="cb-dot"></span><span class="cb-lab">'+col.label+'</span>'+
+      '<span class="cb-n">'+c[k]+'</span></button>';
+  }).join('');
+  el.innerHTML = h;
+  el.querySelectorAll('.cbtn').forEach(b=>{
+    b.onclick = ()=>{
+      const v = b.getAttribute('data-c');
+      filterColor = v ? (filterColor===v ? null : v) : null;
+      render();
+    };
+  });
+}
+
+function sortedTeams(){
+  let list = S.teams.slice();
+  if(filterColor){
+    list = list.filter(t=> t.mission && parseCode(t.mission.code).color === filterColor);
+  }
+  if(sortMode==='nome'){
+    list.sort((a,b)=> a.name.localeCompare(b.name,'it'));
+  } else if(sortMode==='grav'){
+    list.sort((a,b)=>{
+      const sa = a.mission ? (COLORS[parseCode(a.mission.code).color]||{sev:0}).sev : -1;
+      const sb = b.mission ? (COLORS[parseCode(b.mission.code).color]||{sev:0}).sev : -1;
+      if(sb!==sa) return sb-sa;
+      return (b.mission?b.mission.activatedAt:0)-(a.mission?a.mission.activatedAt:0);
+    });
+  } else {
+    list.sort((a,b)=>{
+      const ta = a.mission?a.mission.activatedAt:0;
+      const tb = b.mission?b.mission.activatedAt:0;
+      if(ta && tb) return ta-tb;
+      if(ta && !tb) return -1;
+      if(!ta && tb) return 1;
+      return a.name.localeCompare(b.name,'it');
+    });
+  }
+  return list;
+}
+
+function renderOpsList(){
+  const el = document.getElementById('opsList');
+  const list = sortedTeams();
+  document.getElementById('opsBadge').textContent = S.teams.filter(t=>t.mission).length;
+  if(!list.length){ el.innerHTML = '<div class="empty">Nessun equipaggio corrisponde al filtro.</div>'; return; }
+  el.innerHTML = list.map(t=>{
+    const col = statusColor(t);
+    const crew = crewInfo(t);
+    const crewBadge = '<span class="crew-badge" style="background:'+crew.color+'">'+crew.short+'</span>';
+    let codeHtml = '', sub = '', right = '';
+    if(t.mission){
+      const pc = parseCode(t.mission.code);
+      const cc = COLORS[pc.color] || {hex:'#888',fg:'#fff'};
+      codeHtml = '<span class="ops-code" style="background:'+cc.hex+';color:'+cc.fg+'">'+esc(t.mission.code)+'</span>';
+      const ms = MISSION_STATE_MAP[t.status];
+      sub = (ms ? '<b style="color:'+ms.color+'">'+ms.icon+' '+esc(ms.short)+'</b> · ' : '') +
+            esc(t.mission.address || describeCode(t.mission.code));
+      right = '<span class="pill" style="background:#0d1728;color:#9fd0ff">'+elapsed(t.mission.activatedAt)+'</span>' +
+              '<span class="pill" style="background:#0d1728;color:var(--muted)">'+fmtTime(t.mission.activatedAt)+'</span>';
+    } else {
+      sub = (TEAM_TYPES[t.type]||{}).label || '';
+      right = '<span class="pill" style="background:#0d1728;color:var(--muted)">'+esc(stateShort(t.status))+'</span>';
+    }
+    return '<div class="ops-item" data-id="'+t.id+'">'+
+      '<div class="ops-stripe" style="--c:'+col+'"></div>'+
+      '<div class="ops-main"><div class="ops-top"><span class="ops-name">'+esc(t.name)+'</span>'+crewBadge+codeHtml+'</div>'+
+      '<div class="ops-sub">'+sub+'</div></div>'+
+      '<div class="ops-right">'+right+'</div></div>';
+  }).join('');
+  el.querySelectorAll('.ops-item').forEach(node=>{
+    node.onclick = ()=> openTeam(node.getAttribute('data-id'));
+  });
+}
+
+function dispCardHTML(icon, label, b){
+  const segments = [];
+  if(b.disp) segments.push('<div class="disp-seg disp" style="flex:'+b.disp+'"></div>');
+  if(b.busy) segments.push('<div class="disp-seg busy" style="flex:'+b.busy+'"></div>');
+  if(b.noop) segments.push('<div class="disp-seg noop" style="flex:'+b.noop+'"></div>');
+  return '<div class="disp-card">'+
+    '<div class="disp-top">'+
+      '<span class="disp-ico2">'+icon+'</span>'+
+      '<span class="disp-name2">'+label+'</span>'+
+      '<span class="disp-tot">'+b.tot+' totali</span>'+
+    '</div>'+
+    '<div class="disp-bar">'+segments.join('')+'</div>'+
+    '<div class="disp-legend">'+
+      '<span class="disp-leg disp"><b>'+b.disp+'</b> disponibili</span>'+
+      '<span class="disp-leg busy"><b>'+b.busy+'</b> impegnati</span>'+
+      '<span class="disp-leg noop"><b>'+b.noop+'</b> non op.</span>'+
+    '</div>'+
+  '</div>';
+}
+
+function renderDisponibilita(){
+  const elV = document.getElementById('dispVeicoli');
+  const byType = {};
+  Object.keys(TEAM_TYPES).forEach(k=>{ byType[k] = {disp:0, busy:0, noop:0, tot:0}; });
+  S.teams.forEach(t=>{
+    const k = TEAM_TYPES[t.type] ? t.type : 'auto';
+    const b = byType[k]; b.tot++;
+    if(!t.operational){ b.noop++; return; }
+    if(t.mission){ b.busy++; } else { b.disp++; }
+  });
+  const rowsV = Object.keys(TEAM_TYPES).map(k=>{
+    const T = TEAM_TYPES[k], b = byType[k];
+    if(!b.tot) return '';
+    return dispCardHTML(T.icon, T.label, b);
+  }).join('');
+  elV.innerHTML = rowsV || '<div class="empty">Nessun mezzo registrato.</div>';
+
+  const elC = document.getElementById('dispEquipaggi');
+  const byCrew = {};
+  Object.keys(CREW_TYPES).forEach(k=>{ byCrew[k] = {disp:0, busy:0, noop:0, tot:0}; });
+  S.teams.forEach(t=>{
+    const k = crewOf(t);
+    const b = byCrew[k]; b.tot++;
+    if(!t.operational){ b.noop++; return; }
+    if(t.mission){ b.busy++; } else { b.disp++; }
+  });
+  const rowsC = Object.keys(CREW_TYPES).map(k=>{
+    const C = CREW_TYPES[k], b = byCrew[k];
+    if(!b.tot) return '';
+    const coloredIcon = '<span style="color:'+C.color+';font-weight:900">'+C.short+'</span>';
+    return dispCardHTML(coloredIcon, C.label, b);
+  }).join('');
+  elC.innerHTML = rowsC || '<div class="empty">Nessun equipaggio registrato.</div>';
+}
+
+function renderAdminList(){
+  const el = document.getElementById('teamAdminList');
+  if(!S.teams.length){ el.innerHTML = '<div class="empty">Nessuna squadra registrata.</div>'; return; }
+  el.innerHTML = S.teams.map(t=>{
+    const type = TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+    const crew = crewInfo(t);
+    const col = statusColor(t);
+    return '<div class="tm-admin"><div class="tm-ico">'+type.icon+'</div>'+
+      '<div class="tm-info"><div class="tm-name">'+esc(t.name)+'</div>'+
+        '<div class="tm-sub"><span class="dot" style="background:'+col+'"></span>'+esc(stateShort(t.status))+
+          '<span class="crew-badge" style="background:'+crew.color+';font-size:9.5px;padding:1px 6px">'+crew.short+'</span>'+
+          (t.mission?'· '+esc(t.mission.code):'')+'</div></div>'+
+      '<button class="btn mini" data-act="edit" data-id="'+t.id+'">✏️</button>'+
+      '<button class="btn mini ghost" data-act="hist" data-id="'+t.id+'">🕓</button>'+
+      '<button class="btn mini danger" data-act="del" data-id="'+t.id+'">🗑</button></div>';
+  }).join('');
+  el.querySelectorAll('button[data-act]').forEach(b=>{
+    b.onclick = ()=>{
+      const id = b.getAttribute('data-id');
+      const act = b.getAttribute('data-act');
+      if(act==='edit') editTeam(id);
+      if(act==='del')  deleteTeam(id);
+      if(act==='hist') openTeam(id);
+    };
+  });
+}
+
+function renderPoiList(){
+  const el = document.getElementById('poiList');
+  if(!S.pois.length){ el.innerHTML = '<div class="empty">Nessun punto chiave inserito.</div>'; return; }
+  el.innerHTML = S.pois.map(p=>{
+    const c = POI_CATS[p.cat]||POI_CATS.info;
+    return '<div class="poi-item"><div class="poi-ico" style="background:'+c.color+'22;color:'+c.color+'">'+c.icon+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="poi-name">'+esc(p.name)+'</div>'+
+        '<div class="poi-cat">'+esc(c.label)+(p.note?' · '+esc(p.note):'')+'</div></div>'+
+      '<button class="btn mini ghost" data-focus="'+p.id+'">🔍</button>'+
+      '<button class="btn mini danger" data-del="'+p.id+'">🗑</button></div>';
+  }).join('');
+  el.querySelectorAll('button[data-del]').forEach(b=>{
+    b.onclick = ()=>{ removePoi(b.getAttribute('data-del')); };
+  });
+  el.querySelectorAll('button[data-focus]').forEach(b=>{
+    b.onclick = ()=>{
+      const p = S.pois.find(x=>x.id===b.getAttribute('data-focus'));
+      if(p && map) map.flyTo([p.lat,p.lng], 17, {duration:.6});
+    };
+  });
+}
+
+function renderTeamSelect(){
+  const sel = document.getElementById('teamSelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">⏳ Nessuna (crea target in attesa)</option>' +
+    S.teams.map(t=>{
+      const type = TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+      const crew = crewInfo(t);
+      const tag = !t.operational ? '⛔ ' : (t.mission?'🚨 ':'✅ ');
+      return '<option value="'+t.id+'">'+tag+esc(t.name)+' ('+type.label+' · '+crew.label+')</option>';
+    }).join('');
+  if(prev) sel.value = prev;
+  updateTeamWarn();
+}
+
+function updateTeamWarn(){
+  const sel = document.getElementById('teamSelect');
+  const warn = document.getElementById('teamWarn');
+  const t = S.teams.find(x=>x.id===sel.value);
+  if(!t){
+    warn.innerHTML = 'ℹ️ Il target verrà creato <b>in attesa</b> di assegnazione.';
+    warn.classList.remove('hidden','warn');
+    warn.classList.add('info');
+    return;
+  }
+  const msgs = [];
+  if(!t.operational) msgs.push('⛔ <b>'+esc(t.name)+'</b> è NON operativa: l\'invio richiederà una conferma.');
+  if(t.mission) msgs.push('🚨 <b>'+esc(t.name)+'</b> è già impegnata su <b>'+esc(t.mission.code)+'</b>.');
+  warn.classList.remove('info');
+  warn.classList.add('warn');
+  if(msgs.length){ warn.innerHTML = msgs.join('<br>'); warn.classList.remove('hidden'); }
+  else warn.classList.add('hidden');
+}
+
+function renderLegend(){
+  let h = '<div class="m-title" style="margin:0 0 6px">Ambiente</div>';
+  Object.keys(ENV).forEach(k=>{
+    h += '<div class="pp-row"><span><b>'+k+'</b></span><span style="text-align:right;font-size:12px">'+esc(ENV[k].split('—')[1]||ENV[k])+'</span></div>';
+  });
+  h += '<div class="m-title" style="margin:12px 0 6px">Patologia</div>';
+  Object.keys(PAT).forEach(k=>{
+    h += '<div class="pp-row"><span><b>'+k+'</b></span><span style="text-align:right;font-size:12px">'+esc(PAT[k].split('—')[1]||PAT[k])+'</span></div>';
+  });
+  h += '<div class="m-title" style="margin:12px 0 6px">Codice colore</div>';
+  COLOR_ORDER.forEach(k=>{
+    const c = COLORS[k];
+    h += '<div class="pp-row"><span><span class="dot" style="background:'+c.hex+'"></span><b>'+k+'</b></span>'+
+         '<span style="font-size:12px">'+c.label+'</span></div>';
+  });
+  h += '<div class="m-title" style="margin:12px 0 6px">Fasi missione</div>';
+  MISSION_STATES.forEach(ms=>{
+    h += '<div class="pp-row"><span><b>'+ms.icon+'</b></span>'+
+         '<span style="text-align:right;font-size:12px">'+esc(ms.key)+'</span></div>';
+  });
+  h += '<div class="m-title" style="margin:12px 0 6px">Codici di rientro</div>';
+  Object.keys(RETURN_CODES).forEach(k=>{
+    const rc = RETURN_CODES[k];
+    h += '<div class="pp-row"><span><b>'+rc.icon+' '+k+'</b></span>'+
+         '<span style="text-align:right;font-size:12px">'+esc(rc.label)+'</span></div>';
+  });
+  h += '<div class="warn" style="margin-top:10px">Esempio: <b>K2R</b> = Casa · Cardiocircolatoria · Codice Rosso</div>';
+  document.getElementById('legendBody').innerHTML = h;
+}
+
+/* =========================================================
+   9. AZIONI
+   ========================================================= */
+function setStatus(teamId, status, note){
+  const t = S.teams.find(x=>x.id===teamId);
+  if(!t || !status) return;
+
+  const ms = MISSION_STATE_MAP[status];
+
+  if(ms && ms.terminal){
+    if(t.mission){
+      closeMission(t.id, note||'Arrivo in sede', status);
+      return;
+    }
+    t.history = t.history||[];
+    if(t.status !== status){
+      t.history.unshift({ts:Date.now(), status, note: note||'Arrivo in sede'});
+      t.history = t.history.slice(0,120);
+    }
+    t.status = status;
+    t.updatedAt = Date.now();
+    return;
+  }
+
+  if(t.status !== status){
+    t.status = status;
+    t.history = t.history||[];
+    t.history.unshift({ts:Date.now(), status, note:note||''});
+    t.history = t.history.slice(0,120);
+  }
+  if(status === 'Non operativa') t.operational = false;
+  t.updatedAt = Date.now();
+}
+
+function createPendingTarget(data){
+  const p = parseCode(data.code);
+  const tg = { id: uid('tg'), code:p.label, env:p.env, pat:p.pat, color:p.color,
+    lat:+data.lat.toFixed(6), lng:+data.lng.toFixed(6),
+    address: data.address||'', note: data.note||'',
+    activatedAt: Date.now(), assignedAt: null,
+    teamIds:[], teamName:null,
+    status:'in_attesa', closedAt:null, closeNote:'', returnCode:null };
+  S.targets.unshift(tg);
+  S.log.unshift({ts:Date.now(), text:'Target '+tg.code+' creato in attesa di assegnazione'});
+  return tg;
+}
+
+function assignTeamToTarget(targetId, teamId){
+  const tg = S.targets.find(x=>x.id===targetId);
+  const t  = S.teams.find(x=>x.id===teamId);
+  if(!tg || !t) return {ok:false, error:'Target o squadra inesistenti.'};
+  if(t.mission) return {ok:false, error:'La squadra è già impegnata su '+t.mission.code+'.'};
+  if(tg.status === 'chiuso') return {ok:false, error:'Il target è chiuso.'};
+
+  tg.teamIds = tg.teamIds || [];
+  if(tg.teamIds.includes(t.id)) return {ok:false, error:'Squadra già assegnata a questo target.'};
+  tg.teamIds.push(t.id);
+  tg.teamName = targetTeamNames(tg)[0] || null;
+
+  if(tg.status === 'in_attesa'){
+    tg.status = 'aperto';
+    tg.assignedAt = Date.now();
+  }
+
+  t.mission = { targetId:tg.id, code:tg.code, lat:tg.lat, lng:tg.lng,
+                address:tg.address, activatedAt:tg.activatedAt, note:tg.note||'' };
+  setStatus(t.id, 'Partenza', 'Missione '+tg.code+' assegnata');
+  S.log.unshift({ts:Date.now(), text:'Target '+tg.code+': aggiunta '+t.name});
+  return {ok:true, target:tg, team:t, warning: !t.operational};
+}
+
+function assignMission(teamId, data){
+  const t = S.teams.find(x=>x.id===teamId);
+  if(!t) return {ok:false, error:'Squadra inesistente.'};
+  const p = parseCode(data.code);
+  if(!p.valid) return {ok:false, error:'Codice non valido: manca il codice colore (B / V / G / R / N).'};
+  if(data.lat==null || data.lng==null) return {ok:false, error:'Nessun punto selezionato.'};
+  if(t.mission) closeMission(teamId, 'Riassegnata');
+
+  const tg = { id: uid('tg'), code:p.label, env:p.env, pat:p.pat, color:p.color,
+    lat:+data.lat.toFixed(6), lng:+data.lng.toFixed(6),
+    address: data.address||'', note: data.note||'',
+    activatedAt: Date.now(), assignedAt: Date.now(),
+    teamIds: [t.id], teamName: t.name,
+    status:'aperto', closedAt:null, closeNote:'', returnCode:null };
+  S.targets.unshift(tg);
+
+  t.mission = { targetId:tg.id, code:tg.code, lat:tg.lat, lng:tg.lng,
+                address:tg.address, activatedAt:tg.activatedAt, note:tg.note };
+  setStatus(t.id, 'Partenza', 'Missione '+tg.code+' assegnata');
+  S.log.unshift({ts:Date.now(), text:'Missione '+tg.code+' assegnata a '+t.name});
+  return {ok:true, target:tg, team:t, warning: !t.operational};
+}
+
+function closeMission(teamId, note, finalStatus){
+  const t = S.teams.find(x=>x.id===teamId);
+  if(!t) return;
+  if(t.mission){
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    if(tg){
+      tg.teamIds = (tg.teamIds||[]).filter(id => id !== teamId);
+      tg.teamName = targetTeamNames(tg)[0] || null;
+      if(tg.teamIds.length === 0 && tg.status === 'aperto'){
+        tg.status = 'chiuso';
+        tg.closedAt = Date.now();
+        tg.closeNote = note||'';
+      }
+    }
+    S.log.unshift({ts:Date.now(), text:'Missione '+t.mission.code+' chiusa ('+t.name+')'});
+  }
+  t.mission = null;
+  setStatus(t.id, finalStatus || (t.operational?'Disponibile':'Non operativa'), note||'Missione chiusa');
+}
+
+function removePoi(id){
+  const p = S.pois.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm('Eliminare il punto "'+p.name+'"?')) return;
+  S.pois = S.pois.filter(x=>x.id!==id);
+  render();
+}
+
+function deleteTeam(id){
+  const t = S.teams.find(x=>x.id===id);
+  if(!t) return;
+  if(!confirm('Eliminare definitivamente "'+t.name+'"?')) return;
+  S.targets.forEach(tg=>{
+    if(Array.isArray(tg.teamIds) && tg.teamIds.includes(id)){
+      tg.teamIds = tg.teamIds.filter(x=>x!==id);
+      tg.teamName = targetTeamNames(tg)[0] || null;
+      if(tg.teamIds.length === 0 && tg.status === 'aperto'){
+        tg.status='chiuso'; tg.closedAt=Date.now();
+      }
+    }
+  });
+  S.teams = S.teams.filter(x=>x.id!==id);
+  if(myTeamId===id){ myTeamId=null; localStorage.removeItem('sge_myteam'); }
+  render();
+}
+
+/* =========================================================
+   10. MODAL
+   ========================================================= */
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+function openModal(title, html){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modal.classList.remove('hidden');
+}
+function closeModal(){ modal.classList.add('hidden'); modalBody.innerHTML=''; }
+document.getElementById('modalClose').onclick = closeModal;
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+function openTeam(id){
+  const t = S.teams.find(x=>x.id===id);
+  if(!t) return;
+  const type = TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  const m = t.mission;
+  const col = m ? (COLORS[parseCode(m.code).color]||{hex:'#888',fg:'#fff'}) : null;
+
+  let h = '<div class="mt-head"><div class="mt-ico">'+type.icon+'</div>'+
+    '<div><div class="mt-name">'+esc(t.name)+'</div>'+
+    '<div class="mt-sub">'+type.label+
+      '<span class="crew-badge" style="background:'+crew.color+'">'+crew.label+'</span>'+
+      (t.phone?'<span>· '+esc(t.phone)+'</span>':'')+'</div></div>'+
+    '<div class="mt-status" style="background:'+statusColor(t)+'">'+esc(stateShort(t.status))+'</div></div>';
+
+  if(m){
+    h += '<div class="mission-card" style="border-left:5px solid '+col.hex+'">'+
+      '<div class="mc-code" style="background:'+col.hex+';color:'+col.fg+'">'+esc(m.code)+'</div>'+
+      '<div class="mc-info"><div>'+esc(m.address||'—')+'</div>'+
+      '<div class="muted">Attivazione '+fmtTime(m.activatedAt)+' · '+elapsed(m.activatedAt)+'</div></div></div>';
+    const tg = S.targets.find(x=>x.id===m.targetId);
+    if(tg && (tg.teamIds||[]).length > 1){
+      const others = (tg.teamIds||[]).filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean);
+      h += '<div class="info" style="margin-bottom:10px">🚑 Su questo target anche: <b>'+
+           esc(others.map(o=>o.name).join(', '))+'</b></div>';
+    }
+    if(tg && tg.returnCode != null){
+      const rc = RETURN_CODES[tg.returnCode];
+      h += '<div class="info" style="margin-bottom:10px;border-color:'+rc.color+';color:'+rc.color+'">'+
+           rc.icon+' Codice rientro <b>'+tg.returnCode+'</b> — '+esc(rc.label)+'</div>';
+    }
+    h += '<div class="row"><button class="btn ghost" id="mCloseBtn">✔ Chiudi missione</button>'+
+         '<button class="btn ghost" id="mChangeBtn">🔁 Cambia codice</button>'+
+         '<button class="btn ghost" id="mFocusBtn">🎯 Vai al target</button></div>';
+  } else {
+    h += '<div class="empty">Nessuna missione attiva</div>';
+  }
+
+  if(m){
+    h += '<div class="field"><label>Avanzamento missione</label><div class="status-grid">'+
+      MISSION_STATES.map(ms=>{
+        const on = t.status===ms.key;
+        return '<button class="btn '+(on?'primary':'')+'" data-phase="'+esc(ms.key)+'">'+
+          '<span class="big">'+ms.icon+'</span>'+esc(ms.short)+'</button>';
+      }).join('')+'</div></div>';
+  }
+  h += '<div class="field"><label>Imposta stato</label><select id="mStatus">'+
+    (m ? MISSION_STATE_KEYS.concat(AVAIL_STATES) : AVAIL_STATES)
+      .map(s=>'<option value="'+esc(s)+'"'+(t.status===s?' selected':'')+'>'+
+        stateIcon(s)+' '+esc(s)+'</option>').join('')+
+    '</select></div>';
+
+  h += '<div class="row">'+
+    '<button class="btn '+(t.operational?'danger':'primary')+'" id="mOpBtn">'+
+    (t.operational?'⛔ Rendi NON operativa':'✅ Rendi operativa')+'</button>'+
+    '<button class="btn ghost" id="mEditBtn">✏️ Modifica</button></div>';
+
+  h += '<div class="field"><label>Cronologia stati</label><div class="hist">'+
+    ((t.history&&t.history.length)
+      ? t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span>'+
+          '<span><b>'+esc(stateShort(x.status))+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join('')
+      : '<div class="empty">Nessuna voce</div>')+'</div></div>';
+
+  openModal('Dettagli equipaggio', h);
+
+  if(document.getElementById('mCloseBtn')) document.getElementById('mCloseBtn').onclick = ()=>{
+    closeMission(id); render(); openTeam(id);
+  };
+  if(document.getElementById('mFocusBtn')) document.getElementById('mFocusBtn').onclick = ()=>{
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    if(tg && map){
+      closeModal();
+      map.flyTo([tg.lat,tg.lng], 17, {duration:.6});
+      setTimeout(()=>{
+        const targetMarker = findTargetMarker(tg.id);
+        if(targetMarker) targetMarker.openPopup();
+      }, 700);
+    }
+  };
+  if(document.getElementById('mChangeBtn')) document.getElementById('mChangeBtn').onclick = ()=>{
+    const nc = prompt('Nuovo codice intervento (es. K2R):', t.mission.code);
+    if(!nc) return;
+    const p = parseCode(nc);
+    if(!p.valid){ alert('Codice non valido: serve un codice colore (B/V/G/R/N).'); return; }
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    if(tg){ tg.code=p.label; tg.env=p.env; tg.pat=p.pat; tg.color=p.color; }
+    t.mission.code = p.label;
+    save();
+    render(); openTeam(id);
+  };
+  document.querySelectorAll('#modalBody [data-phase]').forEach(b=>{
+    b.onclick = ()=>{
+      const ph = b.getAttribute('data-phase');
+      if(MISSION_STATE_MAP[ph] && MISSION_STATE_MAP[ph].terminal){
+        if(!confirm('Confermi "Arrivo in Sede / Fine Missione"?\nLa missione verrà chiusa.')) return;
+      }
+      setStatus(id, ph, 'Aggiornato da Sala Operativa');
+      save();
+      render(); openTeam(id);
+    };
+  });
+  document.getElementById('mStatus').onchange = (e)=>{
+    const v = e.target.value;
+    if(MISSION_STATE_MAP[v] && MISSION_STATE_MAP[v].terminal){
+      if(!confirm('Confermi "Arrivo in Sede / Fine Missione"?\nLa missione verrà chiusa.')){ openTeam(id); return; }
+    }
+    setStatus(id, v, 'Modifica manuale da Sala Operativa');
+    save();
+    render(); openTeam(id);
+  };
+  document.getElementById('mOpBtn').onclick = ()=>{
+    t.operational = !t.operational;
+    t.status = t.operational ? 'Disponibile' : 'Non operativa';
+    t.history = t.history||[];
+    t.history.unshift({ts:Date.now(), status:t.status, note: t.operational?'Reimmessa in servizio':'Sospesa dall\'operatore'});
+    save();
+    render(); openTeam(id);
+  };
+  document.getElementById('mEditBtn').onclick = ()=>{ closeModal(); editTeam(id); };
+}
+
+function findTargetMarker(targetId){
+  if(!groups.targets) return null;
+  let found = null;
+  groups.targets.eachLayer(l=>{ if(l.options && l.options.sgeId === targetId) found = l; });
+  return found;
+}
+
+function openAssign(targetId){
+  const tg = S.targets.find(x=>x.id===targetId);
+  if(!tg) return;
+  if(tg.status === 'chiuso'){
+    openModal('Assegna squadra', '<div class="empty">Il target è chiuso.</div>');
+    return;
+  }
+  const already = new Set(tg.teamIds||[]);
+  const available = S.teams.filter(t=>!t.mission && !already.has(t.id));
+  if(!available.length){
+    openModal('Assegna squadra', '<div class="empty">Nessuna squadra disponibile al momento.</div>');
+    return;
+  }
+  const opts = available.map(t=>{
+    const type = TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+    const crew = crewInfo(t);
+    const tag = !t.operational ? '⛔ ' : '✅ ';
+    return '<option value="'+t.id+'">'+tag+esc(t.name)+' ('+type.label+' · '+crew.label+')</option>';
+  }).join('');
+
+  const currentTeams = targetTeams(tg);
+  let h = '<div class="info" style="margin:0 0 12px">Target <b>'+esc(tg.code)+'</b> — '+esc(tg.address||'posizione selezionata')+
+          '<br><span class="muted" style="font-size:11.5px">Attivo da '+elapsed(tg.activatedAt)+'</span>';
+  if(currentTeams.length){
+    h += '<br><span style="font-size:12px">Già assegnate: <b>'+esc(currentTeams.map(t=>t.name).join(', '))+'</b></span>';
+  }
+  h += '</div>';
+  h += '<div class="field"><label>'+(currentTeams.length?'Aggiungi squadra':'Scegli squadra')+'</label><select id="assignTeam">'+opts+'</select></div>';
+  h += '<div class="warn" id="assignWarn" style="margin-bottom:12px;display:none"></div>';
+  h += '<div class="row"><button class="btn ghost" id="assignCancel">Annulla</button>'+
+       '<button class="btn primary" id="assignConfirm">👥 Assegna</button></div>';
+
+  openModal('Assegna squadra al target', h);
+
+  const sel = document.getElementById('assignTeam');
+  const warn = document.getElementById('assignWarn');
+  const refresh = ()=>{
+    const t = S.teams.find(x=>x.id===sel.value);
+    if(t && !t.operational){
+      warn.innerHTML = '⛔ <b>'+esc(t.name)+'</b> è NON operativa: procedendo verrà comunque impegnata.';
+      warn.style.display = '';
+    } else { warn.style.display = 'none'; }
+  };
+  sel.onchange = refresh; refresh();
+
+  document.getElementById('assignCancel').onclick = closeModal;
+  document.getElementById('assignConfirm').onclick = ()=>{
+    const teamId = sel.value;
+    const t = S.teams.find(x=>x.id===teamId);
+    if(t && !t.operational){
+      if(!confirm('⛔ "'+t.name+'" è NON operativa. Assegnare comunque la missione?')) return;
+    }
+    const res = assignTeamToTarget(targetId, teamId);
+    if(!res.ok){ alert(res.error); return; }
+    save();
+    closeModal();
+    render();
+    if(map) map.flyTo([tg.lat, tg.lng], 17, {duration:.7});
+  };
+}
+
+function editTeam(id){
+  const t = id ? S.teams.find(x=>x.id===id) : null;
+  const isNew = !t;
+  const d = t || {name:'',type:'auto',crew:'bravo',phone:'',note:'',operational:true};
+
+  let h = '<div class="field"><label>Nome squadra</label>'+
+    '<input type="text" id="fName" value="'+esc(d.name)+'" placeholder="es. Squadra 6 — Auto"></div>';
+  h += '<div class="row">';
+  h += '<div class="field" style="margin-bottom:0"><label>Tipo mezzo</label><select id="fType">'+
+    Object.keys(TEAM_TYPES).map(k=>'<option value="'+k+'"'+(d.type===k?' selected':'')+'>'+
+      TEAM_TYPES[k].icon+' '+TEAM_TYPES[k].label+'</option>').join('')+'</select></div>';
+  h += '<div class="field" style="margin-bottom:0"><label>Tipo equipaggio</label><select id="fCrew">'+
+    Object.keys(CREW_TYPES).map(k=>'<option value="'+k+'"'+(crewOf(d)===k?' selected':'')+'>'+
+      CREW_TYPES[k].short+' — '+CREW_TYPES[k].label+'</option>').join('')+'</select></div>';
+  h += '</div>';
+  h += '<div class="field" style="margin-top:10px"><label>Telefono / radio</label>'+
+    '<input type="tel" id="fPhone" value="'+esc(d.phone||'')+'" placeholder="facoltativo"></div>';
+  h += '<div class="field"><label>Note</label>'+
+    '<input type="text" id="fNote" value="'+esc(d.note||'')+'" placeholder="facoltativo"></div>';
+  h += '<div class="field"><label>Operatività</label>'+
+    '<select id="fOp"><option value="1"'+(d.operational!==false?' selected':'')+'>Operativa</option>'+
+    '<option value="0"'+(d.operational===false?' selected':'')+'>Non operativa</option></select></div>';
+  h += '<div class="row" style="margin-top:16px">'+
+    '<button class="btn ghost" id="fCancel">Annulla</button>'+
+    '<button class="btn primary" id="fSave">'+(isNew?'Aggiungi':'Salva')+'</button></div>';
+
+  openModal(isNew?'Nuova squadra':'Modifica squadra', h);
+
+  document.getElementById('fCancel').onclick = closeModal;
+  document.getElementById('fSave').onclick = ()=>{
+    const name = document.getElementById('fName').value.trim() || 'Nuova squadra';
+    const type = document.getElementById('fType').value;
+    const crew = document.getElementById('fCrew').value;
+    const phone = document.getElementById('fPhone').value.trim();
+    const note = document.getElementById('fNote').value.trim();
+    const op = document.getElementById('fOp').value === '1';
+
+    if(isNew){
+      S.teams.push({ id: uid('tm'), name, type, crew,
+        operational: op, status: op?'Disponibile':'Non operativa',
+        lat: S.center.lat + (Math.random()-0.5)*0.006,
+        lng: S.center.lng + (Math.random()-0.5)*0.006,
+        gpsAt: Date.now(), phone, note, mission:null,
+        history:[{ts:Date.now(), status: op?'Disponibile':'Non operativa', note:'Squadra creata'}],
+        updatedAt: Date.now() });
+      S.log.unshift({ts:Date.now(), text:'Squadra aggiunta: '+name});
+    } else {
+      t.name = name; t.type = type; t.crew = crew; t.phone = phone; t.note = note;
+      if(t.operational !== op){
+        t.operational = op;
+        t.status = op ? 'Disponibile' : 'Non operativa';
+        t.history = t.history||[];
+        t.history.unshift({ts:Date.now(), status:t.status, note:'Modifica operatività'});
+      }
+      t.updatedAt = Date.now();
+      if(t.mission){
+        const tg = S.targets.find(x=>x.id===t.mission.targetId);
+        if(tg) tg.teamName = targetTeamNames(tg)[0] || null;
+      }
+    }
+    save();
+    closeModal();
+    render();
+  };
+}
+
+/* =========================================================
+   11. GEOCODING
+   ========================================================= */
+const GEO_PROVIDERS = {
+  photon: {
+    label: 'Photon',
+    search: async (q, signal) => {
+      const url = 'https://photon.komoot.io/api/?lang=it&limit=6&q=' + encodeURIComponent(q);
+      const r = await fetch(url, {signal, headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('http ' + r.status);
+      const data = await r.json();
+      return (data.features||[]).map(f=>{
+        const p = f.properties || {};
+        const label = [p.name, p.street, p.housenumber].filter(Boolean).join(' ').trim()
+                      || [p.city, p.state].filter(Boolean).join(', ');
+        const sub = [p.postcode, p.city, p.state, p.country].filter(Boolean)
+                      .filter(x => !label.includes(x)).join(', ');
+        return { label: label || (p.city || 'Luogo'), sub: sub || '',
+          lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+      });
+    },
+    reverse: async (lat, lng) => {
+      const url = 'https://photon.komoot.io/reverse?lang=it&lat=' + lat + '&lon=' + lng;
+      const r = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('http ' + r.status);
+      const d = await r.json();
+      const f = (d.features||[])[0];
+      if(!f) return null;
+      const p = f.properties || {};
+      const parts = [p.name, p.street, p.housenumber].filter(Boolean).join(' ');
+      return parts || [p.city, p.state, p.country].filter(Boolean).join(', ') || null;
+    }
+  },
+  nominatim: {
+    label: 'Nominatim',
+    search: async (q, signal) => {
+      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=it&q='
+                  + encodeURIComponent(q);
+      const r = await fetch(url, {signal, headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('http ' + r.status);
+      const data = await r.json();
+      return data.map(d=>{
+        const parts = String(d.display_name||'').split(',').map(s=>s.trim());
+        return { label: parts.slice(0,2).join(', ') || d.display_name || 'Luogo',
+          sub: parts.slice(2,5).join(', '), lat: +d.lat, lng: +d.lon };
+      });
+    },
+    reverse: async (lat, lng) => {
+      const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&accept-language=it&lat='
+                  + lat + '&lon=' + lng;
+      const r = await fetch(url, {headers:{'Accept':'application/json'}});
+      if(!r.ok) throw new Error('http ' + r.status);
+      const d = await r.json();
+      if(!d || !d.display_name) return null;
+      const parts = String(d.display_name).split(',').map(s=>s.trim());
+      return parts.slice(0,2).join(', ');
+    }
+  }
+};
+
+const geoStatus = { photon: null, nominatim: null };
+
+function updateGeoStatus(extra){
+  const el = document.getElementById('geoStatus');
+  if(!el) return;
+  if(extra === 'loading'){
+    el.innerHTML = '<span class="loading">⏳ ricerca in corso…</span>';
+    return;
+  }
+  const parts = [];
+  for(const k of ['photon','nominatim']){
+    const s = geoStatus[k];
+    if(s === null) continue;
+    parts.push('<span class="'+(s?'ok':'bad')+'">' + GEO_PROVIDERS[k].label + ': ' + (s?'✓':'✗') + '</span>');
+  }
+  el.innerHTML = parts.length ? parts.join(' · ') : '';
+}
+
+async function remoteSearch(q, signal){
+  for(const key of ['photon','nominatim']){
+    try{
+      const results = await GEO_PROVIDERS[key].search(q, signal);
+      geoStatus[key] = true;
+      updateGeoStatus();
+      if(results && results.length) return results;
+    }catch(e){
+      if(e.name === 'AbortError') return undefined;
+      geoStatus[key] = false;
+      updateGeoStatus();
+      console.warn('[geo] ' + key + ' fallito:', e.message);
+    }
+  }
+  return null;
+}
+
+async function reverseGeocode(lat, lng){
+  for(const key of ['photon','nominatim']){
+    try{
+      const addr = await GEO_PROVIDERS[key].reverse(lat, lng);
+      if(addr){
+        geoStatus[key] = true;
+        updateGeoStatus();
+        if(draft && draft.lat === +lat.toFixed(6)){
+          draft.address = addr;
+          document.getElementById('addrInput').value = addr;
+          updateDraftUI();
+        }
+        return;
+      }
+    }catch(e){
+      console.warn('[geo reverse] ' + key + ' fallito:', e.message);
+      geoStatus[key] = false;
+      updateGeoStatus();
+    }
+  }
+}
+
+const addrInput = document.getElementById('addrInput');
+const addrSugg  = document.getElementById('addrSugg');
+let acTimer = null, acAbort = null;
+
+function hideSugg(){ addrSugg.classList.add('hidden'); addrSugg.innerHTML=''; }
+
+function showSugg(items, note){
+  if(!items.length){
+    addrSugg.innerHTML = '<div class="sugg-empty">Nessun risultato'+(note?' (ricerca online non disponibile)':'')+'</div>';
+    addrSugg.classList.remove('hidden');
+    return;
+  }
+  addrSugg.innerHTML = items.map((it,i)=>
+    '<div class="sugg-item" data-i="'+i+'"><div class="s1">'+esc(it.label)+'</div>'+
+    '<div class="s2">'+esc(it.sub||'')+'</div></div>').join('');
+  addrSugg.classList.remove('hidden');
+  addrSugg.querySelectorAll('.sugg-item').forEach(node=>{
+    node.onclick = ()=>{
+      const it = items[+node.getAttribute('data-i')];
+      addrInput.value = it.label;
+      hideSugg();
+      if(it.lat!=null){
+        setDraft(it.lat, it.lng, it.label);
+        if(map) map.flyTo([it.lat,it.lng], 17, {duration:.7});
+        openAcc('accMission');
+      }
+    };
+  });
+}
+
+function localSearch(q){
+  const k = q.toLowerCase();
+  return S.pois.filter(p=>p.name.toLowerCase().includes(k))
+    .slice(0,4)
+    .map(p=>({label:p.name, sub:'Punto chiave · '+(POI_CATS[p.cat]||{}).label, lat:p.lat, lng:p.lng}));
+}
+
+addrInput.addEventListener('input', ()=>{
+  const q = addrInput.value.trim();
+  clearTimeout(acTimer);
+  if(q.length < 3){ hideSugg(); return; }
+
+  const loc = localSearch(q);
+  showSugg(loc, false);
+
+  acTimer = setTimeout(async ()=>{
+    if(acAbort) acAbort.abort();
+    acAbort = new AbortController();
+
+    if(!loc.length) updateGeoStatus('loading');
+
+    const rem = await remoteSearch(q, acAbort.signal);
+    if(rem === undefined) return;
+    if(addrInput.value.trim() !== q) return;
+
+    if(rem === null){
+      if(!loc.length) showSugg([], true);
+      return;
+    }
+    const merged = loc.concat(rem.filter(r=>!loc.some(l=>l.label===r.label))).slice(0,8);
+    showSugg(merged, false);
+  }, 380);
+});
+
+addrInput.addEventListener('keydown', e=>{
+  if(e.key==='Escape') hideSugg();
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-wrap')) hideSugg();
+});
+
+function updateDraftUI(){
+  const box = document.getElementById('draftBox');
+  const txt = document.getElementById('draftText');
+  const w   = document.getElementById('poiCoordWarn');
+  if(draft){
+    box.classList.add('ok');
+    txt.innerHTML = '<b>'+(draft.address?esc(draft.address):'Punto selezionato')+'</b> · '+
+      draft.lat.toFixed(5)+', '+draft.lng.toFixed(5);
+    w.classList.add('hidden');
+  } else {
+    box.classList.remove('ok');
+    txt.textContent = 'Nessun punto selezionato';
+    w.classList.remove('hidden');
+  }
+}
+
+/* =========================================================
+   12. PREVIEW CODICE
+   ========================================================= */
+const codeInput = document.getElementById('codeInput');
+function renderCodePreview(){
+  const raw = codeInput.value.toUpperCase();
+  codeInput.value = raw;
+  const p = parseCode(raw);
+  const el = document.getElementById('codePreview');
+  const bad = document.getElementById('codeBad');
+
+  let h = '';
+  h += '<span class="chip '+(p.env?'on':'')+'">'+(p.env?p.env:'Ambiente')+'</span>';
+  h += '<span class="chip '+(p.pat?'on':'')+'">'+(p.pat?p.pat:'Patologia')+'</span>';
+  if(p.color){
+    const c = COLORS[p.color];
+    h += '<span class="chip col" style="background:'+c.hex+';color:'+c.fg+'">'+c.label+'</span>';
+  } else {
+    h += '<span class="chip">Colore</span>';
+  }
+  el.innerHTML = h;
+
+  if(raw && !p.valid){
+    bad.textContent = '⚠️ Codice colore mancante (B / V / G / R / N).';
+    bad.classList.remove('hidden');
+    bad.style.color = '';
+  } else if(raw && p.valid){
+    bad.textContent = '✓ '+describeCode(raw);
+    bad.classList.remove('hidden');
+    bad.style.color = '#6ee7a8';
+  } else {
+    bad.classList.add('hidden');
+    bad.style.color = '';
+  }
+}
+codeInput.addEventListener('input', renderCodePreview);
+
+/* =========================================================
+   13. EVENTI UI
+   ========================================================= */
+function openAcc(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.add('open');
+}
+document.querySelectorAll('.acc-head').forEach(h=>{
+  h.onclick = ()=> h.parentElement.classList.toggle('open');
+});
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const v = b.getAttribute('data-view');
+    document.getElementById('view-sala').classList.toggle('hidden', v!=='sala');
+    document.getElementById('view-squadre').classList.toggle('hidden', v!=='squadre');
+    if(v==='sala' && map) setTimeout(()=>map.invalidateSize(), 60);
+    if(v==='squadre') renderSquadreView();
+  };
+});
+document.querySelectorAll('.map-tools button').forEach(b=>{
+  b.onclick = ()=>{
+    const k = b.getAttribute('data-layer');
+    layerVis[k] = !layerVis[k];
+    b.classList.toggle('on', layerVis[k]);
+    renderMap();
+  };
+});
+
+document.getElementById('sendMission').onclick = ()=>{
+  const teamId = document.getElementById('teamSelect').value;
+  const code   = codeInput.value.trim();
+  const note   = document.getElementById('missionNote').value.trim();
+
+  if(!draft){ alert('Seleziona un punto sulla mappa o digita un indirizzo.'); return; }
+  const p = parseCode(code);
+  if(!p.valid){ alert('Codice intervento non valido: manca il codice colore (B / V / G / R / N).'); return; }
+
+  if(!teamId){
+    createPendingTarget({code, lat:draft.lat, lng:draft.lng, address:draft.address, note});
+    save();
+    draft = null;
+    document.getElementById('addrInput').value = '';
+    document.getElementById('missionNote').value = '';
+    codeInput.value = '';
+    renderCodePreview();
+    updateDraftUI();
+    render();
+    return;
+  }
+
+  const t = S.teams.find(x=>x.id===teamId);
+  if(!t.operational){
+    if(!confirm('⛔ ATTENZIONE\n\n"'+t.name+'" è attualmente NON operativa.\nVuoi comunque inviarla in missione?')) return;
+  }
+  if(t.mission){
+    if(!confirm('"'+t.name+'" è già impegnata su '+t.mission.code+'.\nLa missione precedente verrà chiusa. Continuare?')) return;
+  }
+
+  const res = assignMission(teamId, {code, lat:draft.lat, lng:draft.lng, address:draft.address, note});
+  if(!res.ok){ alert(res.error); return; }
+  if(res.warning){ t.operational = false; }
+  save();
+
+  draft = null;
+  document.getElementById('addrInput').value = '';
+  document.getElementById('missionNote').value = '';
+  codeInput.value = '';
+  renderCodePreview();
+  updateDraftUI();
+  render();
+  if(map) map.flyTo([res.target.lat, res.target.lng], 17, {duration:.8});
+};
+
+document.getElementById('teamSelect').onchange = updateTeamWarn;
+document.getElementById('sortMode').onchange = e=>{
+  sortMode = e.target.value;
+  renderOpsList();
+};
+document.getElementById('addTeamBtn').onclick = ()=> editTeam(null);
+
+(function(){
+  const sel = document.getElementById('poiCat');
+  sel.innerHTML = Object.keys(POI_CATS).map(k=>
+    '<option value="'+k+'">'+POI_CATS[k].icon+' '+POI_CATS[k].label+'</option>').join('');
+})();
+
+document.getElementById('poiForm').onsubmit = e=>{
+  e.preventDefault();
+  if(!draft){ alert('Clicca prima sulla mappa per scegliere la posizione del punto.'); return; }
+  const name = document.getElementById('poiName').value.trim();
+  if(!name) return;
+  S.pois.push({ id: uid('poi'),
+    cat: document.getElementById('poiCat').value, name,
+    note: document.getElementById('poiNote').value.trim(),
+    lat: draft.lat, lng: draft.lng, createdAt: Date.now() });
+  S.log.unshift({ts:Date.now(), text:'Punto chiave aggiunto: '+name});
+  save();
+  document.getElementById('poiName').value = '';
+  document.getElementById('poiNote').value = '';
+  render();
+};
+
+document.getElementById('resetBtn').onclick = ()=>{
+  if(!confirm('Ripristinare i dati dimostrativi? Tutte le modifiche andranno perse.')) return;
+  S = defaultState();
+  draft = null;
+  filterColor = null;
+  selection = null;
+  save();
+  render();
+  if(map) map.setView([S.center.lat, S.center.lng], 15);
+};
+
+/* =========================================================
+   14. VISTA SQUADRE (mirror interno della SOL)
+   ========================================================= */
+function renderSquadreView(){
+  const sel = document.getElementById('myTeam');
+  sel.innerHTML = '<option value="">— seleziona equipaggio —</option>' +
+    S.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
+  if(myTeamId && S.teams.some(t=>t.id===myTeamId)) sel.value = myTeamId;
+  sel.onchange = ()=>{ myTeamId = sel.value || null; localStorage.setItem('sge_myteam', myTeamId||''); renderSquadreView(); };
+
+  const boxS = document.getElementById('sqStatus');
+  const boxM = document.getElementById('sqMission');
+  const boxG = document.getElementById('sqGps');
+  const boxH = document.getElementById('sqHistory');
+
+  const t = S.teams.find(x=>x.id===myTeamId);
+  if(!t){
+    boxS.innerHTML = '<div class="m-card"><div class="empty">Seleziona un equipaggio per iniziare.</div></div>';
+    boxM.innerHTML = ''; boxG.textContent = ''; boxH.innerHTML = '';
+    document.getElementById('sqPhaseCard').classList.add('hidden');
+    document.getElementById('sqPhaseGrid').innerHTML = '';
+    document.getElementById('sqAvailGrid').innerHTML = '';
+    return;
+  }
+
+  const type = TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  const col = statusColor(t);
+
+  const phaseCard = document.getElementById('sqPhaseCard');
+  const phaseGrid = document.getElementById('sqPhaseGrid');
+  const availGrid = document.getElementById('sqAvailGrid');
+
+  if(t.mission){
+    phaseCard.classList.remove('hidden');
+    phaseGrid.innerHTML = MISSION_STATES.map(ms=>{
+      const on = t.status===ms.key;
+      return '<button class="btn '+(on?'primary':'')+'" data-status="'+esc(ms.key)+
+        '" style="flex-direction:column;gap:3px;font-size:11.5px;padding:10px 6px">'+
+        '<span class="big">'+ms.icon+'</span>'+esc(ms.short)+'</button>';
+    }).join('');
+  } else {
+    phaseCard.classList.add('hidden');
+    phaseGrid.innerHTML = '';
+  }
+
+  availGrid.innerHTML = AVAIL_STATES.map(k=>{
+    const on  = t.status===k;
+    const ico = k==='Disponibile' ? '✅' : (k==='In pausa' ? '⏸️' : '⛔');
+    return '<button class="btn '+(on?'primary':'')+'" data-status="'+k+
+      '" style="flex-direction:column;gap:3px;font-size:11.5px;padding:10px 6px">'+
+      '<span class="big">'+ico+'</span>'+esc(k)+'</button>';
+  }).join('');
+
+  document.querySelectorAll('#view-squadre .status-grid button[data-status]').forEach(b=>{
+    b.onclick = ()=> onSquadraStatus(b.getAttribute('data-status'));
+  });
+
+  boxS.innerHTML =
+    '<div class="m-status-big" style="background:'+col+'">'+
+      '<span class="sb-ico">'+statusIcon(t)+'</span>'+
+      '<div><div style="font-size:11px;opacity:.75;font-weight:700;letter-spacing:.6px">STATO ATTUALE</div>'+
+      '<div>'+esc(stateShort(t.status))+'</div></div>'+
+      '<div style="margin-left:auto;text-align:right">'+
+        '<div style="font-size:22px">'+type.icon+'</div>'+
+        '<div style="font-size:11px;margin-top:2px">'+crew.label+'</div>'+
+      '</div></div>';
+
+  if(t.mission){
+    const c = COLORS[parseCode(t.mission.code).color] || {hex:'#888',fg:'#fff'};
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    let extra = '';
+    if(tg && (tg.teamIds||[]).length > 1){
+      const others = (tg.teamIds||[]).filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean);
+      extra = '<div class="muted" style="margin-top:4px;font-size:12px">🚑 Insieme a: <b>'+esc(others.map(o=>o.name).join(', '))+'</b></div>';
+    }
+    if(tg && tg.returnCode != null){
+      const rc = RETURN_CODES[tg.returnCode];
+      extra += '<div style="color:'+rc.color+';margin-top:4px;font-size:12.5px;font-weight:700">'+
+               rc.icon+' Cod. rientro '+tg.returnCode+' — '+esc(rc.label)+'</div>';
+    }
+    boxM.innerHTML =
+      '<div class="m-card m-mission" style="--c:'+c.hex+'">'+
+        '<div class="mc-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</div>'+
+        '<div class="mc-info">'+
+          (MISSION_STATE_MAP[t.status]
+            ? '<div style="font-weight:800;color:'+MISSION_STATE_MAP[t.status].color+';font-size:12.5px;margin-bottom:3px">'+
+              MISSION_STATE_MAP[t.status].icon+' '+esc(MISSION_STATE_MAP[t.status].short)+'</div>'
+            : '')+
+          '<div style="font-weight:700">'+esc(t.mission.address||'Indirizzo non specificato')+'</div>'+
+          '<div class="muted">Attivata alle '+fmtTime(t.mission.activatedAt)+' · da '+elapsed(t.mission.activatedAt)+'</div>'+
+          (t.mission.note?'<div class="muted" style="margin-top:4px">📝 '+esc(t.mission.note)+'</div>':'')+
+          extra+
+        '</div></div>'+
+      '<button class="btn primary block" id="sqComplete" style="margin-bottom:13px">✅ Missione completata</button>';
+    setTimeout(()=>{
+      const b = document.getElementById('sqComplete');
+      if(b) b.onclick = ()=>{
+        setStatus(t.id, 'Arrivo in Sede / Fine Missione', 'Completata dall\'equipaggio');
+        save();
+        render(); renderSquadreView();
+      };
+    },0);
+  } else {
+    boxM.innerHTML = '<div class="m-card"><div class="empty">Nessuna missione assegnata.<br>In attesa di disposizioni dalla Sala Operativa.</div></div>';
+  }
+
+  boxG.innerHTML = 'Ultimo aggiornamento: <b>'+fmtTime(t.gpsAt)+'</b><br>'+
+                   'Coordinate: '+t.lat.toFixed(5)+', '+t.lng.toFixed(5);
+
+  boxH.innerHTML = (t.history&&t.history.length)
+    ? '<div class="hist">'+t.history.map(x=>
+        '<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span>'+
+        '<span><b>'+esc(stateShort(x.status))+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join('')+'</div>'
+    : '<div class="empty">Nessuna voce</div>';
+}
+
+function onSquadraStatus(st){
+  if(!myTeamId){ alert('Seleziona prima un equipaggio.'); return; }
+  const t = S.teams.find(x=>x.id===myTeamId);
+  if(!t) return;
+
+  const isPhase = !!MISSION_STATE_MAP[st];
+
+  if(st === 'Arrivo in Sede / Fine Missione'){
+    if(t.mission && !confirm('Confermi l\'arrivo in sede?\nLa missione verrà chiusa.')) return;
+    setStatus(t.id, st, 'Fine missione');
+    save();
+    render(); renderSquadreView();
+    return;
+  }
+
+  if(!isPhase && t.mission){
+    if(!confirm('"'+t.name+'" ha una missione attiva su '+t.mission.code+'.\n'+
+                'Cambiando stato la missione verrà chiusa. Continuare?')) return;
+    closeMission(t.id, 'Chiusa dall\'equipaggio');
+  }
+
+  if(st === 'Non operativa'){
+    if(!confirm('Rendere "'+t.name+'" NON operativa?')) return;
+    t.operational = false;
+  } else if(!isPhase){
+    t.operational = true;
+  }
+
+  setStatus(t.id, st, 'Aggiornato dall\'equipaggio');
+  save();
+  render();
+  renderSquadreView();
+}
+
+document.getElementById('gpsBtn').onclick = ()=>{
+  if(!myTeamId){ alert('Seleziona prima un equipaggio.'); return; }
+  const t = S.teams.find(x=>x.id===myTeamId);
+  if(!t) return;
+  const apply = (lat,lng)=>{
+    t.lat = +lat.toFixed(6); t.lng = +lng.toFixed(6); t.gpsAt = Date.now();
+    save();
+    render(); renderSquadreView();
+  };
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos => apply(pos.coords.latitude, pos.coords.longitude),
+      () => apply(t.lat + (Math.random()-0.5)*0.0012, t.lng + (Math.random()-0.5)*0.0012),
+      {enableHighAccuracy:true, timeout:6000});
+  } else {
+    apply(t.lat + (Math.random()-0.5)*0.0012, t.lng + (Math.random()-0.5)*0.0012);
+  }
+};
+
+/* =========================================================
+   15. API GLOBALE
+   ========================================================= */
+window.SGE = {
+  openTeam, openAssign,
+  closeMission: function(id){ closeMission(id,'Chiusa da Sala Operativa'); save(); render(); },
+  removePoi,
+  focusTarget: function(id){
+    const tg = S.targets.find(x=>x.id===id);
+    if(tg && map){
+      map.flyTo([tg.lat,tg.lng], 18, {duration:.6});
+      setTimeout(()=>{
+        const mk = findTargetMarker(id);
+        if(mk) mk.openPopup();
+      }, 700);
+    }
+  },
+  focusTeam: function(id){
+    const t = S.teams.find(x=>x.id===id);
+    if(t && map){
+      map.flyTo([t.lat,t.lng], 18, {duration:.6});
+      setTimeout(()=>{
+        if(groups.teams){
+          let mk = null;
+          groups.teams.eachLayer(l=>{ if(l.options && l.options.sgeId === id) mk = l; });
+          if(mk) mk.openPopup();
+        }
+      }, 700);
+    }
+  }
+};
+
+/* =========================================================
+   16. CLOCK + TICK
+   ========================================================= */
+function tickClock(){
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) + '  ' +
+    d.toLocaleTimeString('it-IT');
+}
+tickClock();
+setInterval(tickClock, 1000);
+setInterval(()=>{
+  if(document.getElementById('view-sala').classList.contains('hidden')) return;
+  if(modal.classList.contains('hidden')) renderOpsList();
+}, 30000);
+
+/* =========================================================
+   17. RENDER MASTER + INIT
+   ========================================================= */
+function render(){
+  save();
+  renderMap();
+  renderTopColorBar();
+  renderColorBar();
+  renderOpsList();
+  renderDisponibilita();
+  renderAdminList();
+  renderPoiList();
+  renderTeamSelect();
+  updateDraftUI();
+  renderSquadreView();
+}
+
+renderLegend();
+renderCodePreview();
+updateDraftUI();
+updateGeoStatus();
+initMap();
+render();
+renderSquadreView();
+initSolSync();
+updateSolSyncDot();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>SGE — Equipaggio</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#0b1220;--bg2:#0f1726;--panel:#131d2e;--panel2:#1a2639;--panel3:#22304a;
+  --line:#26344b;--txt:#e7eef9;--muted:#8ba0bf;--accent:#3d9bff}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);
+  color:var(--txt);font-size:14px;overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+  padding-bottom:40px}
+button,input,select{font-family:inherit;font-size:14px}
+.hidden{display:none !important}.muted{color:var(--muted)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#2b3a55;border-radius:6px}
+
+.eq-top{position:sticky;top:0;z-index:500;min-height:60px;
+  background:linear-gradient(180deg,#152034,#101828);
+  border-bottom:1px solid var(--line);padding:8px 10px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.eq-team-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
+.eq-team-ico{font-size:22px;flex-shrink:0}
+.eq-team-sel{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);
+  color:var(--txt);padding:9px 11px;border-radius:10px;font-size:14px;font-weight:700;
+  outline:none;cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238ba0bf' d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
+.eq-badges{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.eq-badge{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:20px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:#8ba0bf;
+  display:flex;align-items:center;gap:4px;white-space:nowrap}
+.eq-badge.on{color:#6ee7a8;border-color:rgba(110,231,168,.4)}
+.eq-badge .dot{width:7px;height:7px;border-radius:50%;background:#5b6b82}
+.eq-badge.on .dot{background:#6ee7a8;box-shadow:0 0 6px #6ee7a8}
+.eq-badge.sol-on{color:#9fd0ff;border-color:rgba(159,208,255,.4)}
+.eq-badge.sol-on .dot{background:#9fd0ff;box-shadow:0 0 6px #9fd0ff}
+.eq-room{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:20px;
+  background:rgba(61,155,255,.12);border:1px solid rgba(61,155,255,.4);color:#9fd0ff;
+  cursor:pointer;white-space:nowrap}
+.eq-room:hover{background:rgba(61,155,255,.2)}
+.eq-clock{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;
+  margin-left:auto}
+
+.eq-main{max-width:600px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:14px;margin-bottom:12px}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);font-weight:800;margin:0 0 9px 0}
+.divider{height:1px;background:var(--line);margin:14px 0}
+
+.eq-hero{display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;
+  font-weight:800;font-size:17px;color:#08111d;margin-bottom:12px}
+.eq-hero .ico{font-size:26px}
+.eq-hero .lbl{font-size:10.5px;opacity:.75;font-weight:800;letter-spacing:.6px}
+.eq-hero .val{font-size:17px;line-height:1.15}
+.eq-hero .right{margin-left:auto;text-align:right}
+.eq-hero .right .big{font-size:22px}
+.eq-hero .right .sm{font-size:11px;margin-top:2px}
+
+.eq-mission{position:relative;border-radius:14px;padding:14px;margin-bottom:12px;
+  background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--c,#3d9bff);
+  transition:.3s}
+.eq-mission.alert{animation:missionAlert 1.6s ease-in-out 3}
+@keyframes missionAlert{
+  0%,100%{box-shadow:0 0 0 0 rgba(61,155,255,0)}
+  50%{box-shadow:0 0 0 8px rgba(61,155,255,.35)}
+}
+.mc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.mc-code{font-size:17px;font-weight:800;padding:6px 12px;border-radius:10px;letter-spacing:.6px}
+.mc-phase{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;
+  background:var(--panel2);color:var(--txt);display:inline-flex;align-items:center;gap:4px}
+.mc-addr{font-size:15px;font-weight:700;line-height:1.35;margin-bottom:6px;word-break:break-word}
+.mc-time{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px}
+.mc-time b{color:var(--txt);font-variant-numeric:tabular-nums}
+.mc-note{margin-top:10px;padding:9px 11px;background:var(--panel2);border-radius:9px;
+  font-size:12.5px;line-height:1.5;border-left:3px solid var(--accent)}
+.mc-note .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);font-weight:800;margin-bottom:3px}
+
+.gmap-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  background:linear-gradient(180deg,#4285f4,#2c6ddb);color:#fff;border:none;padding:14px;
+  border-radius:12px;font-weight:800;font-size:14.5px;cursor:pointer;margin-bottom:12px;
+  box-shadow:0 4px 14px rgba(66,133,244,.35);transition:.15s}
+.gmap-btn:hover{transform:translateY(-1px)}
+.gmap-btn:active{transform:translateY(0)}
+.gmap-btn .gm-ico{font-size:18px}
+
+.map-mini{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  margin-bottom:12px;background:#0a0f18}
+
+.phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.phase-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;
+  border-radius:11px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  font-weight:700;font-size:12.5px;cursor:pointer;transition:.15s;text-align:center}
+.phase-btn:hover{background:#25354f}
+.phase-btn .big{font-size:20px}
+.phase-btn.on{background:var(--c);color:#fff;border-color:var(--c);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+.prev-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;
+  border-radius:11px;background:var(--panel2);border:1px dashed var(--line);color:var(--txt);
+  font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;transition:.15s}
+.prev-btn:hover{background:#25354f;border-color:#3b5480}
+.prev-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.retcode-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:9px}
+.retcode-btn{padding:12px 4px;border-radius:10px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--txt);font-weight:900;font-size:18px;
+  cursor:pointer;transition:.15s}
+.retcode-btn:hover{background:#25354f;transform:translateY(-1px)}
+.retcode-btn.on{background:var(--c);color:#fff;border-color:var(--c);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+.retcode-desc{font-size:12.5px;color:var(--muted);text-align:center;padding:7px;
+  background:var(--panel2);border-radius:9px;min-height:32px;line-height:1.35}
+.retcode-desc.sel{color:var(--txt);font-weight:600}
+
+/* Editor codice intervento */
+.code-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--panel2);border-radius:10px;padding:10px 12px}
+.code-cur{display:flex;align-items:center;gap:9px;min-width:0}
+.code-cur-badge{font-size:22px;font-weight:900;padding:6px 14px;border-radius:10px;
+  letter-spacing:1px;background:var(--c,#3d9bff);color:#fff;border:2px solid rgba(255,255,255,.35)}
+.code-cur-desc{font-size:11.5px;color:var(--muted);line-height:1.35;min-width:0}
+.edit-btn{background:rgba(61,155,255,.15);border:1px solid rgba(61,155,255,.4);color:#9fd0ff;
+  font-weight:800;font-size:12px;padding:7px 12px;border-radius:9px;cursor:pointer;
+  transition:.15s;white-space:nowrap}
+.edit-btn:hover{background:rgba(61,155,255,.25)}
+.editor{background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+  padding:12px;margin-top:10px;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.editor .field{margin-bottom:10px}
+.editor .field label{display:block;font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin-bottom:5px;font-weight:800}
+.editor select{width:100%;background:#0d1728;border:1px solid var(--line);color:var(--txt);
+  padding:10px;border-radius:9px;outline:none;font-size:13.5px;cursor:pointer}
+.editor select:focus{border-color:var(--accent)}
+.color-picker{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.color-opt{padding:10px 4px;border-radius:9px;border:1px solid var(--line);
+  background:var(--c);color:var(--f);font-weight:900;font-size:14px;cursor:pointer;
+  transition:.15s;text-align:center}
+.color-opt:hover{transform:translateY(-1px)}
+.color-opt.on{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 60%,transparent)}
+.editor-actions{display:flex;gap:8px;margin-top:12px}
+.editor-actions button{flex:1;padding:11px;border-radius:10px;font-weight:800;font-size:13px;
+  cursor:pointer;transition:.15s;border:1px solid var(--line)}
+.btn-cancel{background:transparent;color:var(--muted)}
+.btn-cancel:hover{background:rgba(255,255,255,.06);color:var(--txt)}
+.btn-save{background:#2fa84f;border-color:#2fa84f;color:#fff}
+.btn-save:hover{background:#3dbf62}
+.editor-warn{font-size:11.5px;color:#ffd45e;background:rgba(255,212,94,.08);
+  border:1px solid rgba(255,212,94,.3);padding:8px 10px;border-radius:9px;margin-top:10px;
+  line-height:1.4}
+
+.avail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.avail-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;
+  border-radius:11px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  font-weight:700;font-size:12.5px;cursor:pointer;transition:.15s}
+.avail-btn .big{font-size:20px}
+.avail-btn.on{background:var(--c);color:#fff;border-color:var(--c);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+
+.gps-info{font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.55}
+.gps-info b{color:var(--txt);font-variant-numeric:tabular-nums}
+.gps-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6b7280;
+  vertical-align:middle;margin-right:5px}
+.gps-dot.on{background:#6ee7a8;box-shadow:0 0 8px #6ee7a8;animation:gpsPulse 2s infinite}
+@keyframes gpsPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.hist{max-height:280px;overflow-y:auto;border-radius:10px;background:var(--panel2);
+  border:1px solid var(--line)}
+.hist-row{display:flex;gap:10px;padding:9px 11px;border-bottom:1px solid #1e2b42;
+  font-size:12.5px;line-height:1.45}
+.hist-row:last-child{border-bottom:none}
+.hist-row .h-t{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0;
+  width:82px;font-size:11.5px}
+.hist-row .h-ico{flex-shrink:0;font-size:14px}
+.hist-row b{font-weight:700}
+
+.empty{text-align:center;color:var(--muted);padding:24px 12px;font-size:13px;line-height:1.6}
+
+.mk-target{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:12.5px;position:relative;
+  border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.6);
+  background:var(--c);color:var(--f)}
+.mk-target.pulse{animation:mpulse 2s infinite}
+@keyframes mpulse{
+  0%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,.5)}
+  70%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 14px rgba(255,255,255,0)}
+  100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}
+}
+.mk-team{width:42px;height:42px;border-radius:50%;background:#101a2b;position:relative;
+  border:3px solid var(--c);display:flex;align-items:center;justify-content:center;
+  font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.65)}
+.mk-team .crew{position:absolute;bottom:-6px;right:-6px;width:18px;height:18px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;color:#fff;border:2px solid #0b1220}
+.mk-poi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;background:var(--c);color:#fff;font-size:13px;
+  border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.leaflet-popup-content-wrapper{background:var(--panel2);color:var(--txt);border-radius:11px;
+  border:1px solid var(--line)}
+.leaflet-popup-tip{background:var(--panel2)}
+.leaflet-popup-content{margin:10px 12px;font-size:13px;line-height:1.5}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:#1e3a5c;color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;
+  font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:3000;opacity:0;
+  pointer-events:none;transition:.3s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.toast2{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:#2fa84f;color:#fff;padding:14px 22px;border-radius:14px;font-weight:800;
+  font-size:14px;box-shadow:0 12px 40px rgba(47,168,79,.5);z-index:3001;opacity:0;
+  pointer-events:none;transition:.3s;max-width:90vw;text-align:center;display:flex;
+  align-items:center;gap:10px}
+.toast2.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header class="eq-top">
+  <div class="eq-team-wrap">
+    <span class="eq-team-ico" id="teamIco">🚑</span>
+    <select class="eq-team-sel" id="teamSelect"></select>
+  </div>
+  <div class="eq-badges">
+    <span class="eq-room" id="roomBadge" title="Codice stanza condivisa">🏷️ <span id="roomLabel">—</span></span>
+    <span class="eq-badge" id="netBadge" title="Connessione internet">
+      <span class="dot"></span><span id="netLabel">rete…</span>
+    </span>
+    <span class="eq-badge" id="solBadge" title="Stato SOL">
+      <span class="dot"></span><span id="solLabel">SOL…</span>
+    </span>
+    <span class="eq-badge on" id="gpsBadge" title="Stato GPS">
+      <span class="dot"></span><span id="gpsLabel">GPS</span>
+    </span>
+  </div>
+  <span class="eq-clock" id="clock"></span>
+</header>
+
+<main class="eq-main">
+  <div id="eqContent"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="toast2" id="toast2">
+  <span id="toast2Ico">🚨</span><span id="toast2Msg">Nuova missione</span>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   1. COSTANTI
+   ========================================================= */
+const KEY = 'sge_v4';
+const MY_TEAM_KEY = 'sge_eq_myteam';
+const MY_PAGE_ID = 'eq_' + Math.random().toString(36).slice(2,10);
+
+const SESSION_ROOM = (function(){
+  const p = new URLSearchParams(location.search);
+  return p.get('room') || localStorage.getItem('sge_room') || 'sge-demo-2024';
+})();
+localStorage.setItem('sge_room', SESSION_ROOM);
+
+const COLORS = {
+  R:{label:'Rosso', hex:'#e53935',fg:'#fff',sev:5},
+  G:{label:'Giallo',hex:'#f2c200',fg:'#2a2200',sev:4},
+  V:{label:'Verde', hex:'#2fa84f',fg:'#fff',sev:3},
+  B:{label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a',sev:2},
+  N:{label:'Nero',  hex:'#1c1c1c',fg:'#fff',sev:1}
+};
+const COLOR_ORDER = ['R','G','V','B','N'];
+
+const ENV = {
+  K:'Casa', S:'Strada', P:'Uffici/Esercizi', Y:'Impianti sportivi', L:'Impianti lavorativi'
+};
+const ENV_FULL = {
+  K:'Casa — eventi in edifici adibiti ad abitazione',
+  S:'Strada — eventi sulla viabilità pubblica o privata',
+  P:'Uffici ed esercizi pubblici — negozi, bar, uffici',
+  Y:'Impianti sportivi — palestre, stadi, campi sportivi',
+  L:'Impianti lavorativi — fabbriche, cantieri, luoghi di lavoro'
+};
+const PAT = {
+  '1':'Traumatica','2':'Cardiocircolatoria','3':'Respiratoria','4':'Neurologica',
+  '5':'Psichiatrica','6':'Neoplastica','7':'Tossicologica','8':'Metabolica',
+  '9':'Altra patologia'
+};
+const PAT_FULL = {
+  '1':'Traumatica — incidenti domestici, cadute, fratture',
+  '2':'Cardiocircolatoria — dolori toracici, infarti, aritmie',
+  '3':'Respiratoria — insufficienza respiratoria, asma',
+  '4':'Neurologica — ictus, ischemie, convulsioni',
+  '5':'Psichiatrica — crisi d\'ansia, agitazione psicomotoria',
+  '6':'Neoplastica — complicazioni legate a tumori',
+  '7':'Tossicologica — avvelenamenti, intossicazioni',
+  '8':'Metabolica — crisi glicemiche, problemi endocrini',
+  '9':'Altra patologia / Gastrointestinale'
+};
+
+const TEAM_TYPES = {
+  piedi:{label:'A piedi',icon:'🚶'}, moto:{label:'Moto',icon:'🏍️'},
+  auto:{label:'Auto',icon:'🚗'}, ambulanza:{label:'Ambulanza',icon:'🚑'}
+};
+const CREW_TYPES = {
+  bravo:{label:'Bravo',short:'B',color:'#8b5cf6'},
+  india:{label:'India',short:'I',color:'#06b6d4'},
+  mike: {label:'Mike', short:'M',color:'#f59e0b'}
+};
+const POI_CATS = {
+  soccorso:{label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
+  chiusura:{label:'Strade chiuse',     icon:'⛔',color:'#ff7043'},
+  centrale:{label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
+  info:    {label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}
+};
+
+const MISSION_STATES = [
+  {key:'Partenza',                       icon:'🚔', color:'#3d9bff', short:'Partenza'},
+  {key:'Sul Posto',                      icon:'📍', color:'#f2c200', short:'Sul Posto'},
+  {key:'Verso l\'Ospedale',              icon:'🚑', color:'#e53935', short:'Verso Ospedale'},
+  {key:'Intervento Chiuso sul Posto',    icon:'✅', color:'#2fa84f', short:'Chiuso sul Posto'},
+  {key:'In Ospedale',                    icon:'🏥', color:'#8b5cf6', short:'In Ospedale'},
+  {key:'In rientro',                     icon:'↩️', color:'#06b6d4', short:'In rientro'},
+  {key:'Arrivo in Sede / Fine Missione', icon:'🏁', color:'#2fa84f', short:'Fine Missione', terminal:true}
+];
+const MISSION_STATE_MAP = {};
+MISSION_STATES.forEach(s=>{ MISSION_STATE_MAP[s.key] = s; });
+
+const AVAIL_STATES = [
+  {key:'Disponibile',  icon:'✅', color:'#2fa84f'},
+  {key:'In pausa',     icon:'⏸️', color:'#f2c200'},
+  {key:'Rientro',      icon:'↩️', color:'#3d9bff'},
+  {key:'Non operativa',icon:'⛔', color:'#6b7280'}
+];
+
+const RETURN_CODES = {
+  0:{label:'Non trasportato / Rifiuto', icon:'🚫', color:'#6b7280'},
+  1:{label:'Trasporto codice verde',    icon:'🟢', color:'#2fa84f'},
+  2:{label:'Trasporto codice giallo',   icon:'🟡', color:'#f2c200'},
+  3:{label:'Trasporto codice rosso',    icon:'🔴', color:'#e53935'},
+  4:{label:'Altro / Trasferimento',     icon:'🔀', color:'#8b5cf6'}
+};
+
+const TILE_PROVIDERS = {
+  esri:    {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',maxZoom:19,attribution:'Esri'},
+  esriSat: {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',maxZoom:19,attribution:'Esri'},
+  osm:     {url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',maxZoom:19,attribution:'OSM'}
+};
+
+/* =========================================================
+   2. UTILITÀ
+   ========================================================= */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function parseCode(raw){
+  const src = String(raw==null?'':raw).toUpperCase();
+  let env=null, pat=null, color=null;
+  for(let i=0;i<src.length;i++){
+    const ch=src[i];
+    if(!env && ENV[ch]){ env=ch; continue; }
+    if(!pat && PAT[ch]){ pat=ch; continue; }
+    if(!color && COLORS[ch]){ color=ch; continue; }
+  }
+  return { env, pat, color, label:(env||'')+(pat||'')+(color||''), valid: !!color };
+}
+function describeCode(code){
+  const p = parseCode(code); const out=[];
+  if(p.env) out.push(ENV[p.env]);
+  if(p.pat) out.push(PAT[p.pat]);
+  if(p.color) out.push('Cod. '+COLORS[p.color].label);
+  return out.join(' · ');
+}
+function fmtTime(ts){ if(!ts) return '—'; return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}); }
+function fmtDateTime(ts){ if(!ts) return '—'; const d=new Date(ts); return d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})+' '+fmtTime(ts); }
+function elapsed(ts){
+  if(!ts) return '—';
+  const s=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60);
+  if(h>0) return h+'h '+String(m).padStart(2,'0')+'m';
+  return m+'m';
+}
+function crewOf(t){ return CREW_TYPES[t.crew] ? t.crew : 'bravo'; }
+function crewInfo(t){ return CREW_TYPES[crewOf(t)]; }
+function statusColor(t){
+  const ms = MISSION_STATE_MAP[t.status];
+  if(t.mission){
+    if(ms) return ms.color;
+    const c = COLORS[parseCode(t.mission.code).color];
+    return c ? c.hex : '#e53935';
+  }
+  if(!t.operational) return '#6b7280';
+  const a = AVAIL_STATES.find(x=>x.key===t.status);
+  return a ? a.color : '#6b7280';
+}
+function statusIcon(t){
+  const ms = MISSION_STATE_MAP[t.status];
+  if(t.mission) return ms ? ms.icon : '🚨';
+  if(!t.operational) return '⛔';
+  const a = AVAIL_STATES.find(x=>x.key===t.status);
+  return a ? a.icon : '•';
+}
+function stateShort(s){ const m = MISSION_STATE_MAP[s]; return m ? m.short : s; }
+function targetTeams(tg){
+  if(!tg || !Array.isArray(tg.teamIds)) return [];
+  return tg.teamIds.map(id => S.teams.find(x=>x.id===id)).filter(Boolean);
+}
+
+/* =========================================================
+   3. STATO
+   ========================================================= */
+let S = { center:{lat:45.5195,lng:9.0784}, teams:[], targets:[], pois:[], log:[] };
+
+(function seedIfEmpty(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ S = JSON.parse(raw); return; }
+  }catch(e){}
+  const C = {lat:45.5195, lng:9.0784};
+  const now = Date.now();
+  S.center = C;
+  S.teams = [
+    {id:'t1',name:'Squadra 1 — Auto',type:'auto',crew:'bravo',operational:true,
+     status:'Disponibile',lat:C.lat+0.0038,lng:C.lng+0.0042,gpsAt:now,mission:null,history:[]},
+    {id:'t2',name:'Squadra 2 — Ambulanza',type:'ambulanza',crew:'india',operational:true,
+     status:'Disponibile',lat:C.lat-0.0026,lng:C.lng+0.0055,gpsAt:now,mission:null,history:[]},
+    {id:'t3',name:'Squadra 3 — Moto',type:'moto',crew:'mike',operational:true,
+     status:'Disponibile',lat:C.lat+0.0055,lng:C.lng-0.0032,gpsAt:now,mission:null,history:[]},
+    {id:'t4',name:'Squadra 4 — A piedi',type:'piedi',crew:'bravo',operational:true,
+     status:'Disponibile',lat:C.lat-0.0042,lng:C.lng-0.0048,gpsAt:now,mission:null,history:[]}
+  ];
+  S.targets = []; S.pois = []; S.log = [];
+})();
+
+if(!Array.isArray(S.teams)) S.teams = [];
+if(!Array.isArray(S.targets)) S.targets = [];
+if(!Array.isArray(S.pois)) S.pois = [];
+S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
+S.targets.forEach(tg=>{
+  if(!Array.isArray(tg.teamIds)){ tg.teamIds = tg.teamId ? [tg.teamId] : []; delete tg.teamId; }
+  if(tg.returnCode === undefined) tg.returnCode = null;
+});
+
+/* =========================================================
+   4. SINCRONIZZAZIONE MULTI-CANALE (localStorage + BC + MQTT)
+   ========================================================= */
+let _lastRev = 0;
+let _skipPublish = false;
+if(S._rev) _lastRev = S._rev;
+
+let _bc = null;
+try { _bc = new BroadcastChannel('sge_sync'); } catch(e){}
+
+let mqttClient = null;
+let mqttOnline = false;
+const MQTT_URL = 'wss://broker.hivemq.com:8884/mqtt';
+const MQTT_BASE = 'sge/' + SESSION_ROOM;
+
+let lastRemoteAt = 0;
+let lastSolAt = 0;
+
+function initMqtt(){
+  if(typeof mqtt === 'undefined'){ updateBadges(); return; }
+  try{
+    mqttClient = mqtt.connect(MQTT_URL, {
+      clientId: 'eq_' + Math.random().toString(16).slice(2,10),
+      clean: true, keepalive: 30, reconnectPeriod: 4000, connectTimeout: 10000
+    });
+    mqttClient.on('connect', ()=>{
+      mqttOnline = true;
+      mqttClient.subscribe(MQTT_BASE + '/#', {qos:0});
+      updateBadges();
+      toast('🌐 Connesso al broker');
+    });
+    mqttClient.on('close', ()=>{ mqttOnline = false; updateBadges(); });
+    mqttClient.on('error', ()=>{ mqttOnline = false; updateBadges(); });
+    mqttClient.on('message', (topic, payload)=>{
+      if(topic === MQTT_BASE + '/eq') return;
+      try{
+        const data = JSON.parse(payload.toString());
+        if(topic === MQTT_BASE + '/sol') lastSolAt = Date.now();
+        applyRemoteState(data);
+      }catch(e){}
+    });
+  }catch(e){}
+}
+
+function publishState(){
+  if(_skipPublish) return;
+  const rev = Date.now() + Math.random();
+  S._rev = rev;
+  S._writer = MY_PAGE_ID;
+  S._lastEqTs = Date.now();
+  _lastRev = rev;
+  const json = JSON.stringify(S);
+  try { localStorage.setItem(KEY, json); } catch(e){}
+  if(_bc) try { _bc.postMessage({type:'sync', rev}); } catch(e){}
+  if(mqttClient && mqttOnline){
+    try { mqttClient.publish(MQTT_BASE + '/eq', json, {qos:0, retain:true}); } catch(e){}
+  }
+  updateBadges();
+}
+function save(){ publishState(); }
+
+function applyRemoteState(incoming){
+  if(!incoming || !incoming._rev) return;
+  if(incoming._rev <= _lastRev) return;
+  if(incoming._writer === MY_PAGE_ID) return;
+  _lastRev = incoming._rev;
+  _skipPublish = true;
+  try{
+    S = incoming;
+    S.teams = S.teams||[]; S.targets = S.targets||[]; S.pois = S.pois||[]; S.log = S.log||[];
+    if(!S.center) S.center = {lat:45.5195,lng:9.0784};
+    S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
+    S.targets.forEach(tg=>{
+      if(!Array.isArray(tg.teamIds)){ tg.teamIds = tg.teamId ? [tg.teamId] : []; delete tg.teamId; }
+    });
+    lastRemoteAt = Date.now();
+    /* Verifica nuova missione per la mia squadra */
+    const me = getMyTeam();
+    if(me && me.mission && me.mission.targetId !== lastMissionId){
+      lastMissionId = me.mission.targetId;
+      notifyNewMission(me);
+    } else if(me && !me.mission){
+      lastMissionId = null;
+    }
+    renderAll();
+  } finally {
+    _skipPublish = false;
+  }
+  updateBadges();
+}
+
+let lastMissionId = null;
+
+function notifyNewMission(me){
+  if(navigator.vibrate) try{ navigator.vibrate([300,100,300,100,300]); }catch(e){}
+  const t2 = document.getElementById('toast2');
+  const ico = document.getElementById('toast2Ico');
+  const msg = document.getElementById('toast2Msg');
+  if(t2 && ico && msg){
+    ico.textContent = '🚨';
+    msg.textContent = 'Nuova missione: '+me.mission.code;
+    t2.classList.add('show');
+    setTimeout(()=>t2.classList.remove('show'), 4000);
+  }
+  setTimeout(()=>{
+    const c = document.querySelector('.eq-mission');
+    if(c) c.classList.add('alert');
+  }, 100);
+}
+
+function initSyncChannels(){
+  window.addEventListener('storage', e=>{
+    if(e.key === KEY && e.newValue){
+      try { applyRemoteState(JSON.parse(e.newValue)); } catch(err){}
+    }
+  });
+  if(_bc){
+    _bc.onmessage = e=>{
+      if(e.data && e.data.type === 'sync'){
+        const v = localStorage.getItem(KEY);
+        if(v) try { applyRemoteState(JSON.parse(v)); } catch(err){}
+      }
+    };
+  }
+  setInterval(()=>{
+    const v = localStorage.getItem(KEY);
+    if(!v) return;
+    try {
+      const p = JSON.parse(v);
+      if(p._rev && p._rev > _lastRev) applyRemoteState(p);
+    } catch(err){}
+  }, 1000);
+  setInterval(updateBadges, 2000);
+}
+
+function updateBadges(){
+  /* rete */
+  const nb = document.getElementById('netBadge');
+  const nl = document.getElementById('netLabel');
+  if(nb && nl){
+    if(mqttOnline){ nb.classList.add('on'); nl.textContent = 'rete OK'; }
+    else { nb.classList.remove('on'); nl.textContent = 'rete…'; }
+  }
+  /* SOL */
+  const sb = document.getElementById('solBadge');
+  const sl = document.getElementById('solLabel');
+  if(sb && sl){
+    const age = Date.now() - lastSolAt;
+    if(age < 15000){ sb.classList.add('sol-on'); sl.textContent = 'SOL online'; }
+    else { sb.classList.remove('sol-on'); sl.textContent = 'SOL offline'; }
+  }
+  /* GPS */
+  const gb = document.getElementById('gpsBadge');
+  const gl = document.getElementById('gpsLabel');
+  if(gb && gl){
+    if(gpsActive){ gb.classList.add('on'); gl.textContent = 'GPS'; }
+    else { gb.classList.remove('on'); gl.textContent = 'GPS off'; }
+  }
+}
+
+/* =========================================================
+   5. GESTIONE SQUADRA + GPS AUTOMATICO
+   ========================================================= */
+let myTeamId = localStorage.getItem(MY_TEAM_KEY) || null;
+function getMyTeam(){ return S.teams.find(t=>t.id===myTeamId); }
+
+let gpsActive = false;
+let gpsWatchId = null;
+let lastGpsPublish = 0;
+let lastGpsPos = null;
+
+function startAutoGPS(){
+  if(!navigator.geolocation){
+    console.warn('[GPS] non disponibile');
+    return;
+  }
+  if(gpsWatchId != null) return;
+  gpsActive = true;
+  updateBadges();
+  gpsWatchId = navigator.geolocation.watchPosition(
+    pos=>{
+      const t = getMyTeam();
+      if(!t) return;
+      const lat = +pos.coords.latitude.toFixed(6);
+      const lng = +pos.coords.longitude.toFixed(6);
+      const now = Date.now();
+      /* Aggiorna sempre lo stato locale */
+      t.lat = lat; t.lng = lng; t.gpsAt = now;
+      /* Pubblica solo se spostamento significativo o > 15s */
+      const dist = lastGpsPos ? haversine(lastGpsPos.lat, lastGpsPos.lng, lat, lng) : 9999;
+      if(now - lastGpsPublish > 15000 || dist > 25){
+        lastGpsPublish = now;
+        lastGpsPos = {lat,lng};
+        publishState();
+      }
+      /* Refresh UI ogni volta */
+      const gd = document.querySelector('.gps-dot');
+      if(gd) gd.classList.add('on');
+      const gpsInfo = document.getElementById('gpsInfo');
+      if(gpsInfo){
+        gpsInfo.innerHTML = '<span class="gps-dot on"></span> <b>GPS attivo</b> — '+
+          'ultimo aggiornamento '+fmtTime(t.gpsAt)+'<br>'+
+          'Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>';
+      }
+    },
+    err=>{
+      console.warn('[GPS] errore', err.message);
+      /* Fallback: simula posizione ogni 20s */
+      gpsActive = false;
+      updateBadges();
+    },
+    {enableHighAccuracy:true, maximumAge:5000, timeout:20000}
+  );
+}
+function stopAutoGPS(){
+  if(gpsWatchId != null){
+    try { navigator.geolocation.clearWatch(gpsWatchId); }catch(e){}
+    gpsWatchId = null;
+    gpsActive = false;
+    updateBadges();
+  }
+}
+function haversine(lat1,lng1,lat2,lng2){
+  const R = 6371000;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+/* =========================================================
+   6. AZIONI
+   ========================================================= */
+function setStatus(status, note, silent){
+  const t = getMyTeam();
+  if(!t || !status) return;
+  const ms = MISSION_STATE_MAP[status];
+  if(ms && ms.terminal){
+    if(t.mission){
+      const tg = S.targets.find(x=>x.id===t.mission.targetId);
+      if(tg){
+        tg.teamIds = (tg.teamIds||[]).filter(id=>id!==t.id);
+        if(tg.teamIds.length === 0 && tg.status === 'aperto'){
+          tg.status = 'chiuso';
+          tg.closedAt = Date.now();
+          tg.closeNote = note || 'Fine missione';
+        }
+      }
+      S.log.unshift({ts:Date.now(), text:'Missione '+t.mission.code+' conclusa ('+t.name+')'});
+    }
+    t.mission = null;
+    t.status = status;
+    t.history = t.history||[];
+    t.history.unshift({ts:Date.now(), status, note: note||'Arrivo in sede'});
+    t.history = t.history.slice(0,120);
+    t.updatedAt = Date.now();
+    if(!silent) publishState();
+    return;
+  }
+  if(t.status !== status || note){
+    t.status = status;
+    t.history = t.history||[];
+    t.history.unshift({ts:Date.now(), status, note:note||''});
+    t.history = t.history.slice(0,120);
+  }
+  if(status === 'Non operativa') t.operational = false;
+  else if(AVAIL_STATES.some(a=>a.key===status)) t.operational = true;
+  t.updatedAt = Date.now();
+  if(!silent) publishState();
+}
+
+function goBackToPreviousPhase(){
+  const t = getMyTeam();
+  if(!t || !t.history) return;
+  for(let i=1; i<t.history.length; i++){
+    const h = t.history[i];
+    if(h.status === t.status) continue;
+    if(MISSION_STATE_MAP[h.status] && !MISSION_STATE_MAP[h.status].terminal){
+      if(!confirm('Tornare allo stato "'+h.status+'"?')) return;
+      setStatus(h.status, 'Ripristino stato precedente');
+      toast('↩️ Tornato a: '+h.status);
+      return;
+    }
+  }
+  toast('Nessuno stato precedente');
+}
+
+function applyInterventionCode(newEnv, newPat, newColor){
+  const t = getMyTeam();
+  if(!t || !t.mission) return false;
+  const code = (newEnv||'') + (newPat||'') + (newColor||'');
+  const p = parseCode(code);
+  if(!p.valid){ alert('Codice non valido.'); return false; }
+  const tg = S.targets.find(x=>x.id===t.mission.targetId);
+  if(tg){ tg.code=p.label; tg.env=p.env; tg.pat=p.pat; tg.color=p.color; }
+  t.mission.code = p.label;
+  t.history = t.history||[];
+  t.history.unshift({ts:Date.now(), status:t.status, note:'Codice → '+p.label});
+  publishState();
+  toast('✏️ Codice aggiornato: '+p.label);
+  renderAll();
+  return true;
+}
+
+function setReturnCode(rc){
+  const t = getMyTeam();
+  if(!t || !t.mission) return;
+  const tg = S.targets.find(x=>x.id===t.mission.targetId);
+  if(!tg) return;
+  tg.returnCode = rc;
+  tg.returnCodeAt = Date.now();
+  publishState();
+  toast('Codice rientro '+rc+' impostato');
+  renderAll();
+}
+
+function setAvailability(status){
+  const t = getMyTeam();
+  if(!t) return;
+  if(status === 'Non operativa'){
+    if(!confirm('Rendere la squadra NON operativa?')) return;
+  }
+  if(t.mission && status !== 'Non operativa'){
+    if(!confirm('La squadra ha una missione attiva. Cambiando stato la missione verrà chiusa. Continuare?')) return;
+    setStatus('Arrivo in Sede / Fine Missione', 'Chiusura automatica', true);
+  }
+  setStatus(status, 'Aggiornato dall\'equipaggio');
+}
+
+function openGoogleMaps(){
+  const t = getMyTeam();
+  if(!t || !t.mission) return;
+  const url = 'https://www.google.com/maps/dir/?api=1&destination='+t.mission.lat+','+t.mission.lng;
+  window.open(url, '_blank');
+}
+
+/* =========================================================
+   7. MINI-MAPPA
+   ========================================================= */
+let miniMap = null;
+let tileLayer = null;
+const mgroups = {};
+
+function buildTile(key){
+  const p = TILE_PROVIDERS[key] || TILE_PROVIDERS.esri;
+  return L.tileLayer(p.url, {maxZoom:p.maxZoom, attribution:p.attribution});
+}
+function initMiniMap(){
+  if(typeof L === 'undefined' || miniMap) return;
+  const el = document.getElementById('miniMap');
+  if(!el) return;
+  miniMap = L.map(el, {zoomControl:false, attributionControl:false, dragging:true})
+    .setView([S.center.lat, S.center.lng], 14);
+  tileLayer = buildTile(localStorage.getItem('sge_provider') || 'esri').addTo(miniMap);
+  mgroups.target = L.layerGroup().addTo(miniMap);
+  mgroups.team   = L.layerGroup().addTo(miniMap);
+  mgroups.poi    = L.layerGroup().addTo(miniMap);
+  mgroups.line   = L.layerGroup().addTo(miniMap);
+  setTimeout(()=>miniMap && miniMap.invalidateSize(), 200);
+}
+function teamMiniIcon(t){
+  const col = statusColor(t);
+  const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  return L.divIcon({className:'',
+    html:'<div class="mk-team" style="--c:'+col+'">'+type.icon+
+      '<span class="crew" style="background:'+crew.color+'">'+crew.short+'</span></div>',
+    iconSize:[42,42], iconAnchor:[21,21]});
+}
+function targetMiniIcon(tg){
+  const c = COLORS[tg.color] || {hex:'#889',fg:'#fff'};
+  return L.divIcon({className:'',
+    html:'<div class="mk-target pulse" style="--c:'+c.hex+';--f:'+c.fg+'">'+esc(tg.code)+'</div>',
+    iconSize:[44,44], iconAnchor:[22,22]});
+}
+function poiMiniIcon(p){
+  const c = POI_CATS[p.cat] || POI_CATS.info;
+  return L.divIcon({className:'',
+    html:'<div class="mk-poi" style="--c:'+c.color+'">'+c.icon+'</div>',
+    iconSize:[26,26], iconAnchor:[13,13]});
+}
+function renderMiniMap(){
+  if(!miniMap) return;
+  mgroups.target.clearLayers(); mgroups.team.clearLayers();
+  mgroups.poi.clearLayers(); mgroups.line.clearLayers();
+  const t = getMyTeam();
+  if(!t) return;
+  L.marker([t.lat,t.lng], {icon:teamMiniIcon(t), zIndexOffset:700}).addTo(mgroups.team);
+  const bounds = [[t.lat,t.lng]];
+  if(t.mission){
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    const tlat = tg ? tg.lat : t.mission.lat;
+    const tlng = tg ? tg.lng : t.mission.lng;
+    const fakeTg = tg || {code:t.mission.code, color:parseCode(t.mission.code).color};
+    L.marker([tlat,tlng], {icon:targetMiniIcon(fakeTg), zIndexOffset:600}).addTo(mgroups.target);
+    bounds.push([tlat,tlng]);
+    L.polyline([[t.lat,t.lng],[tlat,tlng]], {color:'#3d9bff', weight:3, opacity:.85, dashArray:'8,8'})
+      .addTo(mgroups.line);
+    S.pois.forEach(p=>{
+      const d = miniMap.distance([tlat,tlng],[p.lat,p.lng]);
+      if(d < 900){
+        L.marker([p.lat,p.lng], {icon:poiMiniIcon(p)}).addTo(mgroups.poi);
+        bounds.push([p.lat,p.lng]);
+      }
+    });
+  }
+  if(bounds.length >= 2) miniMap.fitBounds(bounds, {padding:[40,40], maxZoom:17, animate:false});
+  else miniMap.setView([t.lat,t.lng], 16, {animate:false});
+  setTimeout(()=>miniMap && miniMap.invalidateSize(), 50);
+}
+
+/* =========================================================
+   8. RENDER
+   ========================================================= */
+function renderTeamSelect(){
+  const sel = document.getElementById('teamSelect');
+  if(!sel) return;
+  if(!S.teams.length){ sel.innerHTML = '<option>— Nessuna squadra —</option>'; return; }
+  if(!myTeamId || !S.teams.some(t=>t.id===myTeamId)){
+    myTeamId = S.teams[0].id;
+    localStorage.setItem(MY_TEAM_KEY, myTeamId);
+  }
+  sel.innerHTML = S.teams.map(t=>{
+    const tag = !t.operational ? '⛔ ' : (t.mission?'🚨 ':'✅ ');
+    return '<option value="'+t.id+'"'+(t.id===myTeamId?' selected':'')+'>'+tag+esc(t.name)+'</option>';
+  }).join('');
+}
+
+function renderHero(){
+  const t = getMyTeam();
+  if(!t) return '<div class="card"><div class="empty">Nessuna squadra.</div></div>';
+  const col = statusColor(t);
+  const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
+  const crew = crewInfo(t);
+  return '<div class="eq-hero" style="background:'+col+'">'+
+    '<span class="ico">'+statusIcon(t)+'</span>'+
+    '<div><div class="lbl">STATO</div><div class="val">'+esc(stateShort(t.status))+'</div></div>'+
+    '<div class="right"><div class="big">'+type.icon+'</div><div class="sm">'+crew.label+'</div></div>'+
+  '</div>';
+}
+
+function renderMission(){
+  const t = getMyTeam();
+  if(!t || !t.mission) return '';
+  const m = t.mission;
+  const p = parseCode(m.code);
+  const c = COLORS[p.color] || {hex:'#888',fg:'#fff'};
+  const ms = MISSION_STATE_MAP[t.status];
+  const tg = S.targets.find(x=>x.id===m.targetId);
+  const others = tg ? targetTeams(tg).filter(x=>x.id!==t.id) : [];
+  let h = '<div class="eq-mission" style="--c:'+c.hex+'">';
+  h += '<div class="mc-top">';
+  h += '<span class="mc-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(m.code)+'</span>';
+  if(ms) h += '<span class="mc-phase" style="color:'+ms.color+'">'+ms.icon+' '+esc(ms.short)+'</span>';
+  h += '</div>';
+  h += '<div class="mc-addr">📍 '+esc(m.address || 'Posizione selezionata')+'</div>';
+  h += '<div class="mc-time">'+
+       '<span>🕒 Attivata <b>'+fmtTime(m.activatedAt)+'</b></span>'+
+       '<span>⏱️ Trascorsi <b>'+elapsed(m.activatedAt)+'</b></span>'+
+       '</div>';
+  if(m.note) h += '<div class="mc-note"><div class="lbl">📝 Note dalla SOL</div>'+esc(m.note)+'</div>';
+  if(others.length) h += '<div class="mc-note" style="border-left-color:#8b5cf6">'+
+         '<div class="lbl">🚑 Sul target anche</div>'+esc(others.map(o=>o.name).join(', '))+'</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderPhases(){
+  const t = getMyTeam();
+  if(!t || !t.mission) return '';
+  let h = '<div class="card">';
+  h += '<div class="section-title">🚦 Fase missione</div>';
+  h += '<div class="phase-grid">';
+  MISSION_STATES.forEach(ms=>{
+    const on = t.status === ms.key;
+    h += '<button class="phase-btn '+(on?'on':'')+'" data-phase="'+esc(ms.key)+'" style="--c:'+ms.color+'">'+
+         '<span class="big">'+ms.icon+'</span>'+esc(ms.short)+'</button>';
+  });
+  h += '</div>';
+  const prev = getPreviousPhase(t);
+  h += '<button class="prev-btn" id="prevBtn" '+(prev?'':'disabled')+'>'+
+       '<span class="big">⬅</span>'+(prev ? 'Torna a: <b>'+esc(prev)+'</b>' : 'Nessuno stato precedente')+
+       '</button>';
+  h += '</div>';
+  return h;
+}
+function getPreviousPhase(t){
+  if(!t.history || t.history.length < 2) return null;
+  const cur = t.status;
+  for(let i=1; i<t.history.length; i++){
+    const h = t.history[i];
+    if(h.status === cur) continue;
+    if(MISSION_STATE_MAP[h.status] && !MISSION_STATE_MAP[h.status].terminal) return h.status;
+  }
+  return null;
+}
+
+function renderReturnCodeAndCodeEditor(){
+  const t = getMyTeam();
+  if(!t || !t.mission) return '';
+  const tg = S.targets.find(x=>x.id===t.mission.targetId);
+  const curRc = tg ? tg.returnCode : null;
+  const p = parseCode(t.mission.code);
+  const c = COLORS[p.color] || {hex:'#888',fg:'#fff'};
+
+  let h = '<div class="card">';
+  /* --- Codice di rientro --- */
+  h += '<div class="section-title">🔢 Codice di rientro (0–4)</div>';
+  h += '<div class="retcode-grid">';
+  Object.keys(RETURN_CODES).forEach(k=>{
+    const rc = RETURN_CODES[k];
+    h += '<button class="retcode-btn '+(curRc==k?'on':'')+'" data-rc="'+k+'" style="--c:'+rc.color+'" title="'+esc(rc.label)+'">'+k+'</button>';
+  });
+  h += '</div>';
+  const desc = curRc != null ? RETURN_CODES[curRc].icon+' <b>'+RETURN_CODES[curRc].label+'</b>' : 'Nessun codice selezionato';
+  h += '<div class="retcode-desc'+(curRc!=null?' sel':'')+'">'+desc+'</div>';
+
+  /* --- Divider --- */
+  h += '<div class="divider"></div>';
+
+  /* --- Codice intervento con editor protetto --- */
+  h += '<div class="section-title">✏️ Codice intervento</div>';
+  h += '<div class="code-row" id="codeRow">'+
+       '<div class="code-cur">'+
+         '<span class="code-cur-badge" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</span>'+
+         '<span class="code-cur-desc">'+esc(describeCode(t.mission.code))+'</span>'+
+       '</div>'+
+       '<button class="edit-btn" id="codeEditBtn">🔒 Modifica</button>'+
+       '</div>';
+  h += '<div class="editor hidden" id="codeEditor">';
+  h += '<div class="field"><label>Ambiente</label><select id="editEnv">'+
+       Object.keys(ENV).map(k=>'<option value="'+k+'"'+(p.env===k?' selected':'')+'>'+k+' — '+esc(ENV[k])+'</option>').join('')+
+       '</select></div>';
+  h += '<div class="field"><label>Patologia</label><select id="editPat">'+
+       Object.keys(PAT).map(k=>'<option value="'+k+'"'+(p.pat===k?' selected':'')+'>'+k+' — '+esc(PAT[k])+'</option>').join('')+
+       '</select></div>';
+  h += '<div class="field"><label>Codice colore</label><div class="color-picker" id="editColorGrid">'+
+       COLOR_ORDER.map(k=>{
+         const cc = COLORS[k];
+         return '<button class="color-opt '+(p.color===k?'on':'')+'" data-color="'+k+'" style="--c:'+cc.hex+';--f:'+cc.fg+'">'+k+'</button>';
+       }).join('')+'</div></div>';
+  h += '<div class="editor-warn">⚠️ Stai per modificare il codice intervento. La modifica verrà trasmessa alla Sala Operativa in tempo reale. Verifica bene prima di salvare.</div>';
+  h += '<div class="editor-actions">'+
+       '<button class="btn-cancel" id="codeCancel">Annulla</button>'+
+       '<button class="btn-save" id="codeSave">✓ Salva</button>'+
+       '</div>';
+  h += '</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderAvailability(){
+  const t = getMyTeam();
+  if(!t) return '';
+  let h = '<div class="card">';
+  h += '<div class="section-title">🟢 Stato equipaggio</div>';
+  h += '<div class="avail-grid">';
+  AVAIL_STATES.forEach(a=>{
+    const on = !t.mission && t.status === a.key;
+    h += '<button class="avail-btn '+(on?'on':'')+'" data-avail="'+esc(a.key)+'" style="--c:'+a.color+'">'+
+         '<span class="big">'+a.icon+'</span>'+esc(a.key)+'</button>';
+  });
+  h += '</div>';
+  if(t.mission) h += '<div class="muted" style="font-size:11.5px;margin-top:9px;text-align:center">Disponibile solo dopo la chiusura della missione</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderGPS(){
+  const t = getMyTeam();
+  if(!t) return '';
+  const age = t.gpsAt ? Math.floor((Date.now()-t.gpsAt)/1000) : null;
+  let ago = '—';
+  if(age != null){
+    if(age < 60) ago = age+'s fa';
+    else if(age < 3600) ago = Math.floor(age/60)+'m fa';
+    else ago = Math.floor(age/3600)+'h fa';
+  }
+  const dot = gpsActive ? '<span class="gps-dot on"></span>' : '<span class="gps-dot"></span>';
+  return '<div class="card">'+
+    '<div class="section-title">📡 Posizione GPS</div>'+
+    '<div class="gps-info" id="gpsInfo">'+
+      dot+' <b>'+(gpsActive?'GPS attivo (automatico)':'GPS non attivo')+'</b><br>'+
+      'Ultimo aggiornamento: <b>'+esc(ago)+'</b><br>'+
+      'Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>'+
+    '</div>'+
+    '<button class="gps-btn" id="gpsToggle">'+(gpsActive?'⏸️ Disattiva GPS automatico':'▶️ Attiva GPS automatico')+'</button>'+
+  '</div>';
+}
+
+function renderHistory(){
+  const t = getMyTeam();
+  if(!t) return '';
+  let h = '<div class="card">';
+  h += '<div class="section-title">🕓 Cronologia stati</div>';
+  if(!t.history || !t.history.length) h += '<div class="empty">Nessuna voce</div>';
+  else {
+    h += '<div class="hist">'+t.history.slice(0,40).map(x=>{
+      const ms = MISSION_STATE_MAP[x.status];
+      const icon = ms ? ms.icon : (x.status==='Disponibile' ? '✅'
+        : x.status==='In pausa' ? '⏸️'
+        : x.status==='Non operativa' ? '⛔'
+        : x.status==='Rientro' ? '↩️' : '•');
+      return '<div class="hist-row">'+
+        '<span class="h-t">'+fmtDateTime(x.ts)+'</span>'+
+        '<span class="h-ico">'+icon+'</span>'+
+        '<span><b>'+esc(x.status)+'</b>'+
+          (x.note?'<br><span class="muted" style="font-size:11.5px">'+esc(x.note)+'</span>':'')+
+        '</span></div>';
+    }).join('')+'</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function renderAll(){
+  renderTeamSelect();
+  const t = getMyTeam();
+  document.getElementById('teamIco').textContent = t ? (TEAM_TYPES[t.type]||TEAM_TYPES.auto).icon : '🚑';
+
+  const el = document.getElementById('eqContent');
+  el.innerHTML =
+    renderHero() +
+    renderMission() +
+    (t && t.mission ? '<button class="gmap-btn" id="gmapBtn"><span class="gm-ico">🗺️</span> Naviga con Google Maps</button>' : '') +
+    (t && t.mission ? '<div class="map-mini" id="miniMap"></div>' : '') +
+    renderPhases() +
+    renderReturnCodeAndCodeEditor() +
+    renderAvailability() +
+    renderGPS() +
+    renderHistory();
+
+  /* Bind eventi */
+  const gmapBtn = document.getElementById('gmapBtn');
+  if(gmapBtn) gmapBtn.onclick = openGoogleMaps;
+  const prevBtn = document.getElementById('prevBtn');
+  if(prevBtn) prevBtn.onclick = goBackToPreviousPhase;
+
+  document.querySelectorAll('.phase-btn[data-phase]').forEach(b=>{
+    b.onclick = ()=>{
+      const ph = b.getAttribute('data-phase');
+      if(MISSION_STATE_MAP[ph] && MISSION_STATE_MAP[ph].terminal){
+        const tg = S.targets.find(x=>x.id===(getMyTeam().mission||{}).targetId);
+        if(!tg || tg.returnCode == null){
+          if(!confirm('Stai chiudendo la missione.\n\nNon hai ancora selezionato un codice di rientro (0-4).\nProcedere comunque?')) return;
+        } else {
+          if(!confirm('Confermi la chiusura?\nCodice rientro: '+tg.returnCode+' — '+RETURN_CODES[tg.returnCode].label)) return;
+        }
+      }
+      setStatus(ph, 'Aggiornato dall\'equipaggio');
+      toast('✓ '+ph);
+    };
+  });
+
+  document.querySelectorAll('.retcode-btn[data-rc]').forEach(b=>{
+    b.onclick = ()=>{
+      const rc = +b.getAttribute('data-rc');
+      /* Conferma per evitare selezione accidentale */
+      if(!confirm('Impostare il codice di rientro '+rc+'?\n'+RETURN_CODES[rc].label)) return;
+      setReturnCode(rc);
+    };
+  });
+
+  document.querySelectorAll('.avail-btn[data-avail]').forEach(b=>{
+    b.onclick = ()=> setAvailability(b.getAttribute('data-avail'));
+  });
+
+  /* Editor codice */
+  const editBtn = document.getElementById('codeEditBtn');
+  const editor = document.getElementById('codeEditor');
+  const codeRow = document.getElementById('codeRow');
+  if(editBtn && editor && codeRow){
+    editBtn.onclick = ()=>{
+      /* Sicura: chiedi conferma prima di aprire */
+      if(!confirm('⚠️ Aprire l\'editor del codice intervento?\n\nVerifica bene la modifica prima di salvare.')) return;
+      codeRow.classList.add('hidden');
+      editor.classList.remove('hidden');
+    };
+    const closeEditor = ()=>{
+      editor.classList.add('hidden');
+      codeRow.classList.remove('hidden');
+    };
+    document.getElementById('codeCancel').onclick = closeEditor;
+
+    let selColor = parseCode(t.mission.code).color || 'R';
+    document.querySelectorAll('#editColorGrid .color-opt').forEach(b=>{
+      b.onclick = ()=>{
+        document.querySelectorAll('#editColorGrid .color-opt').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+        selColor = b.getAttribute('data-color');
+      };
+    });
+    document.getElementById('codeSave').onclick = ()=>{
+      const ne = document.getElementById('editEnv').value;
+      const np = document.getElementById('editPat').value;
+      const newCode = ne+np+selColor;
+      if(newCode === t.mission.code){ toast('Nessuna modifica'); closeEditor(); return; }
+      if(!confirm('Confermi il cambio codice?\n\n'+
+                  'PRIMA: '+t.mission.code+' ('+describeCode(t.mission.code)+')\n'+
+                  'DOPO:  '+newCode+' ('+describeCode(newCode)+')')) return;
+      applyInterventionCode(ne, np, selColor);
+      closeEditor();
+    };
+  }
+
+  /* GPS toggle */
+  const gpsToggle = document.getElementById('gpsToggle');
+  if(gpsToggle){
+    gpsToggle.onclick = ()=>{
+      if(gpsActive) stopAutoGPS();
+      else startAutoGPS();
+      renderAll();
+    };
+  }
+
+  /* Mini-mappa */
+  if(t && t.mission){
+    setTimeout(()=>{
+      if(!miniMap) initMiniMap();
+      else renderMiniMap();
+    }, 60);
+  } else if(miniMap){
+    try { miniMap.remove(); }catch(e){}
+    miniMap = null;
+  }
+}
+
+/* =========================================================
+   9. TOAST
+   ========================================================= */
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+/* =========================================================
+   10. CLOCK + TICK
+   ========================================================= */
+function tickClock(){
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('it-IT');
+}
+tickClock();
+setInterval(tickClock, 1000);
+setInterval(()=>{
+  /* Aggiorna elapsed */
+  const t = getMyTeam();
+  if(t && t.mission){
+    /* aggiorna solo i campi testuali per evitare di perdere focus */
+    const el = document.querySelector('.mc-time b:last-of-type');
+    if(el) el.textContent = elapsed(t.mission.activatedAt);
+  }
+}, 15000);
+
+/* =========================================================
+   11. TEAM SELECT CHANGE
+   ========================================================= */
+document.getElementById('teamSelect').onchange = function(){
+  myTeamId = this.value || null;
+  localStorage.setItem(MY_TEAM_KEY, myTeamId||'');
+  lastMissionId = null;
+  renderAll();
+};
+
+/* Room badge */
+const roomBadge = document.getElementById('roomBadge');
+const roomLabel = document.getElementById('roomLabel');
+if(roomLabel) roomLabel.textContent = SESSION_ROOM;
+if(roomBadge){
+  roomBadge.onclick = ()=>{
+    const url = location.origin + location.pathname + '?room=' + SESSION_ROOM;
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=> toast('📋 Copiato: '+SESSION_ROOM));
+    } else {
+      prompt('Stanza: '+SESSION_ROOM+'\nURL:', url);
+    }
+  };
+}
+
+/* =========================================================
+   12. INIT
+   ========================================================= */
+renderAll();
+updateBadges();
+setTimeout(()=>{
+  /* Auto-avvio GPS */
+  startAutoGPS();
+  /* Mini-mappa se richiesta */
+  const t = getMyTeam();
+  if(t && t.mission){
+    if(!miniMap) initMiniMap();
+    else renderMiniMap();
+  }
+}, 300);
+
+initSyncChannels();
+initMqtt();
+updateBadges();
+
+})();
+</script>
+</body>
+</html>
