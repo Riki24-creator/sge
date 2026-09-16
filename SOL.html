@@ -425,11 +425,9 @@ display:flex;align-items:center;gap:12px}
 .chat-bubble-row{display:flex;flex-direction:column;max-width:70%}
 .chat-bubble-row.eq{align-self:flex-start}
 .chat-bubble-row.sol{align-self:flex-end;align-items:flex-end}
-.chat-bubble-row.broadcast{align-self:center;align-items:center;max-width:90%}
 .chat-bubble-row .cb-text{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;word-wrap:break-word}
 .chat-bubble-row.eq .cb-text{background:#3a3a3a;color:var(--txt);border-bottom-left-radius:4px}
 .chat-bubble-row.sol .cb-text{background:var(--accent);color:#111;border-bottom-right-radius:4px}
-.chat-bubble-row.broadcast .cb-text{background:linear-gradient(135deg,#6a3d9a,#ab47bc);color:#fff;font-weight:700}
 .chat-bubble-row .cb-text img{max-width:100%;max-height:250px;border-radius:10px;display:block;cursor:pointer;margin-top:4px}
 .chat-bubble-row .cb-meta{font-size:10.5px;color:var(--muted);margin-top:4px;padding:0 4px}
 .chat-input-area{padding:14px 18px;border-top:1px solid #2e2e2e;background:#252525}
@@ -488,7 +486,7 @@ margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;bo
 .dash-card{background:#252525;border:1px solid #333;border-radius:14px;padding:18px}
 .dash-card h3{margin:0 0 14px;font-size:12.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:800}
 .dash-bar{display:flex;align-items:flex-end;gap:3px;height:160px;padding-bottom:6px;border-bottom:1px solid #333;overflow-x:auto}
-.dash-bar .bar{flex:1;min-width:14px;background:linear-gradient(180deg,var(--accent),#c87f1a);border-radius:3px 3px 0 0;position:relative;cursor:pointer}
+.dash-bar .bar{flex:1;min-width:14px;background:linear-gradient(180deg,var(--accent),#c87f1a);border-radius:3px 3px 0 0;transition:.3s;position:relative;cursor:pointer}
 .dash-bar .bar:hover{background:linear-gradient(180deg,var(--accent-h),var(--accent))}
 .dash-bar .bar-lbl{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9.5px;color:var(--muted);font-weight:700}
 .dash-bar-wrap{display:flex;height:14px;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.35);margin-bottom:10px}
@@ -510,6 +508,10 @@ font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;font-weight:800;bo
 .board-table tbody tr:hover{background:rgba(255,255,255,.03)}
 .board-table tbody tr:last-child td{border-bottom:none}
 .badge-lite{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;background:#2d2d2d;color:var(--muted)}
+.timeline-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #333;font-size:12.5px}
+.timeline-row:last-child{border-bottom:none}
+.timeline-row .tr-time{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent);width:60px;flex-shrink:0}
+.timeline-row .tr-lbl{flex:1}
 .zones-list .zone-item{display:flex;align-items:center;gap:10px;padding:9px 11px;background:#2d2d2d;
 border:1px solid #3a3a3a;border-radius:var(--radius-xs);margin-bottom:6px}
 .zone-color{width:20px;height:20px;border-radius:6px;flex-shrink:0}
@@ -569,7 +571,9 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
 
       <div class="acc open ic-blue" id="accBoard">
         <button class="acc-head"><span class="acc-ico">📋</span><span class="title">Assignment board</span><span class="chev">▾</span></button>
-        <div class="acc-body"><div id="boardContainer"></div></div>
+        <div class="acc-body">
+          <div id="boardContainer"></div>
+        </div>
       </div>
 
       <div class="acc open ic-blue" id="accInterventions">
@@ -667,8 +671,13 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
       <div class="acc ic-purple" id="accZones">
         <button class="acc-head"><span class="acc-ico">🗺️</span><span class="title">Zone</span><span class="chev">▾</span></button>
         <div class="acc-body">
-          <div class="row"><input type="text" id="zoneName" placeholder="Nome zona"></div>
-          <div class="row"><button class="btn" id="zoneStartBtn">📍 Inizia disegno</button><button class="btn primary" id="zoneSaveBtn" disabled>💾 Salva zona</button></div>
+          <div class="row">
+            <input type="text" id="zoneName" placeholder="Nome zona">
+          </div>
+          <div class="row">
+            <button class="btn" id="zoneStartBtn">📍 Inizia disegno</button>
+            <button class="btn primary" id="zoneSaveBtn" disabled>💾 Salva zona</button>
+          </div>
           <div class="warn hidden" id="zoneWarn">Clicca sulla mappa per aggiungere i vertici della zona. Poi premi Salva.</div>
           <div class="zones-list" id="zonesList" style="margin-top:12px"></div>
         </div>
@@ -697,14 +706,14 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
 </section>
 
 <section id="view-squadre" class="view hidden">
-  <div style="max-width:520px;margin:0 auto;padding:16px 14px 50px">
-    <div class="acc open" style="margin-bottom:13px"><div class="acc-body" style="padding:14px"><label style="display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px;font-weight:700">Seleziona equipaggio</label><select id="myTeam"></select></div></div>
+  <div class="mobile">
+    <div class="m-card"><div class="m-title">Seleziona equipaggio</div><select id="myTeam"></select></div>
     <div id="sqStatus"></div>
     <div id="sqMission"></div>
-    <div class="acc hidden" id="sqPhaseCard" style="margin-bottom:13px"><button class="acc-head"><span class="acc-ico">🚦</span><span class="title">Fase missione</span><span class="chev">▾</span></button><div class="acc-body"><div class="status-grid" id="sqPhaseGrid"></div></div></div>
-    <div class="acc" style="margin-bottom:13px"><button class="acc-head"><span class="acc-ico">🟢</span><span class="title">Disponibilità</span><span class="chev">▾</span></button><div class="acc-body"><div class="status-grid" id="sqAvailGrid"></div></div></div>
-    <div class="acc" style="margin-bottom:13px"><button class="acc-head"><span class="acc-ico">📡</span><span class="title">Posizione GPS</span><span class="chev">▾</span></button><div class="acc-body"><div id="sqGps" class="muted" style="font-size:12.5px;margin-bottom:10px"></div><button class="btn ghost block" id="gpsBtn">📡 Aggiorna posizione</button></div></div>
-    <div class="acc" style="margin-bottom:13px"><button class="acc-head"><span class="acc-ico">🕓</span><span class="title">Cronologia stati</span><span class="chev">▾</span></button><div class="acc-body"><div id="sqHistory"></div></div></div>
+    <div class="m-card hidden" id="sqPhaseCard"><div class="m-title">Fase missione</div><div class="status-grid" id="sqPhaseGrid"></div></div>
+    <div class="m-card"><div class="m-title">Disponibilità</div><div class="status-grid" id="sqAvailGrid"></div></div>
+    <div class="m-card"><div class="m-title">Posizione GPS</div><div id="sqGps" class="muted" style="font-size:12.5px;margin-bottom:10px"></div><button class="btn ghost block" id="gpsBtn">📡 Aggiorna posizione</button></div>
+    <div class="m-card"><div class="m-title">Cronologia stati</div><div id="sqHistory"></div></div>
   </div>
 </section>
 
@@ -798,6 +807,9 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
 (function(){
 'use strict';
 
+/* =========================================================
+   COSTANTI
+   ========================================================= */
 const KEY='sge_v4';
 const BACKUP_PREFIX='sge_backup_';
 const IDB_NAME='sge_db';
@@ -880,6 +892,9 @@ const DEFAULT_BROKERS=[
   {url:'wss://broker.emqx.io:8084/mqtt',user:'',pass:'',label:'EMQX (pubblico)'}
 ];
 
+/* =========================================================
+   UTILS
+   ========================================================= */
 function uid(p){ return (p||'id')+'-'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function stateShort(s){ const m=MISSION_STATE_MAP[s]; return m?m.short:s; }
@@ -925,6 +940,9 @@ function totalChatUnread(){ let n=0; S.teams.forEach(t=>{n+=chatUnreadFor(t.id);
 function totalNotifUnread(){ return (S.notifications||[]).filter(n=>!n.read).length; }
 function ackStatus(t){ if(!t.mission) return null; const tg=S.targets.find(x=>x.id===t.mission.targetId); if(!tg||!tg.ack) return {state:'sent',label:'📤 Inviata',color:'#ffcc80'}; return {state:'ack',label:'✅ '+fmtTime(tg.ack.ts),color:'#81c784'}; }
 
+/* =========================================================
+   CRYPTO (AES-GCM)
+   ========================================================= */
 async function deriveKey(passphrase, salt){
   const enc=new TextEncoder();
   const keyMaterial=await crypto.subtle.importKey('raw',enc.encode(passphrase),'PBKDF2',false,['deriveKey']);
@@ -952,6 +970,9 @@ async function decryptText(text, passphrase){
   return new TextDecoder().decode(plain);
 }
 
+/* =========================================================
+   INDEXEDDB FALLBACK
+   ========================================================= */
 function openIDB(){
   return new Promise((resolve,reject)=>{
     const req=indexedDB.open(IDB_NAME,1);
@@ -973,7 +994,21 @@ async function idbSave(state){
     r.onsuccess=(e)=>{ const c=e.target.result; if(c){ keys.push(c.key); c.continue(); } else { keys.sort(); while(keys.length>12){ tx.objectStore(IDB_STORE).delete(keys.shift()); } } };
   }catch(e){}
 }
+async function idbLoadLatest(){
+  try{
+    const db=await openIDB();
+    const tx=db.transaction(IDB_STORE,'readonly');
+    const r=tx.objectStore(IDB_STORE).openCursor(null,'prev');
+    return new Promise(res=>{
+      r.onsuccess=(e)=>{ const c=e.target.result; res(c?c.value.data:null); };
+      r.onerror=()=>res(null);
+    });
+  }catch(e){ return null; }
+}
 
+/* =========================================================
+   STATO
+   ========================================================= */
 function defaultState(){
   const C={lat:45.5195,lng:9.0784}; const now=Date.now();
   function mkTeam(name,type,crew,dLat,dLng,status,turno){
@@ -1065,6 +1100,7 @@ try{
     if(tg.returnCode===undefined) tg.returnCode=null;
     if(!Array.isArray(tg.photos)) tg.photos=[];
     if(tg.ack===undefined) tg.ack=null;
+    /* Migrazione chat dal target al team */
     if(Array.isArray(tg.chat) && tg.chat.length){
       const t=S.teams.find(x=>x.id===tg.teamIds[0]);
       if(t){ if(!Array.isArray(t.chat)) t.chat=[]; t.chat=t.chat.concat(tg.chat.map(m=>Object.assign({},m,{teamId:t.id}))); }
@@ -1073,6 +1109,9 @@ try{
   });
 }catch(e){ S=defaultState(); }
 
+/* =========================================================
+   SYNC (multi-broker + crypto)
+   ========================================================= */
 const MY_PAGE_ID='sol_'+Math.random().toString(36).slice(2,10);
 const SESSION_ROOM=(function(){const p=new URLSearchParams(location.search);return p.get('room')||localStorage.getItem('sge_room')||'sge-demo-2024';})();
 localStorage.setItem('sge_room',SESSION_ROOM);
@@ -1302,6 +1341,9 @@ function updateSolEqBadge(){
 
 setInterval(()=>{ idbSave(S); }, 5*60*1000);
 
+/* =========================================================
+   SOUND
+   ========================================================= */
 let audioCtx=null, audioEnabled=false;
 function initAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
 function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); audioEnabled=true; }
@@ -1322,6 +1364,9 @@ function playSound(type){
   }catch(e){}
 }
 
+/* =========================================================
+   UI STATE
+   ========================================================= */
 let draft=null, filterColor=null, sortMode='cron', quickFilter='all';
 let myTeamId=localStorage.getItem('sge_myteam')||null;
 const layerVis={targets:true,teams:true,pois:true,zones:true,tracks:false};
@@ -1336,6 +1381,9 @@ let zonePoints=[];
 let currentModalTab='info';
 let trackingTeamId=null;
 
+/* =========================================================
+   MAP
+   ========================================================= */
 let map=null, currentTileLayer=null;
 let currentProvider=localStorage.getItem('sge_provider')||'esri';
 let tileErrorCount=0, consecutiveErrors=0, triedProviders={};
@@ -1543,7 +1591,7 @@ function renderMap(){
   if(layerVis.zones){
     S.zones.forEach(z=>{
       const poly=L.polygon(z.points,{color:z.color||'#ab47bc',weight:2,fillOpacity:.12,fillColor:z.color||'#ab47bc'});
-      poly.bindPopup('<b>'+esc(z.name||'Zona')+'</b>');
+      poly.bindPopup('<b>'+esc(z.name||'Zona')+'</b><br><span class="muted">Click destro per opzioni</span>');
       poly.on('contextmenu',()=>{ if(confirm('Eliminare la zona "'+(z.name||'—')+'"?')){ S.zones=S.zones.filter(x=>x.id!==z.id); save(); render(); }});
       poly.addTo(groups.zones);
     });
@@ -1559,13 +1607,16 @@ function renderMap(){
   drawSelectionLines();
 }
 
+/* =========================================================
+   OSRM ETA
+   ========================================================= */
 const _osrmCache = {};
 async function getOSRMETA(fromLat,fromLng,toLat,toLng){
   const key = fromLat.toFixed(4)+','+fromLng.toFixed(4)+'->'+toLat.toFixed(4)+','+toLng.toFixed(4);
   if(_osrmCache[key] && Date.now()-_osrmCache[key].ts < 60000) return _osrmCache[key].data;
   try{
     const url='https://router.project-osrm.org/route/v1/driving/'+fromLng+','+fromLat+';'+toLng+','+toLat+'?overview=false&alternatives=false';
-    const r=await fetch(url);
+    const r=await fetch(url,{signal:AbortSignal.timeout(5000)});
     if(!r.ok) throw new Error('http '+r.status);
     const d=await r.json();
     if(!d.routes||!d.routes[0]) throw new Error('no route');
@@ -1595,6 +1646,9 @@ function computeTimes(tg){
   return times;
 }
 
+/* =========================================================
+   OVERLAY
+   ========================================================= */
 const overlayTimers={};
 const MAX_OVERLAYS=3;
 function showOverlay(notif){
@@ -1630,6 +1684,9 @@ function handleNotifClick(notif){
   else if(notif.teamId){ const t=S.teams.find(x=>x.id===notif.teamId); if(t&&map){ switchView('sala'); map.flyTo([t.lat,t.lng],17,{duration:.6}); } }
 }
 
+/* =========================================================
+   KPI + INTERVENTI
+   ========================================================= */
 function renderKPI(){
   const active=S.targets.filter(tg=>tg.status!=='chiuso').length;
   const busy=S.teams.filter(t=>t.operational&&t.mission).length;
@@ -1688,6 +1745,9 @@ function renderInterventions(){
   el.querySelectorAll('.intv-del').forEach(b=>{ b.onclick=(e)=>{ e.stopPropagation(); SGE.deleteTarget(b.getAttribute('data-del')); }; });
 }
 
+/* =========================================================
+   COLORBAR + OPS
+   ========================================================= */
 function counts(){
   const c={R:0,G:0,V:0,B:0,N:0,tot:0};
   S.teams.forEach(t=>{ if(t.mission){ const col=parseCode(t.mission.code).color; if(col){ c[col]++; c.tot++; } } });
@@ -1857,6 +1917,7 @@ function renderTeamSelect(){
   });
   sel.innerHTML='<option value="">⏳ Nessuna (crea target in attesa)</option>'+sorted.map(t=>{
     const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+    const crew=crewInfo(t);
     const tag=!t.operational?'⛔ ':(t.mission?'🚨 ':'✅ ');
     let dist='';
     if(draft){ const d=haversine(t.lat,t.lng,draft.lat,draft.lng); dist=' · '+(d<1000?Math.round(d)+'m':(d/1000).toFixed(1)+'km'); }
@@ -1916,6 +1977,9 @@ function renderLegend(){
   document.getElementById('legendBody').innerHTML=h;
 }
 
+/* =========================================================
+   TAB BADGES
+   ========================================================= */
 function updateTabBadges(){
   const chatUnread=totalChatUnread();
   const notifUnread=totalNotifUnread();
@@ -1926,6 +1990,9 @@ function updateTabBadges(){
   if(bb){ if(bcastUnread>0){ bb.textContent=bcastUnread>99?'99+':bcastUnread; bb.classList.remove('hidden'); } else bb.classList.add('hidden'); }
 }
 
+/* =========================================================
+   CHAT VIEW
+   ========================================================= */
 function renderChatView(){
   const listEl=document.getElementById('chatList');
   const convEl=document.getElementById('chatConv');
@@ -2014,6 +2081,9 @@ function sendChatPhotoToTeam(teamId,dataUrl){
   save();
 }
 
+/* =========================================================
+   BROADCAST VIEW
+   ========================================================= */
 function renderBroadcastView(){
   const wrap=document.getElementById('broadcastMsgs'); if(!wrap) return;
   const arr=S.broadcast||[];
@@ -2027,6 +2097,7 @@ function renderBroadcastView(){
     }).join('');
   }
   setTimeout(()=>{ wrap.scrollTop=wrap.scrollHeight; },30);
+  /* Mark as read */
   if(arr.length) localStorage.setItem('sge_bcast_read', Date.now());
   updateTabBadges();
 }
@@ -2039,6 +2110,9 @@ function sendBroadcast(text){
   toast('📣 Annuncio inviato a tutte le squadre');
 }
 
+/* =========================================================
+   NOTIFICHE VIEW
+   ========================================================= */
 function renderNotifView(){
   const listEl=document.getElementById('notifList'), filtersEl=document.getElementById('notifFilters'), headerCount=document.getElementById('notifHeaderCount');
   if(!listEl||!filtersEl) return;
@@ -2076,6 +2150,9 @@ function renderNotifView(){
   });
 }
 
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
 function renderDashboard(){
   const el=document.getElementById('dashGrid');
   if(!el) return;
@@ -2083,12 +2160,18 @@ function renderDashboard(){
   const last24h=S.targets.filter(tg=>tg.activatedAt && (now-tg.activatedAt)<24*60*60*1000);
   const total=S.targets.length;
   const closed=S.targets.filter(tg=>tg.status==='chiuso');
+  /* Interventi per ora (ultime 24h) */
   const hours=new Array(24).fill(0);
-  last24h.forEach(tg=>{ const h=new Date(tg.activatedAt).getHours(); hours[h]++; });
+  last24h.forEach(tg=>{
+    const h = new Date(tg.activatedAt).getHours();
+    hours[h]++;
+  });
   const maxH=Math.max(1,...hours);
+  /* Distribuzione codici colore */
   const byColor={R:0,G:0,V:0,B:0,N:0};
   S.targets.forEach(tg=>{ const c=parseCode(tg.code).color; if(c) byColor[c]++; });
   const colorTot=Object.values(byColor).reduce((a,b)=>a+b,0)||1;
+  /* Tempi medi */
   const timesAcc={};
   closed.forEach(tg=>{
     const t=computeTimes(tg);
@@ -2096,6 +2179,7 @@ function renderDashboard(){
     if(t.t2 && t.t1){ const d=t.t2-t.t1; timesAcc.travel=(timesAcc.travel||[]); timesAcc.travel.push(d); }
   });
   const avg=arr=>arr&&arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
+  /* Squadre più attive */
   const teamCount={};
   S.targets.forEach(tg=>{ (tg.teamIds||[]).forEach(tid=>{ teamCount[tid]=(teamCount[tid]||0)+1; }); });
   const topTeams=Object.keys(teamCount).map(tid=>{
@@ -2103,6 +2187,7 @@ function renderDashboard(){
     return t?{name:t.name,count:teamCount[tid]}:null;
   }).filter(Boolean).sort((a,b)=>b.count-a.count).slice(0,6);
   let h='';
+  /* Card 1: statistiche generali */
   h+='<div class="dash-card"><h3>📊 Numeri</h3>'+
     '<div class="dash-stat-row"><span class="dsr-name">Interventi totali</span><span class="dsr-val">'+total+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Ultimi 24h</span><span class="dsr-val">'+last24h.length+'</span></div>'+
@@ -2112,10 +2197,12 @@ function renderDashboard(){
     '<div class="dash-stat-row"><span class="dsr-name">Tempo medio dispatch</span><span class="dsr-val">'+fmtDur(avg(timesAcc.dispatch))+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Tempo medio viaggio</span><span class="dsr-val">'+fmtDur(avg(timesAcc.travel))+'</span></div>'+
   '</div>';
+  /* Card 2: interventi per ora */
   h+='<div class="dash-card"><h3>🕐 Interventi per ora (ultime 24h)</h3>'+
     '<div class="dash-bar">'+
     hours.map((v,i)=>'<div class="bar" style="height:'+Math.max(4, (v/maxH)*140)+'px" title="'+i+':00 — '+v+' interventi"><span class="bar-lbl">'+i+'</span></div>').join('')+
     '</div></div>';
+  /* Card 3: distribuzione codici */
   h+='<div class="dash-card"><h3>🎨 Distribuzione codici</h3>'+
     '<div class="dash-bar-wrap">'+
     COLOR_ORDER.map(k=>{ const p=(byColor[k]/colorTot*100).toFixed(1); return byColor[k]?('<div class="seg" style="flex:'+byColor[k]+';background:'+COLORS[k].hex+'"></div>'):''; }).join('')+
@@ -2123,10 +2210,12 @@ function renderDashboard(){
     '<div class="dash-legend">'+
     COLOR_ORDER.map(k=>{ const p=colorTot?Math.round(byColor[k]/colorTot*100):0; return '<div class="dash-leg"><span class="dl-dot" style="background:'+COLORS[k].hex+'"></span>'+COLORS[k].label+' <b>'+byColor[k]+'</b> ('+p+'%)</div>'; }).join('')+
     '</div></div>';
+  /* Card 4: top squadre */
   h+='<div class="dash-card"><h3>🏆 Squadre più impegnate</h3>';
   if(!topTeams.length) h+='<div class="empty">Nessun dato</div>';
   else h+=topTeams.map(t=>'<div class="dash-stat-row"><span class="dsr-name">'+esc(t.name)+'</span><span class="dsr-val">'+t.count+' interventi</span></div>').join('');
   h+='</div>';
+  /* Card 5: distribuzione mezzi */
   const byType={};
   S.teams.forEach(t=>{ const k=TEAM_TYPES[t.type]?t.type:'auto'; byType[k]=(byType[k]||0)+1; });
   h+='<div class="dash-card"><h3>🚑 Flotta</h3>';
@@ -2139,7 +2228,11 @@ function renderDashboard(){
   el.innerHTML=h;
 }
 
+/* =========================================================
+   HANDOVER
+   ========================================================= */
 function generateHandover(){
+  const now=Date.now();
   const active=S.targets.filter(tg=>tg.status!=='chiuso');
   const lines=[];
   lines.push('═══════════════════════════════════════');
@@ -2210,6 +2303,9 @@ function openHandoverModal(){
   };
 }
 
+/* =========================================================
+   PDF REPORT
+   ========================================================= */
 function printReport(){
   const now=new Date();
   let h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report SGE</title>';
@@ -2241,6 +2337,9 @@ function printReport(){
   setTimeout(()=>w.print(),400);
 }
 
+/* =========================================================
+   AZIONI
+   ========================================================= */
 function setStatus(teamId,status,note){
   const t=S.teams.find(x=>x.id===teamId); if(!t||!status) return;
   const ms=MISSION_STATE_MAP[status];
@@ -2347,6 +2446,9 @@ function deleteTeam(id){
   save(); render();
 }
 
+/* =========================================================
+   MODAL
+   ========================================================= */
 const modal=document.getElementById('modal');
 const modalTitle=document.getElementById('modalTitle');
 const modalBody=document.getElementById('modalBody');
@@ -2378,6 +2480,7 @@ function renderTeamModal(id){
       const ack=ackStatus(t); if(ack) h+='<div class="info" style="margin-bottom:10px">Conferma: <b style="color:'+ack.color+'">'+ack.label+'</b></div>';
       h+='<div class="row"><button class="btn ghost" id="mCloseBtn">✔ Chiudi missione</button><button class="btn ghost" id="mFocusBtn">🎯 Vai al target</button></div>';
     } else h+='<div class="empty">Nessuna missione attiva</div>';
+    /* Fascia oraria */
     if(t.activeFrom||t.activeTo){
       const af=t.activeFrom?new Date(t.activeFrom).toLocaleString('it-IT'):'—';
       const at=t.activeTo?new Date(t.activeTo).toLocaleString('it-IT'):'—';
@@ -2395,7 +2498,7 @@ function renderTeamModal(id){
     const tr=t.track||[];
     if(!tr.length){ h+='<div class="empty">Nessun dato GPS registrato</div>'; }
     else {
-      h+='<div class="info" style="margin-bottom:10px">👣 '+tr.length+' punti registrati.</div>';
+      h+='<div class="info" style="margin-bottom:10px">👣 '+tr.length+' punti registrati. Clicca per visualizzare sulla mappa principale.</div>';
       h+='<button class="btn primary block" id="mShowTrack">👣 Mostra traccia sulla mappa</button>';
       h+='<div style="max-height:200px;overflow-y:auto;margin-top:10px;background:#1e1e1e;border-radius:8px;padding:8px;font-size:11px;font-family:monospace">';
       h+=tr.slice(-30).map(p=>fmtDateTime(p.ts)+' — '+p.lat.toFixed(4)+','+p.lng.toFixed(4)).join('<br>');
@@ -2526,6 +2629,9 @@ function editTeam(id){
   };
 }
 
+/* =========================================================
+   GEOCODING
+   ========================================================= */
 const GEO_PROVIDERS={
   photon:{search:async(q,signal)=>{ const r=await fetch('https://photon.komoot.io/api/?lang=it&limit=6&q='+encodeURIComponent(q),{signal}); if(!r.ok) throw new Error('http '+r.status); const data=await r.json(); return (data.features||[]).map(f=>{ const p=f.properties||{}; const label=[p.name,p.street,p.housenumber].filter(Boolean).join(' ').trim()||[p.city,p.state].filter(Boolean).join(', '); const sub=[p.postcode,p.city,p.state,p.country].filter(Boolean).filter(x=>!label.includes(x)).join(', '); return {label:label||(p.city||'Luogo'),sub:sub||'',lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]}; }); },
   reverse:async(lat,lng)=>{ const r=await fetch('https://photon.komoot.io/reverse?lang=it&lat='+lat+'&lon='+lng); if(!r.ok) throw new Error('http '+r.status); const d=await r.json(); const f=(d.features||[])[0]; if(!f) return null; const p=f.properties||{}; return [p.name,p.street,p.housenumber].filter(Boolean).join(' ')||[p.city,p.state,p.country].filter(Boolean).join(', ')||null; }},
@@ -2628,6 +2734,9 @@ function showSosBanner(sos){
   document.getElementById('sosCloseBtn').onclick=()=>{ banner.classList.add('hidden'); S.sos=null; save(); };
 }
 
+/* =========================================================
+   SEARCH
+   ========================================================= */
 const searchModal=document.getElementById('searchModal');
 const searchInput=document.getElementById('searchInput');
 const searchResults=document.getElementById('searchResults');
@@ -2651,6 +2760,9 @@ function renderSearchResults(q){
 searchInput.addEventListener('input',()=>renderSearchResults(searchInput.value));
 searchModal.addEventListener('click',e=>{ if(e.target===searchModal) hideSearch(); });
 
+/* =========================================================
+   EXPORT CSV
+   ========================================================= */
 function exportCSV(){
   const rows=[['Codice','Ambiente','Patologia','Colore','Indirizzo','Stato','Attivazione','Assegnazione','Chiusura','Squadre','Cod. Rientro','Note','Conferma','T0','T1','T2','T3']];
   S.targets.slice().sort((a,b)=>(a.activatedAt||0)-(b.activatedAt||0)).forEach(tg=>{
@@ -2672,6 +2784,9 @@ function exportCSV(){
   toast('📥 Report CSV esportato');
 }
 
+/* =========================================================
+   CONFIG MODAL
+   ========================================================= */
 function openConfigModal(){
   let h='<div class="field"><label>🔐 Chiave cifratura E2E (opzionale)</label>'+
     '<input type="text" id="cfgKey" value="'+esc(S.config.encryptKey||'')+'" placeholder="lascia vuoto per nessuna cifratura">'+
@@ -2748,6 +2863,9 @@ document.getElementById('configImportInput').addEventListener('change',function(
   e.target.value='';
 });
 
+/* =========================================================
+   FOTO SOL
+   ========================================================= */
 document.getElementById('solPhotoInput').addEventListener('change',function(e){
   const file=e.target.files&&e.target.files[0]; if(!file||!pendingSolPhotoTeamId){ e.target.value=''; return; }
   if(!file.type.startsWith('image/')){ e.target.value=''; return; }
@@ -2771,6 +2889,9 @@ document.getElementById('solPhotoInput').addEventListener('change',function(e){
   e.target.value='';
 });
 
+/* =========================================================
+   VIEW SWITCH
+   ========================================================= */
 function switchView(v){
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
   const btn=document.querySelector('.tabs button[data-view="'+v+'"]');
@@ -2789,6 +2910,9 @@ function switchView(v){
   }
 }
 
+/* =========================================================
+   ZONE
+   ========================================================= */
 function startZoneDrawing(){
   zoneDrawing=true; zonePoints=[];
   document.getElementById('zoneStartBtn').disabled=true;
@@ -2811,6 +2935,9 @@ function saveZone(){
   toast('🗺️ Zona salvata');
 }
 
+/* =========================================================
+   UI EVENTS
+   ========================================================= */
 function openAcc(id){ const el=document.getElementById(id); if(el) el.classList.add('open'); }
 document.querySelectorAll('.acc-head').forEach(h=>{ h.onclick=()=>h.parentElement.classList.toggle('open'); });
 document.querySelectorAll('.tabs button').forEach(b=>{ b.onclick=()=>switchView(b.getAttribute('data-view')); });
@@ -2913,6 +3040,9 @@ document.getElementById('broadcastSendBtn').onclick=()=>{
 };
 document.getElementById('broadcastInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('broadcastSendBtn').click(); } });
 
+/* =========================================================
+   SHORTCUT TASTIERA
+   ========================================================= */
 document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase();
   const isInput=tag==='input'||tag==='textarea'||tag==='select';
@@ -2924,6 +3054,9 @@ document.addEventListener('keydown',e=>{
   if(e.key==='0'){ filterColor=null; render(); }
 });
 
+/* =========================================================
+   VISTA SQUADRE
+   ========================================================= */
 function renderSquadreView(){
   const sel=document.getElementById('myTeam');
   sel.innerHTML='<option value="">— seleziona equipaggio —</option>'+S.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
@@ -2932,7 +3065,7 @@ function renderSquadreView(){
   const boxS=document.getElementById('sqStatus'), boxM=document.getElementById('sqMission'), boxG=document.getElementById('sqGps'), boxH=document.getElementById('sqHistory');
   const t=S.teams.find(x=>x.id===myTeamId);
   if(!t){
-    boxS.innerHTML='<div class="acc"><div class="acc-body" style="padding:14px"><div class="empty">Seleziona un equipaggio.</div></div></div>';
+    boxS.innerHTML='<div class="m-card"><div class="empty">Seleziona un equipaggio.</div></div>';
     boxM.innerHTML=''; boxG.textContent=''; boxH.innerHTML='';
     document.getElementById('sqPhaseCard').classList.add('hidden');
     document.getElementById('sqPhaseGrid').innerHTML='';
@@ -2954,9 +3087,9 @@ function renderSquadreView(){
     if(tg&&(tg.teamIds||[]).length>1){ const others=tg.teamIds.filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean); extra='<div class="muted" style="margin-top:4px;font-size:12px">🚑 Insieme a: <b>'+esc(others.map(o=>o.name).join(', '))+'</b></div>'; }
     if(tg&&tg.returnCode!=null){ const rc=RETURN_CODES[tg.returnCode]; extra+='<div style="color:'+rc.color+';margin-top:4px;font-size:12.5px;font-weight:700">'+rc.icon+' Cod. rientro '+tg.returnCode+' → '+rc.letter+'</div>'; }
     if(tg&&tg.ack) extra+='<div style="color:#81c784;margin-top:4px;font-size:12px">✅ Confermata '+fmtTime(tg.ack.ts)+'</div>';
-    boxM.innerHTML='<div class="acc"><div class="acc-body" style="padding:14px"><div class="mission-card" style="border-left:5px solid '+c.hex+'"><div class="mc-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</div><div class="mc-info">'+(MISSION_STATE_MAP[t.status]?'<div style="font-weight:800;color:'+MISSION_STATE_MAP[t.status].color+';font-size:12.5px;margin-bottom:3px">'+MISSION_STATE_MAP[t.status].icon+' '+esc(MISSION_STATE_MAP[t.status].short)+'</div>':'')+'<div style="font-weight:700">'+esc(t.mission.address||'—')+'</div><div class="muted">Attivata '+fmtTime(t.mission.activatedAt)+' · da '+elapsed(t.mission.activatedAt)+'</div>'+extra+'</div></div><button class="btn primary block" id="sqComplete">✅ Missione completata</button></div></div>';
+    boxM.innerHTML='<div class="m-card m-mission" style="--c:'+c.hex+'"><div class="mc-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</div><div class="mc-info">'+(MISSION_STATE_MAP[t.status]?'<div style="font-weight:800;color:'+MISSION_STATE_MAP[t.status].color+';font-size:12.5px;margin-bottom:3px">'+MISSION_STATE_MAP[t.status].icon+' '+esc(MISSION_STATE_MAP[t.status].short)+'</div>':'')+'<div style="font-weight:700">'+esc(t.mission.address||'—')+'</div><div class="muted">Attivata '+fmtTime(t.mission.activatedAt)+' · da '+elapsed(t.mission.activatedAt)+'</div>'+extra+'</div></div><button class="btn primary block" id="sqComplete" style="margin-bottom:13px">✅ Missione completata</button>';
     setTimeout(()=>{ const b=document.getElementById('sqComplete'); if(b) b.onclick=()=>{ setStatus(t.id,'Arrivo in Sede / Fine Missione','Completata'); save(); render(); renderSquadreView(); }; },0);
-  } else boxM.innerHTML='<div class="acc"><div class="acc-body" style="padding:14px"><div class="empty">Nessuna missione.</div></div></div>';
+  } else boxM.innerHTML='<div class="m-card"><div class="empty">Nessuna missione.</div></div>';
   boxG.innerHTML='Ultimo aggiornamento: <b>'+fmtTime(t.gpsAt)+'</b><br>Coordinate: '+t.lat.toFixed(5)+', '+t.lng.toFixed(5);
   boxH.innerHTML=(t.history&&t.history.length)?'<div class="hist">'+t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span><span><b>'+esc(stateShort(x.status))+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join('')+'</div>':'<div class="empty">Nessuna voce</div>';
 }
@@ -2979,6 +3112,9 @@ document.getElementById('gpsBtn').onclick=()=>{
   else apply(t.lat+(Math.random()-0.5)*0.0012,t.lng+(Math.random()-0.5)*0.0012);
 };
 
+/* =========================================================
+   API GLOBALE
+   ========================================================= */
 window.SGE={
   openTeam, openAssign,
   closeMission:function(id){ closeMission(id,'Chiusa da SOL'); save(); render(); },
@@ -2996,10 +3132,16 @@ window.SGE={
   focusTeam:function(id){ const t=S.teams.find(x=>x.id===id); if(t&&map){ map.flyTo([t.lat,t.lng],18,{duration:.6}); setTimeout(()=>{ if(groups.teams){ let mk=null; groups.teams.eachLayer(l=>{ if(l.options && l.options.sgeId===id) mk=l; }); if(mk) mk.openPopup(); } },700); } }
 };
 
+/* =========================================================
+   CLOCK + TICK
+   ========================================================= */
 function tickClock(){ const d=new Date(); document.getElementById('clock').textContent=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})+'  '+d.toLocaleTimeString('it-IT'); }
 tickClock(); setInterval(tickClock,1000);
 setInterval(()=>{ if(document.getElementById('view-sala').classList.contains('hidden')) return; if(modal.classList.contains('hidden')) { renderOpsList(); renderBoard(); } },30000);
 
+/* =========================================================
+   RENDER MASTER + INIT
+   ========================================================= */
 function render(){
   save();
   renderMap();
@@ -3038,6 +3180,7 @@ updateSolEqBadge();
 updateTabBadges();
 
 if('Notification' in window && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); }
+idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } });
 
 })();
 </script>
