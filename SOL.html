@@ -21,7 +21,6 @@ button,input,select,textarea{font-family:inherit;font-size:13.5px}
 ::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px}
 ::-webkit-scrollbar-thumb:hover{background:#4d4d4d}
 
-/* TOPBAR */
 .topbar{height:58px;display:flex;align-items:center;gap:12px;padding:0 18px;
 background:linear-gradient(180deg,#252525,#1e1e1e);border-bottom:1px solid #2e2e2e;
 position:relative;z-index:1200;box-shadow:0 1px 0 rgba(0,0,0,.35)}
@@ -41,7 +40,6 @@ white-space:nowrap;display:flex;align-items:center;gap:6px;position:relative}
 .tab-badge{background:var(--err);color:#fff;font-size:10px;font-weight:800;
 padding:1px 6px;border-radius:20px;min-width:16px;text-align:center;line-height:1.3}
 .tab-badge.chat{background:var(--ok)}
-.tab-badge.muted{background:#444;color:var(--muted)}
 .topbar .spacer{flex:1}
 .top-colorbar{display:flex;gap:5px;align-items:center;overflow-x:auto;scrollbar-width:none}
 .top-colorbar::-webkit-scrollbar{display:none}
@@ -79,7 +77,6 @@ background:var(--bg2);border-right:1px solid #2e2e2e;padding:12px;scrollbar-gutt
 .leaflet-div-icon{background:transparent !important;border:none !important}
 .leaflet-container{font-family:inherit;background:#1a1a1a}
 
-/* KPI */
 .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .kpi{background:#252525;border:1px solid #343434;border-radius:var(--radius-sm);
 padding:11px 9px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
@@ -248,7 +245,6 @@ font-size:12px;color:var(--muted);backdrop-filter:blur(12px);pointer-events:none
 .map-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
 text-align:center;padding:40px;color:var(--muted)}
 
-/* MAP OVERLAYS (bottom-right) */
 .map-overlays{position:absolute;bottom:56px;right:16px;z-index:850;
 display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;max-width:320px}
 .map-overlay{background:rgba(37,37,37,.96);border-left:3px solid var(--accent);
@@ -277,7 +273,6 @@ border-bottom:1px solid rgba(255,255,255,.05)}
 @keyframes ovPulseRed{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.7)}
 50%{box-shadow:0 8px 24px rgba(0,0,0,.7),0 0 0 6px rgba(239,83,80,.35)}}
 
-/* MARKERS */
 .mk-pin{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
 font-weight:800;font-size:12.5px;position:relative;border:2.5px solid rgba(255,255,255,.9);
 box-shadow:0 4px 14px rgba(0,0,0,.6);background:var(--c);color:var(--f)}
@@ -458,7 +453,6 @@ font-size:12px;padding:4px 8px;border-radius:7px;cursor:pointer;line-height:1}
 .intv-del:hover{background:rgba(239,83,80,.28);border-color:var(--err);color:#fff}
 .intv-badges{display:flex;gap:4px;margin-left:auto}
 
-/* === CHAT VIEW === */
 .chat-layout{display:flex;height:100%;background:var(--bg)}
 .chat-list{width:320px;flex-shrink:0;border-right:1px solid #2e2e2e;background:var(--bg2);
 overflow-y:auto;padding:10px}
@@ -501,7 +495,6 @@ padding:11px 13px;margin-bottom:7px;cursor:pointer;display:flex;gap:10px;align-i
 .chat-team-item .cti-unread{background:var(--err);color:#fff;font-size:10px;
 font-weight:800;padding:2px 7px;border-radius:20px;margin-top:4px;display:inline-block}
 
-/* === NOTIFICHE VIEW === */
 .notif-page{padding:20px;max-width:900px;margin:0 auto;overflow-y:auto;height:100%}
 .notif-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .notif-header h2{margin:0;font-size:18px;font-weight:800}
@@ -539,7 +532,6 @@ border-left:3px solid var(--accent)}
 .notif-item.read .ni-dot{display:none}
 .notif-empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
 
-/* VISTA SQUADRE */
 #view-squadre{overflow-y:auto;background:var(--bg)}
 .mobile{max-width:520px;margin:0 auto;padding:16px 14px 50px}
 .m-card{background:#252525;border:1px solid #333;border-radius:var(--radius);padding:15px;margin-bottom:13px}
@@ -580,7 +572,6 @@ font-weight:800;font-size:17px;color:#111;margin-bottom:13px}
 <section id="view-sala" class="view">
   <div class="app">
     <aside class="sidebar">
-
       <div class="kpi-strip">
         <div class="kpi accent"><div class="kpi-val" id="kpiIntv">0</div><div class="kpi-lbl">Interventi</div></div>
         <div class="kpi err"><div class="kpi-val" id="kpiBusy">0</div><div class="kpi-lbl">Impegnati</div></div>
@@ -773,6 +764,9 @@ font-weight:800;font-size:17px;color:#111;margin-bottom:13px}
 (function(){
 'use strict';
 
+/* =========================================================
+   COSTANTI
+   ========================================================= */
 const KEY='sge_v4';
 const BACKUP_PREFIX='sge_backup_';
 const COLORS={
@@ -783,11 +777,41 @@ const COLORS={
   N:{key:'N',label:'Nero',hex:'#1c1c1c',fg:'#ffffff',sev:1}
 };
 const COLOR_ORDER=['R','G','V','B','N'];
-const ENV={K:'Casa — eventi in edifici adibiti ad abitazione',S:'Strada — eventi sulla viabilità pubblica o privata',P:'Uffici ed esercizi pubblici — negozi, bar, uffici',Y:'Impianti sportivi — palestre, stadi, campi sportivi',L:'Impianti lavorativi — fabbriche, cantieri, luoghi di lavoro'};
-const PAT={'1':'Traumatica — incidenti domestici, cadute, fratture','2':'Cardiocircolatoria — dolori toracici, infarti, aritmie','3':'Respiratoria — insufficienza respiratoria, asma','4':'Neurologica — ictus, ischemie, convulsioni','5':'Psichiatrica — crisi d\'ansia, agitazione psicomotoria','6':'Neoplastica — complicazioni legate a tumori','7':'Tossicologica — avvelenamenti, intossicazioni','8':'Metabolica — crisi glicemiche, problemi endocrini','9':'Altra patologia / Gastrointestinale'};
-const TEAM_TYPES={piedi:{key:'piedi',label:'A piedi',icon:'🚶',speed:5},moto:{key:'moto',label:'Moto',icon:'🏍️',speed:40},auto:{key:'auto',label:'Auto',icon:'🚗',speed:30},ambulanza:{key:'ambulanza',label:'Ambulanza',icon:'🚑',speed:35}};
-const CREW_TYPES={bravo:{key:'bravo',label:'Bravo',short:'B',color:'#8b5cf6'},india:{key:'india',label:'India',short:'I',color:'#06b6d4'},mike:{key:'mike',label:'Mike',short:'M',color:'#f59e0b'}};
-const POI_CATS={soccorso:{key:'soccorso',label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},chiusura:{key:'chiusura',label:'Strade chiuse',icon:'⛔',color:'#ff7043'},centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},info:{key:'info',label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}};
+const ENV={
+  K:'Casa — eventi in edifici adibiti ad abitazione',
+  S:'Strada — eventi sulla viabilità pubblica o privata',
+  P:'Uffici ed esercizi pubblici — negozi, bar, uffici',
+  Y:'Impianti sportivi — palestre, stadi, campi sportivi',
+  L:'Impianti lavorativi — fabbriche, cantieri, luoghi di lavoro'
+};
+const PAT={
+  '1':'Traumatica — incidenti domestici, cadute, fratture',
+  '2':'Cardiocircolatoria — dolori toracici, infarti, aritmie',
+  '3':'Respiratoria — insufficienza respiratoria, asma',
+  '4':'Neurologica — ictus, ischemie, convulsioni',
+  '5':'Psichiatrica — crisi d\'ansia, agitazione psicomotoria',
+  '6':'Neoplastica — complicazioni legate a tumori',
+  '7':'Tossicologica — avvelenamenti, intossicazioni',
+  '8':'Metabolica — crisi glicemiche, problemi endocrini',
+  '9':'Altra patologia / Gastrointestinale'
+};
+const TEAM_TYPES={
+  piedi:{key:'piedi',label:'A piedi',icon:'🚶',speed:5},
+  moto:{key:'moto',label:'Moto',icon:'🏍️',speed:40},
+  auto:{key:'auto',label:'Auto',icon:'🚗',speed:30},
+  ambulanza:{key:'ambulanza',label:'Ambulanza',icon:'🚑',speed:35}
+};
+const CREW_TYPES={
+  bravo:{key:'bravo',label:'Bravo',short:'B',color:'#8b5cf6'},
+  india:{key:'india',label:'India',short:'I',color:'#06b6d4'},
+  mike:{key:'mike',label:'Mike',short:'M',color:'#f59e0b'}
+};
+const POI_CATS={
+  soccorso:{key:'soccorso',label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
+  chiusura:{key:'chiusura',label:'Strade chiuse',icon:'⛔',color:'#ff7043'},
+  centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
+  info:{key:'info',label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}
+};
 const MISSION_STATES=[
   {key:'Partenza',icon:'🚔',color:'#3d9bff',short:'Partenza'},
   {key:'Sul Posto',icon:'📍',color:'#f2c200',short:'Sul Posto'},
@@ -797,10 +821,17 @@ const MISSION_STATES=[
   {key:'In rientro',icon:'↩️',color:'#06b6d4',short:'In rientro'},
   {key:'Arrivo in Sede / Fine Missione',icon:'🏁',color:'#2fa84f',short:'Fine Missione',terminal:true}
 ];
-const MISSION_STATE_MAP={};MISSION_STATES.forEach(s=>{MISSION_STATE_MAP[s.key]=s});
+const MISSION_STATE_MAP={};
+MISSION_STATES.forEach(s=>{MISSION_STATE_MAP[s.key]=s;});
 const MISSION_STATE_KEYS=MISSION_STATES.map(s=>s.key);
 const AVAIL_STATES=['Disponibile','In pausa','Non operativa'];
-const RETURN_CODES={0:{label:'Non trasportato / Rifiuto',icon:'🚫',color:'#6b7280',letter:'N'},1:{label:'Trasporto codice verde',icon:'🟢',color:'#2fa84f',letter:'V'},2:{label:'Trasporto codice giallo',icon:'🟡',color:'#f2c200',letter:'G'},3:{label:'Trasporto codice rosso',icon:'🔴',color:'#e53935',letter:'R'},4:{label:'Altro / Trasferimento',icon:'🔀',color:'#8b5cf6',letter:'B'}};
+const RETURN_CODES={
+  0:{label:'Non trasportato / Rifiuto',icon:'🚫',color:'#6b7280',letter:'N'},
+  1:{label:'Trasporto codice verde',icon:'🟢',color:'#2fa84f',letter:'V'},
+  2:{label:'Trasporto codice giallo',icon:'🟡',color:'#f2c200',letter:'G'},
+  3:{label:'Trasporto codice rosso',icon:'🔴',color:'#e53935',letter:'R'},
+  4:{label:'Altro / Trasferimento',icon:'🔀',color:'#8b5cf6',letter:'B'}
+};
 const TURNOS=['Full','Mattina','Pomeriggio','Notte'];
 const NOTIF_TYPES={
   mission:{icon:'🎯',label:'Missioni',color:'#ffa726'},
@@ -821,7 +852,9 @@ const TILE_PROVIDERS={
 };
 const PROVIDER_ORDER=['esri','esriSat','opentopo','osmDE','osm'];
 
-/* SOUND */
+/* =========================================================
+   SOUND ENGINE
+   ========================================================= */
 let audioCtx=null,audioEnabled=false;
 function initAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
 function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); audioEnabled=true; }
@@ -842,8 +875,13 @@ function playSound(type){
   }catch(e){}
 }
 
+/* =========================================================
+   UTILS
+   ========================================================= */
 function uid(p){ return (p||'id')+'-'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stateShort(s){ const m=MISSION_STATE_MAP[s]; return m?m.short:s; }
+function stateIcon(s){ const m=MISSION_STATE_MAP[s]; return m?m.icon:''; }
 function parseCode(raw){const src=String(raw==null?'':raw).toUpperCase();let env=null,pat=null,color=null;for(let i=0;i<src.length;i++){const ch=src[i];if(!env&&ENV[ch]){env=ch;continue}if(!pat&&PAT[ch]){pat=ch;continue}if(!color&&COLORS[ch]){color=ch;continue}}return {env,pat,color,label:(env||'')+(pat||'')+(color||''),valid:!!color};}
 function describeCode(code){const p=parseCode(code);const out=[];if(p.env)out.push(ENV[p.env].split('—')[0].trim());if(p.pat)out.push(PAT[p.pat].split('—')[0].trim());if(p.color)out.push('Codice '+COLORS[p.color].label);return out.join(' · ');}
 function fmtTime(ts){if(!ts)return'—';return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}
@@ -863,6 +901,9 @@ function chatUnreadFor(teamId){const t=S.teams.find(x=>x.id===teamId);if(!t||!t.
 function totalChatUnread(){let n=0;S.teams.forEach(t=>{n+=chatUnreadFor(t.id);});return n;}
 function totalNotifUnread(){return (S.notifications||[]).filter(n=>!n.read).length;}
 
+/* =========================================================
+   STATO
+   ========================================================= */
 function defaultState(){
   const C={lat:45.5195,lng:9.0784};const now=Date.now();
   function mkTeam(name,type,crew,dLat,dLng,status,turno){
@@ -899,7 +940,9 @@ try{
   if(S.sos===undefined) S.sos=null;
 }catch(e){ S=defaultState(); }
 
-/* SYNC */
+/* =========================================================
+   SYNC
+   ========================================================= */
 const MY_PAGE_ID='sol_'+Math.random().toString(36).slice(2,10);
 const SESSION_ROOM=(function(){const p=new URLSearchParams(location.search);return p.get('room')||localStorage.getItem('sge_room')||'sge-demo-2024';})();
 localStorage.setItem('sge_room',SESSION_ROOM);
@@ -911,7 +954,6 @@ const MQTT_URL='wss://broker.hivemq.com:8884/mqtt';
 const MQTT_BASE='sge/'+SESSION_ROOM;
 let lastSOSId=null;
 
-/* Snapshot per diff notifiche */
 let _lastSnapshot=null;
 function snapshotState(){
   return JSON.parse(JSON.stringify({
@@ -922,17 +964,23 @@ function snapshotState(){
 }
 
 function initMqtt(){
-  if(typeof mqtt==='undefined'){updateNetBadge();return;}
+  if(typeof mqtt==='undefined'){ updateNetBadge(); console.warn('[MQTT] libreria non disponibile'); return; }
   try{
     mqttClient=mqtt.connect(MQTT_URL,{clientId:'sol_'+Math.random().toString(16).slice(2,10),clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:10000});
-    mqttClient.on('connect',()=>{mqttOnline=true;mqttClient.subscribe(MQTT_BASE+'/#',{qos:0});updateNetBadge();toast('🌐 Connesso al broker MQTT');});
+    mqttClient.on('connect',()=>{
+      mqttOnline=true;
+      mqttClient.subscribe(MQTT_BASE+'/#',{qos:0});
+      updateNetBadge();
+      toast('🌐 Connesso al broker MQTT');
+      setTimeout(()=>publishState(), 500);
+    });
     mqttClient.on('close',()=>{mqttOnline=false;updateNetBadge();});
-    mqttClient.on('error',()=>{mqttOnline=false;updateNetBadge();});
+    mqttClient.on('error',(e)=>{mqttOnline=false;updateNetBadge();console.warn('[MQTT]',e.message);});
     mqttClient.on('message',(topic,payload)=>{
       if(topic===MQTT_BASE+'/sol')return;
       try{applyRemoteState(JSON.parse(payload.toString()));}catch(e){}
     });
-  }catch(e){}
+  }catch(e){ console.error('[MQTT] init failed', e); }
 }
 function publishState(){
   if(_skipPublish)return;
@@ -961,7 +1009,6 @@ function applyRemoteState(incoming){
     if(!S.center) S.center={lat:45.5195,lng:9.0784};
     S.teams.forEach(t=>{if(!CREW_TYPES[t.crew])t.crew='bravo';if(typeof t.password!=='string')t.password='';if(!t.turno)t.turno='Full';});
     S.targets.forEach(tg=>{if(!Array.isArray(tg.teamIds)){tg.teamIds=tg.teamId?[tg.teamId]:[];delete tg.teamId;}if(!Array.isArray(tg.chat))tg.chat=[];if(!Array.isArray(tg.photos))tg.photos=[];if(tg.ack===undefined)tg.ack=null;});
-    /* Genera notifiche per il diff */
     generateNotificationsFromDiff(prevSnap, snapshotState());
     _lastSnapshot = snapshotState();
     if(S.sos && S.sos.id !== lastSOSId){
@@ -976,84 +1023,63 @@ function applyRemoteState(incoming){
 
 function generateNotificationsFromDiff(prev, next){
   const events = [];
-  /* Nuovi target */
   next.targets.forEach(ntg=>{
     const old = prev.targets.find(x=>x.id===ntg.id);
     if(!old){
       if(ntg.status!=='in_attesa'){
-        events.push({type:'mission', teamId:ntg.teamIds[0]||null, targetId:ntg.id,
-          text:'Nuovo target '+ntg.code, sub:ntg.address||''});
+        events.push({type:'mission', teamId:ntg.teamIds[0]||null, targetId:ntg.id, text:'Nuovo target '+ntg.code, sub:ntg.address||''});
       }
       return;
     }
-    /* Cambio stato */
-    if(old.status!==ntg.status){
-      if(ntg.status==='chiuso'){
-        events.push({type:'close', teamId:null, targetId:ntg.id,
-          text:'Target '+ntg.code+' chiuso', sub:ntg.address||''});
-      }
+    if(old.status!==ntg.status && ntg.status==='chiuso'){
+      events.push({type:'close', teamId:null, targetId:ntg.id, text:'Target '+ntg.code+' chiuso', sub:ntg.address||''});
     }
-    /* Nuove squadre assegnate */
     const oldIds = new Set(old.teamIds||[]);
     (ntg.teamIds||[]).forEach(tid=>{
       if(!oldIds.has(tid)){
         const tm = next.teams.find(t=>t.id===tid);
-        events.push({type:'mission', teamId:tid, targetId:ntg.id,
-          text:(tm?.name||'Squadra')+' → '+ntg.code, sub:ntg.address||''});
+        events.push({type:'mission', teamId:tid, targetId:ntg.id, text:(tm?.name||'Squadra')+' → '+ntg.code, sub:ntg.address||''});
       }
     });
-    /* Squadre rimosse (fine) */
     (old.teamIds||[]).forEach(tid=>{
       if(!(ntg.teamIds||[]).includes(tid) && ntg.status!=='chiuso'){
         const tm = next.teams.find(t=>t.id===tid);
-        events.push({type:'close', teamId:tid, targetId:ntg.id,
-          text:(tm?.name||'Squadra')+' ha chiuso '+ntg.code, sub:'Target ancora aperto'});
+        events.push({type:'close', teamId:tid, targetId:ntg.id, text:(tm?.name||'Squadra')+' ha chiuso '+ntg.code, sub:'Target ancora aperto'});
       }
     });
-    /* ACK */
     if(ntg.ack && (!old.ack || old.ack.ts!==ntg.ack.ts)){
       const tm = next.teams.find(t=>t.id===ntg.ack.teamId);
-      events.push({type:'ack', teamId:ntg.ack.teamId, targetId:ntg.id,
-        text:(tm?.name||'Squadra')+' ha confermato '+ntg.code, sub:'Ricevuta missione'});
+      events.push({type:'ack', teamId:ntg.ack.teamId, targetId:ntg.id, text:(tm?.name||'Squadra')+' ha confermato '+ntg.code, sub:'Ricevuta missione'});
     }
-    /* Nuovi messaggi chat */
     const oldChatLen = (old.chat||[]).length;
     const newChat = ntg.chat||[];
     for(let i=oldChatLen; i<newChat.length; i++){
       const m = newChat[i];
       if(m.from==='eq'){
         const tm = next.teams.find(t=>t.id===m.teamId);
-        events.push({type:'chat', teamId:m.teamId||null, targetId:ntg.id,
-          text:(tm?.name||'Squadra')+': '+m.text.slice(0,60), sub:'Codice '+ntg.code, chatTs:m.ts});
+        events.push({type:'chat', teamId:m.teamId||null, targetId:ntg.id, text:(tm?.name||'Squadra')+': '+m.text.slice(0,60), sub:'Codice '+ntg.code, chatTs:m.ts});
       }
     }
-    /* Nuove foto */
     const oldPhotoLen = (old.photos||[]).length;
     const newPhotos = ntg.photos||[];
     for(let i=oldPhotoLen; i<newPhotos.length; i++){
       const p = newPhotos[i];
-      events.push({type:'photo', teamId:p.teamId, targetId:ntg.id,
-        text:(p.teamName||'Squadra')+' ha inviato una foto', sub:'Codice '+ntg.code});
+      events.push({type:'photo', teamId:p.teamId, targetId:ntg.id, text:(p.teamName||'Squadra')+' ha inviato una foto', sub:'Codice '+ntg.code});
     }
   });
-  /* Cambi stato squadre */
   next.teams.forEach(nt=>{
     const old = prev.teams.find(x=>x.id===nt.id);
     if(!old) return;
     if(old.status!==nt.status){
       const ms = MISSION_STATE_MAP[nt.status];
       const stateLabel = ms ? ms.short : nt.status;
-      events.push({type:'state', teamId:nt.id, targetId:nt.mission?.targetId||null,
-        text:nt.name+': '+stateLabel, sub:nt.mission?'Codice '+nt.mission.code:''});
+      events.push({type:'state', teamId:nt.id, targetId:nt.mission?.targetId||null, text:nt.name+': '+stateLabel, sub:nt.mission?'Codice '+nt.mission.code:''});
     }
   });
-  /* SOS */
   if(next.sos && (!prev.sos || prev.sos.id!==next.sos.id)){
     const tm = next.teams.find(t=>t.id===next.sos.teamId);
-    events.push({type:'sos', teamId:next.sos.teamId, targetId:null,
-      text:'🆘 SOS da '+(tm?.name||'Squadra'), sub:'Richiesta urgente', critical:true});
+    events.push({type:'sos', teamId:next.sos.teamId, targetId:null, text:'🆘 SOS da '+(tm?.name||'Squadra'), sub:'Richiesta urgente', critical:true});
   }
-  /* Aggiungi al log */
   events.forEach(ev=>{
     addNotification(ev.type, ev.teamId, ev.targetId, ev.text, ev.sub, ev.critical, ev.chatTs);
   });
@@ -1062,22 +1088,16 @@ function generateNotificationsFromDiff(prev, next){
 function addNotification(type, teamId, targetId, text, sub, critical, chatTs){
   if(!S.notifications) S.notifications=[];
   const id = 'nt-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
-  const notif = {
-    id, ts:Date.now(), type, teamId:teamId||null, targetId:targetId||null,
-    text, sub:sub||'', read:false, critical:!!critical, chatTs: chatTs||null
-  };
+  const notif = {id, ts:Date.now(), type, teamId:teamId||null, targetId:targetId||null, text, sub:sub||'', read:false, critical:!!critical, chatTs: chatTs||null};
   S.notifications.push(notif);
   if(S.notifications.length > 500) S.notifications = S.notifications.slice(-500);
-  /* Overlay sulla mappa */
   showOverlay(notif);
-  /* Suono */
   if(type==='sos') playSound('sos');
   else if(type==='chat') playSound('msg');
   else if(type==='mission') playSound('mission');
   else if(type==='ack') playSound('ack');
   else if(type==='state') playSound('state');
   else if(type==='close') playSound('close');
-  /* Se sono sulla view notif o chat, aggiorna */
   updateTabBadges();
   if(!document.getElementById('view-notif').classList.contains('hidden')) renderNotifView();
   if(!document.getElementById('view-chat').classList.contains('hidden')) renderChatView();
@@ -1267,7 +1287,6 @@ const MAX_OVERLAYS = 3;
 function showOverlay(notif){
   const container = document.getElementById('mapOverlays');
   if(!container) return;
-  /* Limita numero overlay visibili */
   const existing = container.querySelectorAll('.map-overlay');
   if(existing.length >= MAX_OVERLAYS){
     const oldest = existing[0];
@@ -1284,7 +1303,6 @@ function showOverlay(notif){
     '<span class="ov-time">'+fmtTime(notif.ts)+'</span>';
   el.onclick = ()=>{ handleNotifClick(notif); dismissOverlay(el); };
   container.appendChild(el);
-  /* Auto dismiss */
   const ttl = notif.critical ? 12000 : 5500;
   overlayTimers[notif.id] = setTimeout(()=>dismissOverlay(el), ttl);
 }
@@ -1414,7 +1432,7 @@ function renderOpsList(){
             (etaPill||'')+(ackBadge||'');
     } else {
       sub=(TEAM_TYPES[t.type]||{}).label+' · Turno '+esc(t.turno||'Full');
-      right='<span class="pill" style="background:rgba(0,0,0,.25);color:var(--muted)">'+esc(MISSION_STATE_MAP[t.status]?MISSION_STATE_MAP[t.status].short:t.status)+'</span>';
+      right='<span class="pill" style="background:rgba(0,0,0,.25);color:var(--muted)">'+esc(stateShort(t.status))+'</span>';
     }
     return '<div class="ops-item" data-id="'+t.id+'"><div class="ops-stripe" style="--c:'+col+'"></div><div class="ops-main"><div class="ops-top"><span class="ops-name">'+esc(t.name)+'</span>'+crewBadge+codeHtml+'</div><div class="ops-sub">'+sub+'</div></div><div class="ops-right">'+right+'</div></div>';
   }).join('');
@@ -1444,7 +1462,7 @@ function renderAdminList(){
     const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;const crew=crewInfo(t);const col=statusColor(t);
     const pwdBadge=t.password?'<span class="tm-pwd set">🔒</span>':'<span class="tm-pwd unset">🔓</span>';
     const turnoBadge=t.turno?'<span class="turno-badge">'+esc(t.turno)+'</span>':'';
-    return '<div class="tm-admin"><div class="tm-ico">'+type.icon+'</div><div class="tm-info"><div class="tm-name">'+esc(t.name)+'</div><div class="tm-sub"><span class="dot" style="background:'+col+'"></span>'+esc(MISSION_STATE_MAP[t.status]?MISSION_STATE_MAP[t.status].short:t.status)+'<span class="crew-badge" style="background:'+crew.color+';font-size:9.5px;padding:1px 6px">'+crew.short+'</span>'+turnoBadge+(t.mission?'· '+esc(t.mission.code):'')+pwdBadge+'</div></div>'+
+    return '<div class="tm-admin"><div class="tm-ico">'+type.icon+'</div><div class="tm-info"><div class="tm-name">'+esc(t.name)+'</div><div class="tm-sub"><span class="dot" style="background:'+col+'"></span>'+esc(stateShort(t.status))+'<span class="crew-badge" style="background:'+crew.color+';font-size:9.5px;padding:1px 6px">'+crew.short+'</span>'+turnoBadge+(t.mission?'· '+esc(t.mission.code):'')+pwdBadge+'</div></div>'+
       '<button class="btn mini" data-act="edit" data-id="'+t.id+'">✏️</button>'+
       '<button class="btn mini ghost" data-act="hist" data-id="'+t.id+'">🕓</button>'+
       '<button class="btn mini danger" data-act="del" data-id="'+t.id+'">🗑</button></div>';
@@ -1490,7 +1508,7 @@ function renderLegend(){
   document.getElementById('legendBody').innerHTML=h;
 }
 
-/* === TAB BADGES === */
+/* TAB BADGES */
 function updateTabBadges(){
   const chatUnread = totalChatUnread();
   const notifUnread = totalNotifUnread();
@@ -1506,12 +1524,11 @@ function updateTabBadges(){
   }
 }
 
-/* === CHAT VIEW === */
+/* CHAT VIEW */
 function renderChatView(){
   const listEl = document.getElementById('chatList');
   const convEl = document.getElementById('chatConv');
   if(!listEl || !convEl) return;
-  /* Teams con chat attive (hanno missione o storico messaggi) */
   const activeTeams = S.teams.filter(t=>{
     if(t.mission) return true;
     const tg = S.targets.find(x=>x.teamIds && x.teamIds.includes(t.id));
@@ -1546,7 +1563,6 @@ function renderChatView(){
   listEl.querySelectorAll('.chat-team-item').forEach(node=>{
     node.onclick = ()=>{
       activeChatTeamId = node.getAttribute('data-tid');
-      /* Marca chat come letta */
       if(!S.chatRead) S.chatRead = {};
       S.chatRead[activeChatTeamId] = Date.now();
       save();
@@ -1554,7 +1570,6 @@ function renderChatView(){
       updateTabBadges();
     };
   });
-  /* Conversation */
   if(!activeChatTeamId || !S.teams.find(x=>x.id===activeChatTeamId)){
     activeChatTeamId = activeTeams[0].id;
     if(!S.chatRead) S.chatRead = {};
@@ -1595,9 +1610,7 @@ function renderChatView(){
   h += '<button id="chatViewSendBtn" '+(tg?'':'disabled')+'>📤 Invia</button>';
   h += '</div></div>';
   convEl.innerHTML = h;
-  /* Auto scroll */
   setTimeout(()=>{ const el = document.getElementById('chatMsgs'); if(el) el.scrollTop = el.scrollHeight; }, 30);
-  /* Bind */
   const inp = document.getElementById('chatViewInput');
   const btn = document.getElementById('chatViewSendBtn');
   if(inp && btn && tg){
@@ -1619,16 +1632,15 @@ function sendChatMsgToTarget(targetId, text){
   save();
 }
 
-/* === NOTIFICHE VIEW === */
+/* NOTIFICHE VIEW */
 function renderNotifView(){
   const listEl = document.getElementById('notifList');
   const filtersEl = document.getElementById('notifFilters');
   const headerCount = document.getElementById('notifHeaderCount');
   if(!listEl || !filtersEl) return;
-  const all = (S.notifications||[]).slice().reverse(); /* più recenti in alto */
+  const all = (S.notifications||[]).slice().reverse();
   const unread = all.filter(n=>!n.read).length;
   headerCount.textContent = unread + (unread===1?' non letta':' non lette');
-  /* Filters con conteggio */
   const counts = {};
   all.forEach(n=>{ counts[n.type] = (counts[n.type]||0)+1; });
   let filtersHtml = '<button class="notif-filter '+(notifFilter==='all'?'on':'')+'" data-f="all">'+
@@ -1644,7 +1656,6 @@ function renderNotifView(){
   filtersEl.querySelectorAll('.notif-filter').forEach(b=>{
     b.onclick = ()=>{ notifFilter = b.getAttribute('data-f'); renderNotifView(); };
   });
-  /* Lista filtrata */
   let list = all;
   if(notifFilter!=='all') list = list.filter(n=>n.type===notifFilter);
   if(!list.length){
@@ -1653,7 +1664,6 @@ function renderNotifView(){
   }
   listEl.innerHTML = list.map(n=>{
     const info = NOTIF_TYPES[n.type] || NOTIF_TYPES.info;
-    const team = n.teamId ? S.teams.find(x=>x.id===n.teamId) : null;
     return '<div class="notif-item '+n.type+' '+(n.read?'read':'unread')+'" data-id="'+n.id+'">'+
       '<span class="ni-ico">'+info.icon+'</span>'+
       '<div class="ni-body">'+
@@ -1786,7 +1796,7 @@ function renderTeamModal(id){
   const t=S.teams.find(x=>x.id===id);if(!t)return;
   const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;const crew=crewInfo(t);const m=t.mission;
   const col=m?(COLORS[parseCode(m.code).color]||{hex:'#888',fg:'#fff'}):null;
-  let h='<div class="mt-head"><div class="mt-ico">'+type.icon+'</div><div><div class="mt-name">'+esc(t.name)+'</div><div class="mt-sub">'+type.label+'<span class="crew-badge" style="background:'+crew.color+'">'+crew.label+'</span>'+(t.turno?'<span class="turno-badge">'+esc(t.turno)+'</span>':'')+'</div></div><div class="mt-status" style="background:'+statusColor(t)+'">'+esc(MISSION_STATE_MAP[t.status]?MISSION_STATE_MAP[t.status].short:t.status)+'</div></div>';
+  let h='<div class="mt-head"><div class="mt-ico">'+type.icon+'</div><div><div class="mt-name">'+esc(t.name)+'</div><div class="mt-sub">'+type.label+'<span class="crew-badge" style="background:'+crew.color+'">'+crew.label+'</span>'+(t.turno?'<span class="turno-badge">'+esc(t.turno)+'</span>':'')+'</div></div><div class="mt-status" style="background:'+statusColor(t)+'">'+esc(stateShort(t.status))+'</div></div>';
   const chatCount=(m && (S.targets.find(x=>x.id===m.targetId)||{}).chat || []).length;
   const photoCount=(m && (S.targets.find(x=>x.id===m.targetId)||{}).photos || []).length;
   h+='<div class="tabs-inner">'+
@@ -1807,7 +1817,7 @@ function renderTeamModal(id){
     h+='<div class="field"><label>Imposta stato</label><select id="mStatus">'+(m?MISSION_STATE_KEYS.concat(AVAIL_STATES):AVAIL_STATES).map(s=>'<option value="'+esc(s)+'"'+(t.status===s?' selected':'')+'>'+(MISSION_STATE_MAP[s]?MISSION_STATE_MAP[s].icon:'')+' '+esc(s)+'</option>').join('')+'</select></div>';
     h+='<div class="field"><label>Accesso equipaggio</label><div class="info" style="margin:0">'+(t.password?'🔒 <b>Password</b>: <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px">'+esc(t.password)+'</code>':'🔓 Nessuna password')+'</div></div>';
     h+='<div class="row"><button class="btn '+(t.operational?'danger':'primary')+'" id="mOpBtn">'+(t.operational?'⛔ NON operativa':'✅ Rendi operativa')+'</button><button class="btn ghost" id="mEditBtn">✏️ Modifica</button></div>';
-    h+='<div class="field"><label>Cronologia stati</label><div class="hist">'+((t.history&&t.history.length)?t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span><span><b>'+esc(MISSION_STATE_MAP[x.status]?MISSION_STATE_MAP[x.status].short:x.status)+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join(''):'<div class="empty">Nessuna voce</div>')+'</div></div>';
+    h+='<div class="field"><label>Cronologia stati</label><div class="hist">'+((t.history&&t.history.length)?t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span><span><b>'+esc(stateShort(x.status))+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join(''):'<div class="empty">Nessuna voce</div>')+'</div></div>';
   } else if(currentModalTab==='chat'){
     h+='<div class="chat-panel" id="chatMessages"></div>';
     h+='<div class="chat-input-row"><input type="text" id="chatInput" placeholder="Scrivi…" autocomplete="off"><button id="chatSendBtn">📤</button></div>';
@@ -1975,7 +1985,6 @@ codeInput.addEventListener('input',renderCodePreview);
 let toastTimer=null;
 function toast(msg){const el=document.getElementById('toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500);}
 
-/* SOS */
 function showSosBanner(sos){
   const banner=document.getElementById('sosBanner');const title=document.getElementById('sosTitle');const sub=document.getElementById('sosSub');
   const t=S.teams.find(x=>x.id===sos.teamId);
@@ -1987,7 +1996,6 @@ function showSosBanner(sos){
   document.getElementById('sosCloseBtn').onclick=()=>{banner.classList.add('hidden');S.sos=null;save();};
 }
 
-/* SEARCH */
 const searchModal=document.getElementById('searchModal');
 const searchInput=document.getElementById('searchInput');
 const searchResults=document.getElementById('searchResults');
@@ -2010,7 +2018,6 @@ function renderSearchResults(q){
 searchInput.addEventListener('input',()=>renderSearchResults(searchInput.value));
 searchModal.addEventListener('click',e=>{if(e.target===searchModal)hideSearch();});
 
-/* CSV */
 function exportCSV(){
   const rows=[['Codice','Ambiente','Patologia','Colore','Indirizzo','Stato','Attivazione','Assegnazione','Chiusura','Squadre','Cod. Rientro','Note','Conferma']];
   S.targets.slice().sort((a,b)=>(a.activatedAt||0)-(b.activatedAt||0)).forEach(tg=>{
@@ -2032,7 +2039,6 @@ function exportCSV(){
 }
 document.getElementById('exportBtn').onclick=exportCSV;
 
-/* GEOFENCING */
 const geofenceNotified={};
 setInterval(()=>{
   S.teams.forEach(t=>{
@@ -2048,7 +2054,6 @@ setInterval(()=>{
   });
 },5000);
 
-/* SHORTCUT */
 document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase();
   const isInput=tag==='input'||tag==='textarea'||tag==='select';
@@ -2060,7 +2065,6 @@ document.addEventListener('keydown',e=>{
   if(e.key==='0'){filterColor=null;render();}
 });
 
-/* VIEW SWITCH */
 function switchView(v){
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
   const btn=document.querySelector('.tabs button[data-view="'+v+'"]');
@@ -2073,7 +2077,6 @@ function switchView(v){
   if(v==='squadre')renderSquadreView();
   if(v==='chat')renderChatView();
   if(v==='notif')renderNotifView();
-  /* Se apro notifiche, marco tutte come lette dopo un attimo */
   if(v==='notif'){
     setTimeout(()=>{
       if(!S.notifications) return;
@@ -2084,7 +2087,6 @@ function switchView(v){
   }
 }
 
-/* UI EVENTS */
 function openAcc(id){const el=document.getElementById(id);if(el)el.classList.add('open');}
 document.querySelectorAll('.acc-head').forEach(h=>{h.onclick=()=>h.parentElement.classList.toggle('open');});
 document.querySelectorAll('.tabs button').forEach(b=>{b.onclick=()=>switchView(b.getAttribute('data-view'));});
@@ -2145,7 +2147,6 @@ document.getElementById('resetBtn').onclick=()=>{
 document.getElementById('roomLabel').textContent=SESSION_ROOM;
 document.getElementById('roomBadge').onclick=()=>{const url=location.origin+location.pathname+'?room='+SESSION_ROOM;if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('📋 URL copiato'));else prompt('URL:',url);};
 
-/* NOTIF azioni */
 document.getElementById('notifMarkAllRead').onclick=()=>{
   if(!S.notifications)return;
   S.notifications.forEach(n=>{n.read=true;});
@@ -2159,7 +2160,6 @@ document.getElementById('notifClearAll').onclick=()=>{
   toast('🗑 Notifiche cancellate');
 };
 
-/* VISTA SQUADRE (mirror) */
 function renderSquadreView(){
   const sel=document.getElementById('myTeam');
   sel.innerHTML='<option value="">— seleziona equipaggio —</option>'+S.teams.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
@@ -2173,7 +2173,7 @@ function renderSquadreView(){
   if(t.mission){phaseCard.classList.remove('hidden');phaseGrid.innerHTML=MISSION_STATES.map(ms=>{const on=t.status===ms.key;return '<button class="btn '+(on?'primary':'')+'" data-status="'+esc(ms.key)+'" style="flex-direction:column;gap:3px;font-size:11.5px;padding:10px 6px"><span class="big">'+ms.icon+'</span>'+esc(ms.short)+'</button>';}).join('');}else{phaseCard.classList.add('hidden');phaseGrid.innerHTML='';}
   availGrid.innerHTML=AVAIL_STATES.map(k=>{const on=t.status===k;const ico=k==='Disponibile'?'✅':(k==='In pausa'?'⏸️':'⛔');return '<button class="btn '+(on?'primary':'')+'" data-status="'+k+'" style="flex-direction:column;gap:3px;font-size:11.5px;padding:10px 6px"><span class="big">'+ico+'</span>'+esc(k)+'</button>';}).join('');
   document.querySelectorAll('#view-squadre .status-grid button[data-status]').forEach(b=>{b.onclick=()=>onSquadraStatus(b.getAttribute('data-status'));});
-  boxS.innerHTML='<div class="m-status-big" style="background:'+col+'"><span class="sb-ico">'+statusIcon(t)+'</span><div><div style="font-size:11px;opacity:.75;font-weight:700">STATO</div><div>'+esc(MISSION_STATE_MAP[t.status]?MISSION_STATE_MAP[t.status].short:t.status)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:22px">'+type.icon+'</div><div style="font-size:11px;margin-top:2px">'+crew.label+'</div></div></div>';
+  boxS.innerHTML='<div class="m-status-big" style="background:'+col+'"><span class="sb-ico">'+statusIcon(t)+'</span><div><div style="font-size:11px;opacity:.75;font-weight:700">STATO</div><div>'+esc(stateShort(t.status))+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:22px">'+type.icon+'</div><div style="font-size:11px;margin-top:2px">'+crew.label+'</div></div></div>';
   if(t.mission){
     const c=COLORS[parseCode(t.mission.code).color]||{hex:'#888',fg:'#fff'};
     const tg=S.targets.find(x=>x.id===t.mission.targetId);let extra='';
@@ -2184,7 +2184,7 @@ function renderSquadreView(){
     setTimeout(()=>{const b=document.getElementById('sqComplete');if(b)b.onclick=()=>{setStatus(t.id,'Arrivo in Sede / Fine Missione','Completata');save();render();renderSquadreView();};},0);
   }else boxM.innerHTML='<div class="m-card"><div class="empty">Nessuna missione.</div></div>';
   boxG.innerHTML='Ultimo aggiornamento: <b>'+fmtTime(t.gpsAt)+'</b><br>Coordinate: '+t.lat.toFixed(5)+', '+t.lng.toFixed(5);
-  boxH.innerHTML=(t.history&&t.history.length)?'<div class="hist">'+t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span><span><b>'+esc(MISSION_STATE_MAP[x.status]?MISSION_STATE_MAP[x.status].short:x.status)+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join('')+'</div>':'<div class="empty">Nessuna voce</div>';
+  boxH.innerHTML=(t.history&&t.history.length)?'<div class="hist">'+t.history.map(x=>'<div class="hist-row"><span class="h-t">'+fmtDateTime(x.ts)+'</span><span><b>'+esc(stateShort(x.status))+'</b>'+(x.note?'<br><span class="muted">'+esc(x.note)+'</span>':'')+'</span></div>').join('')+'</div>':'<div class="empty">Nessuna voce</div>';
 }
 function onSquadraStatus(st){
   if(!myTeamId){alert('Seleziona un equipaggio.');return;}
@@ -2240,7 +2240,6 @@ function render(){
   updateDraftUI();
   renderSquadreView();
   updateTabBadges();
-  /* Se sei su view notif/chat, aggiorna anche quelle */
   if(!document.getElementById('view-chat').classList.contains('hidden')) renderChatView();
   if(!document.getElementById('view-notif').classList.contains('hidden')) renderNotifView();
 }
