@@ -24,12 +24,14 @@ button,input,select{font-family:inherit;font-size:14px}
   display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .eq-team-wrap{flex:1;min-width:180px;display:flex;align-items:center;gap:8px}
 .eq-team-ico{font-size:22px;flex-shrink:0}
-.eq-team-sel{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);
+.eq-team-name{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);
   color:var(--txt);padding:9px 11px;border-radius:10px;font-size:14px;font-weight:700;
-  outline:none;cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238ba0bf' d='M0 0l5 6 5-6z'/></svg>");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
-.eq-badges{display:flex;gap:6px;align-items:center;flex-shrink:0}
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq-logout{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.4);
+  color:#ff8b8b;padding:8px 12px;border-radius:9px;cursor:pointer;font-weight:800;
+  font-size:12.5px;white-space:nowrap;transition:.15s}
+.eq-logout:hover{background:rgba(255,107,107,.25)}
+.eq-badges{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
 .eq-badge{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:20px;
   background:rgba(255,255,255,.04);border:1px solid var(--line);color:#8ba0bf;
   display:flex;align-items:center;gap:4px;white-space:nowrap}
@@ -41,7 +43,6 @@ button,input,select{font-family:inherit;font-size:14px}
 .eq-room{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:20px;
   background:rgba(61,155,255,.12);border:1px solid rgba(61,155,255,.4);color:#9fd0ff;
   cursor:pointer;white-space:nowrap}
-.eq-room:hover{background:rgba(61,155,255,.2)}
 .eq-clock{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;
   margin-left:auto}
 
@@ -51,6 +52,19 @@ button,input,select{font-family:inherit;font-size:14px}
 .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;
   color:var(--muted);font-weight:800;margin:0 0 9px 0}
 .divider{height:1px;background:var(--line);margin:14px 0}
+
+.eq-acc{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  margin-bottom:12px;overflow:hidden}
+.eq-acc-head{width:100%;display:flex;align-items:center;gap:9px;background:transparent;
+  border:none;color:var(--txt);padding:14px 15px;cursor:pointer;font-weight:800;
+  font-size:13.5px;text-align:left;transition:.15s}
+.eq-acc-head:hover{background:rgba(255,255,255,.03)}
+.eq-acc-head .badge{background:var(--accent);color:#04101f;font-size:11px;font-weight:800;
+  padding:1px 8px;border-radius:20px;margin-left:6px}
+.eq-acc-head .chev{margin-left:auto;color:var(--muted);transition:.2s;font-size:12px}
+.eq-acc.open .eq-acc-head .chev{transform:rotate(180deg)}
+.eq-acc-body{display:none;padding:0 15px 15px}
+.eq-acc.open .eq-acc-body{display:block}
 
 .eq-hero{display:flex;align-items:center;gap:12px;border-radius:14px;padding:14px 16px;
   font-weight:800;font-size:17px;color:#08111d;margin-bottom:12px}
@@ -67,8 +81,7 @@ button,input,select{font-family:inherit;font-size:14px}
 .eq-mission.alert{animation:missionAlert 1.6s ease-in-out 3}
 @keyframes missionAlert{
   0%,100%{box-shadow:0 0 0 0 rgba(61,155,255,0)}
-  50%{box-shadow:0 0 0 8px rgba(61,155,255,.35)}
-}
+  50%{box-shadow:0 0 0 8px rgba(61,155,255,.35)}}
 .mc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 .mc-code{font-size:17px;font-weight:800;padding:6px 12px;border-radius:10px;letter-spacing:.6px}
 .mc-phase{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;
@@ -89,8 +102,8 @@ button,input,select{font-family:inherit;font-size:14px}
 .gmap-btn:active{transform:translateY(0)}
 .gmap-btn .gm-ico{font-size:18px}
 
-.map-mini{height:220px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
-  margin-bottom:12px;background:#0a0f18}
+.map-mini{height:280px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  margin-bottom:12px;background:#0a0f18;position:relative}
 
 .phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .phase-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;
@@ -102,7 +115,7 @@ button,input,select{font-family:inherit;font-size:14px}
   box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
 .prev-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;
   border-radius:11px;background:var(--panel2);border:1px dashed var(--line);color:var(--txt);
-  font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;transition:.15s}
+  font-weight:700;font-size:13px;cursor:pointer;margin-top:8px;transition:.15s}
 .prev-btn:hover{background:#25354f;border-color:#3b5480}
 .prev-btn:disabled{opacity:.4;cursor:not-allowed}
 
@@ -116,8 +129,10 @@ button,input,select{font-family:inherit;font-size:14px}
 .retcode-desc{font-size:12.5px;color:var(--muted);text-align:center;padding:7px;
   background:var(--panel2);border-radius:9px;min-height:32px;line-height:1.35}
 .retcode-desc.sel{color:var(--txt);font-weight:600}
+.retcode-hint{font-size:11px;color:#ffd45e;background:rgba(255,212,94,.08);
+  border:1px solid rgba(255,212,94,.3);padding:7px 10px;border-radius:8px;margin-top:8px;
+  line-height:1.4}
 
-/* Editor codice intervento */
 .code-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
   background:var(--panel2);border-radius:10px;padding:10px 12px}
 .code-cur{display:flex;align-items:center;gap:9px;min-width:0}
@@ -161,6 +176,7 @@ button,input,select{font-family:inherit;font-size:14px}
 .avail-btn .big{font-size:20px}
 .avail-btn.on{background:var(--c);color:#fff;border-color:var(--c);
   box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 55%,transparent)}
+.avail-btn:hover:not(.on){background:#25354f}
 
 .gps-info{font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.55}
 .gps-info b{color:var(--txt);font-variant-numeric:tabular-nums}
@@ -168,6 +184,10 @@ button,input,select{font-family:inherit;font-size:14px}
   vertical-align:middle;margin-right:5px}
 .gps-dot.on{background:#6ee7a8;box-shadow:0 0 8px #6ee7a8;animation:gpsPulse 2s infinite}
 @keyframes gpsPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.gps-btn{width:100%;padding:12px;border-radius:11px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--txt);font-weight:700;font-size:13.5px;
+  cursor:pointer;transition:.15s}
+.gps-btn:hover{background:#25354f;border-color:#3b5480}
 
 .hist{max-height:280px;overflow-y:auto;border-radius:10px;background:var(--panel2);
   border:1px solid var(--line)}
@@ -189,14 +209,14 @@ button,input,select{font-family:inherit;font-size:14px}
 @keyframes mpulse{
   0%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,.5)}
   70%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 14px rgba(255,255,255,0)}
-  100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}
-}
+  100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}}
 .mk-team{width:42px;height:42px;border-radius:50%;background:#101a2b;position:relative;
   border:3px solid var(--c);display:flex;align-items:center;justify-content:center;
   font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.65)}
 .mk-team .crew{position:absolute;bottom:-6px;right:-6px;width:18px;height:18px;
   border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:900;color:#fff;border:2px solid #0b1220}
+.mk-team.mine{border-width:4px;box-shadow:0 0 0 3px rgba(61,155,255,.55),0 4px 14px rgba(0,0,0,.65)}
 .mk-poi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
   justify-content:center;background:var(--c);color:#fff;font-size:13px;
   border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.5)}
@@ -218,33 +238,101 @@ button,input,select{font-family:inherit;font-size:14px}
   pointer-events:none;transition:.3s;max-width:90vw;text-align:center;display:flex;
   align-items:center;gap:10px}
 .toast2.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* LOGIN OVERLAY */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(160deg,#0b1220,#152034);
+  z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;
+  overflow-y:auto}
+.login-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  width:100%;max-width:420px;padding:26px 22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.7);position:relative}
+.login-logo{text-align:center;margin-bottom:22px}
+.login-logo .lg{font-size:52px;line-height:1}
+.login-logo h1{margin:10px 0 4px;font-size:24px;letter-spacing:.5px}
+.login-logo h1 b{color:var(--accent)}
+.login-logo p{margin:0;color:var(--muted);font-size:12.5px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:6px;font-weight:800}
+.login-field select,.login-field input{width:100%;background:var(--panel2);
+  border:1px solid var(--line);color:var(--txt);padding:13px 14px;border-radius:11px;
+  outline:none;font-size:15px;font-weight:600;transition:.15s}
+.login-field select:focus,.login-field input:focus{border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(61,155,255,.18)}
+.pwd-field{position:relative}
+.pwd-field input{padding-right:52px;letter-spacing:1.5px}
+.pwd-toggle2{position:absolute;top:50%;right:8px;transform:translateY(-50%);
+  background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;
+  padding:8px;border-radius:8px}
+.pwd-toggle2:hover{color:var(--txt);background:rgba(255,255,255,.05)}
+.login-btn{width:100%;padding:15px;border-radius:12px;background:var(--accent);
+  color:#04101f;border:none;font-weight:900;font-size:15px;cursor:pointer;
+  transition:.15s;letter-spacing:.4px;margin-top:6px}
+.login-btn:hover{background:#5aabff;transform:translateY(-1px)}
+.login-btn:disabled{background:#2a3f5e;color:#8ba0bf;cursor:not-allowed;transform:none}
+.login-msg{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;
+  font-weight:700;text-align:center;line-height:1.45;display:none}
+.login-msg.show{display:block}
+.login-msg.err{background:rgba(229,57,53,.12);color:#ff8b8b;
+  border:1px solid rgba(229,57,57,.4)}
+.login-msg.ok{background:rgba(47,168,79,.12);color:#6ee7a8;
+  border:1px solid rgba(47,168,79,.4)}
+.login-wait{background:rgba(61,155,255,.1);border:1px solid rgba(61,155,255,.35);
+  color:#9fd0ff;padding:11px 14px;border-radius:10px;font-size:12.5px;
+  text-align:center;margin-top:14px;font-weight:600}
+.login-wait.spinner::after{content:'';display:inline-block;width:12px;height:12px;
+  border:2px solid #9fd0ff;border-top-color:transparent;border-radius:50%;
+  margin-left:8px;vertical-align:middle;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-footer{margin-top:16px;text-align:center;font-size:11.5px;color:var(--muted);
+  line-height:1.5}
 </style>
 </head>
 <body>
 
-<header class="eq-top">
-  <div class="eq-team-wrap">
-    <span class="eq-team-ico" id="teamIco">🚑</span>
-    <select class="eq-team-sel" id="teamSelect"></select>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="lg">⛑️</div>
+      <h1><b>SGE</b> Equipaggio</h1>
+      <p>Accedi con le credenziali fornite dalla Centrale Operativa</p>
+    </div>
+    <div class="login-field">
+      <label>Seleziona la tua squadra</label>
+      <select id="loginTeamSelect"><option value="">— in attesa di connessione… —</option></select>
+    </div>
+    <div class="login-field pwd-field" id="loginPwdWrap">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Inserisci la password" autocomplete="off">
+      <button type="button" class="pwd-toggle2" id="loginPwdToggle">👁️</button>
+    </div>
+    <button class="login-btn" id="loginBtn" disabled>Accedi</button>
+    <div class="login-msg" id="loginMsg"></div>
+    <div class="login-wait spinner" id="loginWait">Connessione in corso…</div>
+    <div class="login-footer">Stanza: <b id="loginRoom">—</b><br>
+      Se non conosci la password, contatta la Centrale Operativa.</div>
   </div>
-  <div class="eq-badges">
-    <span class="eq-room" id="roomBadge" title="Codice stanza condivisa">🏷️ <span id="roomLabel">—</span></span>
-    <span class="eq-badge" id="netBadge" title="Connessione internet">
-      <span class="dot"></span><span id="netLabel">rete…</span>
-    </span>
-    <span class="eq-badge" id="solBadge" title="Stato SOL">
-      <span class="dot"></span><span id="solLabel">SOL…</span>
-    </span>
-    <span class="eq-badge on" id="gpsBadge" title="Stato GPS">
-      <span class="dot"></span><span id="gpsLabel">GPS</span>
-    </span>
-  </div>
-  <span class="eq-clock" id="clock"></span>
-</header>
+</div>
 
-<main class="eq-main">
-  <div id="eqContent"></div>
-</main>
+<div id="appMain" class="hidden">
+  <header class="eq-top">
+    <div class="eq-team-wrap">
+      <span class="eq-team-ico" id="teamIco">🚑</span>
+      <span class="eq-team-name" id="teamNameLabel">—</span>
+      <button class="eq-logout" id="logoutBtn">🚪 Esci</button>
+    </div>
+    <div class="eq-badges">
+      <span class="eq-room" id="roomBadge">🏷️ <span id="roomLabel">—</span></span>
+      <span class="eq-badge" id="netBadge"><span class="dot"></span><span id="netLabel">rete…</span></span>
+      <span class="eq-badge" id="solBadge"><span class="dot"></span><span id="solLabel">SOL…</span></span>
+      <span class="eq-badge on" id="gpsBadge"><span class="dot"></span><span id="gpsLabel">GPS</span></span>
+    </div>
+    <span class="eq-clock" id="clock"></span>
+  </header>
+  <main class="eq-main">
+    <div id="eqContent"></div>
+  </main>
+</div>
 
 <div class="toast" id="toast"></div>
 <div class="toast2" id="toast2">
@@ -261,7 +349,7 @@ button,input,select{font-family:inherit;font-size:14px}
    1. COSTANTI
    ========================================================= */
 const KEY = 'sge_v4';
-const MY_TEAM_KEY = 'sge_eq_myteam';
+const AUTH_KEY = 'sge_eq_auth';
 const MY_PAGE_ID = 'eq_' + Math.random().toString(36).slice(2,10);
 
 const SESSION_ROOM = (function(){
@@ -279,33 +367,11 @@ const COLORS = {
 };
 const COLOR_ORDER = ['R','G','V','B','N'];
 
-const ENV = {
-  K:'Casa', S:'Strada', P:'Uffici/Esercizi', Y:'Impianti sportivi', L:'Impianti lavorativi'
-};
-const ENV_FULL = {
-  K:'Casa — eventi in edifici adibiti ad abitazione',
-  S:'Strada — eventi sulla viabilità pubblica o privata',
-  P:'Uffici ed esercizi pubblici — negozi, bar, uffici',
-  Y:'Impianti sportivi — palestre, stadi, campi sportivi',
-  L:'Impianti lavorativi — fabbriche, cantieri, luoghi di lavoro'
-};
+const ENV = { K:'Casa', S:'Strada', P:'Uffici/Esercizi', Y:'Impianti sportivi', L:'Impianti lavorativi' };
 const PAT = {
   '1':'Traumatica','2':'Cardiocircolatoria','3':'Respiratoria','4':'Neurologica',
-  '5':'Psichiatrica','6':'Neoplastica','7':'Tossicologica','8':'Metabolica',
-  '9':'Altra patologia'
+  '5':'Psichiatrica','6':'Neoplastica','7':'Tossicologica','8':'Metabolica','9':'Altra patologia'
 };
-const PAT_FULL = {
-  '1':'Traumatica — incidenti domestici, cadute, fratture',
-  '2':'Cardiocircolatoria — dolori toracici, infarti, aritmie',
-  '3':'Respiratoria — insufficienza respiratoria, asma',
-  '4':'Neurologica — ictus, ischemie, convulsioni',
-  '5':'Psichiatrica — crisi d\'ansia, agitazione psicomotoria',
-  '6':'Neoplastica — complicazioni legate a tumori',
-  '7':'Tossicologica — avvelenamenti, intossicazioni',
-  '8':'Metabolica — crisi glicemiche, problemi endocrini',
-  '9':'Altra patologia / Gastrointestinale'
-};
-
 const TEAM_TYPES = {
   piedi:{label:'A piedi',icon:'🚶'}, moto:{label:'Moto',icon:'🏍️'},
   auto:{label:'Auto',icon:'🚗'}, ambulanza:{label:'Ambulanza',icon:'🚑'}
@@ -342,11 +408,11 @@ const AVAIL_STATES = [
 ];
 
 const RETURN_CODES = {
-  0:{label:'Non trasportato / Rifiuto', icon:'🚫', color:'#6b7280'},
-  1:{label:'Trasporto codice verde',    icon:'🟢', color:'#2fa84f'},
-  2:{label:'Trasporto codice giallo',   icon:'🟡', color:'#f2c200'},
-  3:{label:'Trasporto codice rosso',    icon:'🔴', color:'#e53935'},
-  4:{label:'Altro / Trasferimento',     icon:'🔀', color:'#8b5cf6'}
+  0:{label:'Non trasportato / Rifiuto', icon:'🚫', color:'#6b7280', letter:'N'},
+  1:{label:'Trasporto codice verde',    icon:'🟢', color:'#2fa84f', letter:'V'},
+  2:{label:'Trasporto codice giallo',   icon:'🟡', color:'#f2c200', letter:'G'},
+  3:{label:'Trasporto codice rosso',    icon:'🔴', color:'#e53935', letter:'R'},
+  4:{label:'Altro / Trasferimento',     icon:'🔀', color:'#8b5cf6', letter:'B'}
 };
 
 const TILE_PROVIDERS = {
@@ -417,93 +483,73 @@ function targetTeams(tg){
    ========================================================= */
 let S = { center:{lat:45.5195,lng:9.0784}, teams:[], targets:[], pois:[], log:[] };
 
-(function seedIfEmpty(){
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(raw){ S = JSON.parse(raw); return; }
-  }catch(e){}
-  const C = {lat:45.5195, lng:9.0784};
-  const now = Date.now();
-  S.center = C;
-  S.teams = [
-    {id:'t1',name:'Squadra 1 — Auto',type:'auto',crew:'bravo',operational:true,
-     status:'Disponibile',lat:C.lat+0.0038,lng:C.lng+0.0042,gpsAt:now,mission:null,history:[]},
-    {id:'t2',name:'Squadra 2 — Ambulanza',type:'ambulanza',crew:'india',operational:true,
-     status:'Disponibile',lat:C.lat-0.0026,lng:C.lng+0.0055,gpsAt:now,mission:null,history:[]},
-    {id:'t3',name:'Squadra 3 — Moto',type:'moto',crew:'mike',operational:true,
-     status:'Disponibile',lat:C.lat+0.0055,lng:C.lng-0.0032,gpsAt:now,mission:null,history:[]},
-    {id:'t4',name:'Squadra 4 — A piedi',type:'piedi',crew:'bravo',operational:true,
-     status:'Disponibile',lat:C.lat-0.0042,lng:C.lng-0.0048,gpsAt:now,mission:null,history:[]}
-  ];
-  S.targets = []; S.pois = []; S.log = [];
-})();
-
+try{
+  const raw = localStorage.getItem(KEY);
+  if(raw) S = JSON.parse(raw);
+}catch(e){}
 if(!Array.isArray(S.teams)) S.teams = [];
 if(!Array.isArray(S.targets)) S.targets = [];
 if(!Array.isArray(S.pois)) S.pois = [];
-S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
+S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; if(typeof t.password!=='string') t.password=''; });
 S.targets.forEach(tg=>{
   if(!Array.isArray(tg.teamIds)){ tg.teamIds = tg.teamId ? [tg.teamId] : []; delete tg.teamId; }
-  if(tg.returnCode === undefined) tg.returnCode = null;
 });
 
 /* =========================================================
-   4. SINCRONIZZAZIONE MULTI-CANALE (localStorage + BC + MQTT)
+   4. AUTENTICAZIONE
    ========================================================= */
-let _lastRev = 0;
-let _skipPublish = false;
+let currentAuth = null;
+let myTeamId = null;
+function simpleHash(s){ let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return 'h'+Math.abs(h).toString(36); }
+function loadAuth(){ try{ const r=localStorage.getItem(AUTH_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function saveAuth(teamId, pwd){ const a={teamId, pwdHash:simpleHash(pwd||'')}; try{localStorage.setItem(AUTH_KEY,JSON.stringify(a));}catch(e){} currentAuth=a; myTeamId=teamId; }
+function clearAuth(){ try{localStorage.removeItem(AUTH_KEY);}catch(e){} currentAuth=null; myTeamId=null; }
+function validateAuth(){
+  if(!currentAuth) return false;
+  const t = S.teams.find(x=>x.id===currentAuth.teamId);
+  if(!t) return false;
+  return simpleHash(t.password||'') === currentAuth.pwdHash;
+}
+function getMyTeam(){ return S.teams.find(t=>t.id===myTeamId); }
+
+/* =========================================================
+   5. SYNC MULTI-CANALE
+   ========================================================= */
+let _lastRev = 0, _skipPublish = false;
 if(S._rev) _lastRev = S._rev;
-
-let _bc = null;
-try { _bc = new BroadcastChannel('sge_sync'); } catch(e){}
-
-let mqttClient = null;
-let mqttOnline = false;
-const MQTT_URL = 'wss://broker.hivemq.com:8884/mqtt';
-const MQTT_BASE = 'sge/' + SESSION_ROOM;
-
-let lastRemoteAt = 0;
-let lastSolAt = 0;
+let _bc = null; try { _bc = new BroadcastChannel('sge_sync'); } catch(e){}
+let mqttClient=null, mqttOnline=false;
+const MQTT_URL='wss://broker.hivemq.com:8884/mqtt';
+const MQTT_BASE='sge/' + SESSION_ROOM;
+let lastSolAt=0;
 
 function initMqtt(){
   if(typeof mqtt === 'undefined'){ updateBadges(); return; }
   try{
-    mqttClient = mqtt.connect(MQTT_URL, {
-      clientId: 'eq_' + Math.random().toString(16).slice(2,10),
-      clean: true, keepalive: 30, reconnectPeriod: 4000, connectTimeout: 10000
+    mqttClient = mqtt.connect(MQTT_URL,{
+      clientId:'eq_'+Math.random().toString(16).slice(2,10),
+      clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:10000
     });
-    mqttClient.on('connect', ()=>{
-      mqttOnline = true;
-      mqttClient.subscribe(MQTT_BASE + '/#', {qos:0});
-      updateBadges();
-      toast('🌐 Connesso al broker');
-    });
-    mqttClient.on('close', ()=>{ mqttOnline = false; updateBadges(); });
-    mqttClient.on('error', ()=>{ mqttOnline = false; updateBadges(); });
-    mqttClient.on('message', (topic, payload)=>{
-      if(topic === MQTT_BASE + '/eq') return;
-      try{
-        const data = JSON.parse(payload.toString());
-        if(topic === MQTT_BASE + '/sol') lastSolAt = Date.now();
+    mqttClient.on('connect', ()=>{ mqttOnline=true; mqttClient.subscribe(MQTT_BASE+'/#',{qos:0}); updateBadges(); toast('🌐 Connesso al broker'); });
+    mqttClient.on('close', ()=>{ mqttOnline=false; updateBadges(); });
+    mqttClient.on('error', ()=>{ mqttOnline=false; updateBadges(); });
+    mqttClient.on('message', (topic,payload)=>{
+      if(topic === MQTT_BASE+'/eq') return;
+      try{ const data = JSON.parse(payload.toString());
+        if(topic === MQTT_BASE+'/sol') lastSolAt = Date.now();
         applyRemoteState(data);
       }catch(e){}
     });
   }catch(e){}
 }
-
 function publishState(){
   if(_skipPublish) return;
-  const rev = Date.now() + Math.random();
-  S._rev = rev;
-  S._writer = MY_PAGE_ID;
-  S._lastEqTs = Date.now();
-  _lastRev = rev;
+  const rev = Date.now()+Math.random();
+  S._rev=rev; S._writer=MY_PAGE_ID; S._lastEqTs=Date.now(); _lastRev=rev;
   const json = JSON.stringify(S);
-  try { localStorage.setItem(KEY, json); } catch(e){}
-  if(_bc) try { _bc.postMessage({type:'sync', rev}); } catch(e){}
-  if(mqttClient && mqttOnline){
-    try { mqttClient.publish(MQTT_BASE + '/eq', json, {qos:0, retain:true}); } catch(e){}
-  }
+  try { localStorage.setItem(KEY, json); }catch(e){}
+  if(_bc) try{ _bc.postMessage({type:'sync',rev}); }catch(e){}
+  if(mqttClient && mqttOnline){ try{ mqttClient.publish(MQTT_BASE+'/eq',json,{qos:0,retain:true}); }catch(e){} }
   updateBadges();
 }
 function save(){ publishState(); }
@@ -518,26 +564,17 @@ function applyRemoteState(incoming){
     S = incoming;
     S.teams = S.teams||[]; S.targets = S.targets||[]; S.pois = S.pois||[]; S.log = S.log||[];
     if(!S.center) S.center = {lat:45.5195,lng:9.0784};
-    S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew = 'bravo'; });
-    S.targets.forEach(tg=>{
-      if(!Array.isArray(tg.teamIds)){ tg.teamIds = tg.teamId ? [tg.teamId] : []; delete tg.teamId; }
-    });
-    lastRemoteAt = Date.now();
-    /* Verifica nuova missione per la mia squadra */
+    S.teams.forEach(t=>{ if(!CREW_TYPES[t.crew]) t.crew='bravo'; if(typeof t.password!=='string') t.password=''; });
+    S.targets.forEach(tg=>{ if(!Array.isArray(tg.teamIds)){ tg.teamIds = tg.teamId ? [tg.teamId] : []; delete tg.teamId; } });
+    if(currentAuth && !validateAuth()){ clearAuth(); showLogin('La password è stata modificata dalla Centrale.', false); return; }
     const me = getMyTeam();
-    if(me && me.mission && me.mission.targetId !== lastMissionId){
-      lastMissionId = me.mission.targetId;
-      notifyNewMission(me);
-    } else if(me && !me.mission){
-      lastMissionId = null;
-    }
-    renderAll();
-  } finally {
-    _skipPublish = false;
-  }
+    if(me && me.mission && me.mission.targetId !== lastMissionId){ lastMissionId = me.mission.targetId; notifyNewMission(me); }
+    else if(me && !me.mission){ lastMissionId = null; }
+    if(currentAuth && validateAuth()) renderAll();
+    updateLoginTeamSelect();
+  } finally { _skipPublish = false; }
   updateBadges();
 }
-
 let lastMissionId = null;
 
 function notifyNewMission(me){
@@ -546,159 +583,72 @@ function notifyNewMission(me){
   const ico = document.getElementById('toast2Ico');
   const msg = document.getElementById('toast2Msg');
   if(t2 && ico && msg){
-    ico.textContent = '🚨';
-    msg.textContent = 'Nuova missione: '+me.mission.code;
-    t2.classList.add('show');
-    setTimeout(()=>t2.classList.remove('show'), 4000);
+    ico.textContent='🚨'; msg.textContent='Nuova missione: '+me.mission.code;
+    t2.classList.add('show'); setTimeout(()=>t2.classList.remove('show'),4000);
   }
-  setTimeout(()=>{
-    const c = document.querySelector('.eq-mission');
-    if(c) c.classList.add('alert');
-  }, 100);
+  setTimeout(()=>{ const c = document.querySelector('.eq-mission'); if(c) c.classList.add('alert'); }, 100);
 }
-
 function initSyncChannels(){
-  window.addEventListener('storage', e=>{
-    if(e.key === KEY && e.newValue){
-      try { applyRemoteState(JSON.parse(e.newValue)); } catch(err){}
-    }
-  });
-  if(_bc){
-    _bc.onmessage = e=>{
-      if(e.data && e.data.type === 'sync'){
-        const v = localStorage.getItem(KEY);
-        if(v) try { applyRemoteState(JSON.parse(v)); } catch(err){}
-      }
-    };
-  }
-  setInterval(()=>{
-    const v = localStorage.getItem(KEY);
-    if(!v) return;
-    try {
-      const p = JSON.parse(v);
-      if(p._rev && p._rev > _lastRev) applyRemoteState(p);
-    } catch(err){}
-  }, 1000);
+  window.addEventListener('storage', e=>{ if(e.key === KEY && e.newValue){ try{ applyRemoteState(JSON.parse(e.newValue)); }catch(err){} } });
+  if(_bc){ _bc.onmessage = e=>{ if(e.data && e.data.type === 'sync'){ const v = localStorage.getItem(KEY); if(v) try{ applyRemoteState(JSON.parse(v)); }catch(err){} } }; }
+  setInterval(()=>{ const v = localStorage.getItem(KEY); if(!v) return; try{ const p = JSON.parse(v); if(p._rev && p._rev > _lastRev) applyRemoteState(p); }catch(err){} }, 1000);
   setInterval(updateBadges, 2000);
 }
-
 function updateBadges(){
-  /* rete */
-  const nb = document.getElementById('netBadge');
-  const nl = document.getElementById('netLabel');
-  if(nb && nl){
-    if(mqttOnline){ nb.classList.add('on'); nl.textContent = 'rete OK'; }
-    else { nb.classList.remove('on'); nl.textContent = 'rete…'; }
-  }
-  /* SOL */
-  const sb = document.getElementById('solBadge');
-  const sl = document.getElementById('solLabel');
-  if(sb && sl){
-    const age = Date.now() - lastSolAt;
-    if(age < 15000){ sb.classList.add('sol-on'); sl.textContent = 'SOL online'; }
-    else { sb.classList.remove('sol-on'); sl.textContent = 'SOL offline'; }
-  }
-  /* GPS */
-  const gb = document.getElementById('gpsBadge');
-  const gl = document.getElementById('gpsLabel');
-  if(gb && gl){
-    if(gpsActive){ gb.classList.add('on'); gl.textContent = 'GPS'; }
-    else { gb.classList.remove('on'); gl.textContent = 'GPS off'; }
-  }
+  const nb=document.getElementById('netBadge'), nl=document.getElementById('netLabel');
+  if(nb && nl){ if(mqttOnline){ nb.classList.add('on'); nl.textContent='rete OK'; } else { nb.classList.remove('on'); nl.textContent='rete…'; } }
+  const sb=document.getElementById('solBadge'), sl=document.getElementById('solLabel');
+  if(sb && sl){ const age=Date.now()-lastSolAt; if(age<15000){ sb.classList.add('sol-on'); sl.textContent='SOL online'; } else { sb.classList.remove('sol-on'); sl.textContent='SOL offline'; } }
+  const gb=document.getElementById('gpsBadge'), gl=document.getElementById('gpsLabel');
+  if(gb && gl){ if(gpsActive){ gb.classList.add('on'); gl.textContent='GPS'; } else { gb.classList.remove('on'); gl.textContent='GPS off'; } }
 }
 
 /* =========================================================
-   5. GESTIONE SQUADRA + GPS AUTOMATICO
+   6. GPS AUTOMATICO
    ========================================================= */
-let myTeamId = localStorage.getItem(MY_TEAM_KEY) || null;
-function getMyTeam(){ return S.teams.find(t=>t.id===myTeamId); }
-
-let gpsActive = false;
-let gpsWatchId = null;
-let lastGpsPublish = 0;
-let lastGpsPos = null;
-
+let gpsActive=false, gpsWatchId=null, lastGpsPublish=0, lastGpsPos=null;
 function startAutoGPS(){
-  if(!navigator.geolocation){
-    console.warn('[GPS] non disponibile');
-    return;
-  }
-  if(gpsWatchId != null) return;
-  gpsActive = true;
-  updateBadges();
+  if(!navigator.geolocation || gpsWatchId != null) return;
+  gpsActive=true; updateBadges();
   gpsWatchId = navigator.geolocation.watchPosition(
     pos=>{
-      const t = getMyTeam();
-      if(!t) return;
-      const lat = +pos.coords.latitude.toFixed(6);
-      const lng = +pos.coords.longitude.toFixed(6);
-      const now = Date.now();
-      /* Aggiorna sempre lo stato locale */
-      t.lat = lat; t.lng = lng; t.gpsAt = now;
-      /* Pubblica solo se spostamento significativo o > 15s */
-      const dist = lastGpsPos ? haversine(lastGpsPos.lat, lastGpsPos.lng, lat, lng) : 9999;
-      if(now - lastGpsPublish > 15000 || dist > 25){
-        lastGpsPublish = now;
-        lastGpsPos = {lat,lng};
-        publishState();
-      }
-      /* Refresh UI ogni volta */
-      const gd = document.querySelector('.gps-dot');
-      if(gd) gd.classList.add('on');
-      const gpsInfo = document.getElementById('gpsInfo');
-      if(gpsInfo){
-        gpsInfo.innerHTML = '<span class="gps-dot on"></span> <b>GPS attivo</b> — '+
-          'ultimo aggiornamento '+fmtTime(t.gpsAt)+'<br>'+
-          'Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>';
-      }
+      const t=getMyTeam(); if(!t) return;
+      const lat=+pos.coords.latitude.toFixed(6), lng=+pos.coords.longitude.toFixed(6);
+      const now=Date.now();
+      t.lat=lat; t.lng=lng; t.gpsAt=now;
+      const dist = lastGpsPos ? haversine(lastGpsPos.lat,lastGpsPos.lng,lat,lng) : 9999;
+      if(now-lastGpsPublish > 15000 || dist > 25){ lastGpsPublish=now; lastGpsPos={lat,lng}; publishState(); }
+      const gd = document.querySelector('.gps-dot'); if(gd) gd.classList.add('on');
+      const gi = document.getElementById('gpsInfo');
+      if(gi) gi.innerHTML = '<span class="gps-dot on"></span> <b>GPS attivo</b> — ultimo aggiornamento '+fmtTime(t.gpsAt)+'<br>Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>';
     },
-    err=>{
-      console.warn('[GPS] errore', err.message);
-      /* Fallback: simula posizione ogni 20s */
-      gpsActive = false;
-      updateBadges();
-    },
+    err=>{ console.warn('[GPS]', err.message); gpsActive=false; updateBadges(); },
     {enableHighAccuracy:true, maximumAge:5000, timeout:20000}
   );
 }
-function stopAutoGPS(){
-  if(gpsWatchId != null){
-    try { navigator.geolocation.clearWatch(gpsWatchId); }catch(e){}
-    gpsWatchId = null;
-    gpsActive = false;
-    updateBadges();
-  }
-}
+function stopAutoGPS(){ if(gpsWatchId!=null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(e){} gpsWatchId=null; gpsActive=false; updateBadges(); } }
 function haversine(lat1,lng1,lat2,lng2){
-  const R = 6371000;
-  const dLat = (lat2-lat1) * Math.PI/180;
-  const dLng = (lng2-lng1) * Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return 2*R*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 /* =========================================================
-   6. AZIONI
+   7. AZIONI
    ========================================================= */
 function setStatus(status, note, silent){
-  const t = getMyTeam();
-  if(!t || !status) return;
+  const t=getMyTeam(); if(!t || !status) return;
   const ms = MISSION_STATE_MAP[status];
   if(ms && ms.terminal){
     if(t.mission){
       const tg = S.targets.find(x=>x.id===t.mission.targetId);
       if(tg){
         tg.teamIds = (tg.teamIds||[]).filter(id=>id!==t.id);
-        if(tg.teamIds.length === 0 && tg.status === 'aperto'){
-          tg.status = 'chiuso';
-          tg.closedAt = Date.now();
-          tg.closeNote = note || 'Fine missione';
-        }
+        if(tg.teamIds.length===0 && tg.status==='aperto'){ tg.status='chiuso'; tg.closedAt=Date.now(); tg.closeNote = note||'Fine missione'; }
       }
       S.log.unshift({ts:Date.now(), text:'Missione '+t.mission.code+' conclusa ('+t.name+')'});
     }
-    t.mission = null;
-    t.status = status;
+    t.mission=null; t.status=status;
     t.history = t.history||[];
     t.history.unshift({ts:Date.now(), status, note: note||'Arrivo in sede'});
     t.history = t.history.slice(0,120);
@@ -719,15 +669,15 @@ function setStatus(status, note, silent){
 }
 
 function goBackToPreviousPhase(){
-  const t = getMyTeam();
-  if(!t || !t.history) return;
-  for(let i=1; i<t.history.length; i++){
+  const t=getMyTeam(); if(!t || !t.history) return;
+  for(let i=1;i<t.history.length;i++){
     const h = t.history[i];
     if(h.status === t.status) continue;
     if(MISSION_STATE_MAP[h.status] && !MISSION_STATE_MAP[h.status].terminal){
       if(!confirm('Tornare allo stato "'+h.status+'"?')) return;
       setStatus(h.status, 'Ripristino stato precedente');
       toast('↩️ Tornato a: '+h.status);
+      renderAll();
       return;
     }
   }
@@ -735,8 +685,7 @@ function goBackToPreviousPhase(){
 }
 
 function applyInterventionCode(newEnv, newPat, newColor){
-  const t = getMyTeam();
-  if(!t || !t.mission) return false;
+  const t=getMyTeam(); if(!t || !t.mission) return false;
   const code = (newEnv||'') + (newPat||'') + (newColor||'');
   const p = parseCode(code);
   if(!p.valid){ alert('Codice non valido.'); return false; }
@@ -751,45 +700,58 @@ function applyInterventionCode(newEnv, newPat, newColor){
   return true;
 }
 
+/* Applica codice rientro: aggiorna colore E lettera del codice intervento */
 function setReturnCode(rc){
-  const t = getMyTeam();
-  if(!t || !t.mission) return;
-  const tg = S.targets.find(x=>x.id===t.mission.targetId);
-  if(!tg) return;
+  const t=getMyTeam(); if(!t || !t.mission) return;
+  const tg = S.targets.find(x=>x.id===t.mission.targetId); if(!tg) return;
+  const rcInfo = RETURN_CODES[rc];
+  if(!rcInfo) return;
+
   tg.returnCode = rc;
   tg.returnCodeAt = Date.now();
+
+  /* Ricostruisci codice con la nuova lettera */
+  const p = parseCode(t.mission.code);
+  const newLetter = rcInfo.letter;
+  const newCode = (p.env||'') + (p.pat||'') + newLetter;
+
+  if(newCode !== t.mission.code){
+    tg.code = newCode;
+    tg.color = newLetter;
+    t.mission.code = newCode;
+    t.history = t.history||[];
+    t.history.unshift({ts:Date.now(), status:t.status,
+      note:'Codice rientro '+rc+' · codice → '+newCode+' ('+COLORS[newLetter].label+')'});
+  }
+
   publishState();
-  toast('Codice rientro '+rc+' impostato');
+  toast('Codice rientro '+rc+' → '+rcInfo.letter+' ('+COLORS[newLetter].label+')');
   renderAll();
 }
 
 function setAvailability(status){
-  const t = getMyTeam();
-  if(!t) return;
-  if(status === 'Non operativa'){
-    if(!confirm('Rendere la squadra NON operativa?')) return;
-  }
+  const t=getMyTeam(); if(!t) return;
+  if(status === 'Non operativa'){ if(!confirm('Rendere la squadra NON operativa?')) return; }
   if(t.mission && status !== 'Non operativa'){
     if(!confirm('La squadra ha una missione attiva. Cambiando stato la missione verrà chiusa. Continuare?')) return;
     setStatus('Arrivo in Sede / Fine Missione', 'Chiusura automatica', true);
   }
   setStatus(status, 'Aggiornato dall\'equipaggio');
+  /* FIX: forza il re-render dopo il cambio stato */
+  renderAll();
 }
 
 function openGoogleMaps(){
-  const t = getMyTeam();
-  if(!t || !t.mission) return;
+  const t=getMyTeam(); if(!t || !t.mission) return;
   const url = 'https://www.google.com/maps/dir/?api=1&destination='+t.mission.lat+','+t.mission.lng;
   window.open(url, '_blank');
 }
 
 /* =========================================================
-   7. MINI-MAPPA
+   8. MINI-MAPPA
    ========================================================= */
-let miniMap = null;
-let tileLayer = null;
+let miniMap = null, tileLayer = null;
 const mgroups = {};
-
 function buildTile(key){
   const p = TILE_PROVIDERS[key] || TILE_PROVIDERS.esri;
   return L.tileLayer(p.url, {maxZoom:p.maxZoom, attribution:p.attribution});
@@ -798,21 +760,30 @@ function initMiniMap(){
   if(typeof L === 'undefined' || miniMap) return;
   const el = document.getElementById('miniMap');
   if(!el) return;
+  /* Centro iniziale: sul target se missione attiva, altrimenti centro demo */
+  const t = getMyTeam();
+  let cLat = S.center.lat, cLng = S.center.lng, cZoom = 14;
+  if(t && t.mission){
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    cLat = tg ? tg.lat : t.mission.lat;
+    cLng = tg ? tg.lng : t.mission.lng;
+    cZoom = 16;
+  }
   miniMap = L.map(el, {zoomControl:false, attributionControl:false, dragging:true})
-    .setView([S.center.lat, S.center.lng], 14);
+    .setView([cLat, cLng], cZoom);
   tileLayer = buildTile(localStorage.getItem('sge_provider') || 'esri').addTo(miniMap);
   mgroups.target = L.layerGroup().addTo(miniMap);
-  mgroups.team   = L.layerGroup().addTo(miniMap);
+  mgroups.teams  = L.layerGroup().addTo(miniMap);
   mgroups.poi    = L.layerGroup().addTo(miniMap);
   mgroups.line   = L.layerGroup().addTo(miniMap);
   setTimeout(()=>miniMap && miniMap.invalidateSize(), 200);
 }
-function teamMiniIcon(t){
+function teamMiniIcon(t, isMine){
   const col = statusColor(t);
   const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
   const crew = crewInfo(t);
   return L.divIcon({className:'',
-    html:'<div class="mk-team" style="--c:'+col+'">'+type.icon+
+    html:'<div class="mk-team '+(isMine?'mine':'')+'" style="--c:'+col+'">'+type.icon+
       '<span class="crew" style="background:'+crew.color+'">'+crew.short+'</span></div>',
     iconSize:[42,42], iconAnchor:[21,21]});
 }
@@ -830,54 +801,84 @@ function poiMiniIcon(p){
 }
 function renderMiniMap(){
   if(!miniMap) return;
-  mgroups.target.clearLayers(); mgroups.team.clearLayers();
+  mgroups.target.clearLayers(); mgroups.teams.clearLayers();
   mgroups.poi.clearLayers(); mgroups.line.clearLayers();
-  const t = getMyTeam();
-  if(!t) return;
-  L.marker([t.lat,t.lng], {icon:teamMiniIcon(t), zIndexOffset:700}).addTo(mgroups.team);
-  const bounds = [[t.lat,t.lng]];
-  if(t.mission){
-    const tg = S.targets.find(x=>x.id===t.mission.targetId);
-    const tlat = tg ? tg.lat : t.mission.lat;
-    const tlng = tg ? tg.lng : t.mission.lng;
-    const fakeTg = tg || {code:t.mission.code, color:parseCode(t.mission.code).color};
-    L.marker([tlat,tlng], {icon:targetMiniIcon(fakeTg), zIndexOffset:600}).addTo(mgroups.target);
+
+  const me = getMyTeam();
+  if(!me) return;
+
+  /* Tutte le squadre (incluse le altre, se in missione) */
+  S.teams.forEach(t=>{
+    const isMine = (t.id === me.id);
+    if(!isMine && !t.mission) return;
+    const marker = L.marker([t.lat,t.lng], {
+      icon: teamMiniIcon(t, isMine),
+      zIndexOffset: isMine ? 900 : 700
+    });
+    marker.bindPopup('<b>'+esc(t.name)+'</b><br>'+esc(t.status)+(t.mission?' · '+esc(t.mission.code):''));
+    marker.addTo(mgroups.teams);
+  });
+
+  const bounds = [[me.lat, me.lng]];
+
+  /* Target missione corrente */
+  if(me.mission){
+    const tg = S.targets.find(x=>x.id===me.mission.targetId);
+    const tlat = tg ? tg.lat : me.mission.lat;
+    const tlng = tg ? tg.lng : me.mission.lng;
+    const fakeTg = tg || {code:me.mission.code, color:parseCode(me.mission.code).color};
+    const tmk = L.marker([tlat,tlng], {icon:targetMiniIcon(fakeTg), zIndexOffset:1000});
+    tmk.bindPopup('<b>'+esc(fakeTg.code)+'</b><br>'+esc(me.mission.address||'Target'));
+    tmk.addTo(mgroups.target);
     bounds.push([tlat,tlng]);
-    L.polyline([[t.lat,t.lng],[tlat,tlng]], {color:'#3d9bff', weight:3, opacity:.85, dashArray:'8,8'})
-      .addTo(mgroups.line);
+
+    /* Linea tratteggiata tra me e il target */
+    L.polyline([[me.lat,me.lng],[tlat,tlng]], {
+      color:'#3d9bff', weight:3, opacity:.85, dashArray:'8,8'
+    }).addTo(mgroups.line);
+
+    /* POI vicini al target: TUTTI quelli entro 1200m +
+       TUTTE le strade chiuse entro 2500m */
     S.pois.forEach(p=>{
       const d = miniMap.distance([tlat,tlng],[p.lat,p.lng]);
-      if(d < 900){
-        L.marker([p.lat,p.lng], {icon:poiMiniIcon(p)}).addTo(mgroups.poi);
-        bounds.push([p.lat,p.lng]);
+      const isClosing = (p.cat === 'chiusura');
+      if(d < 1200 || (isClosing && d < 2500)){
+        const mk = L.marker([p.lat,p.lng], {icon:poiMiniIcon(p)});
+        const cat = POI_CATS[p.cat]||POI_CATS.info;
+        mk.bindPopup('<b>'+cat.icon+' '+esc(p.name)+'</b>'+(p.note?'<br>'+esc(p.note):''));
+        mk.addTo(mgroups.poi);
+        if(d < 1200) bounds.push([p.lat,p.lng]);
+      }
+    });
+
+    /* Altri target aperti (non chiusi) nelle vicinanze (<1500m) */
+    S.targets.forEach(tg2=>{
+      if(tg2.id === (tg?tg.id:null)) return;
+      if(tg2.status === 'chiuso') return;
+      const d = miniMap.distance([tlat,tlng],[tg2.lat,tg2.lng]);
+      if(d < 1500){
+        const c = COLORS[tg2.color] || {hex:'#889',fg:'#fff'};
+        const mk = L.marker([tg2.lat,tg2.lng], {
+          icon: L.divIcon({className:'',
+            html:'<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;border:2px solid #fff;background:'+c.hex+';color:'+c.fg+';opacity:.85;box-shadow:0 3px 10px rgba(0,0,0,.5)">'+esc(tg2.code)+'</div>',
+            iconSize:[32,32], iconAnchor:[16,16]})
+        });
+        mk.bindPopup('<b>Altro target</b><br>'+esc(tg2.code));
+        mk.addTo(mgroups.target);
       }
     });
   }
+
   if(bounds.length >= 2) miniMap.fitBounds(bounds, {padding:[40,40], maxZoom:17, animate:false});
-  else miniMap.setView([t.lat,t.lng], 16, {animate:false});
+  else miniMap.setView([me.lat,me.lng], 16, {animate:false});
   setTimeout(()=>miniMap && miniMap.invalidateSize(), 50);
 }
 
 /* =========================================================
-   8. RENDER
+   9. RENDER
    ========================================================= */
-function renderTeamSelect(){
-  const sel = document.getElementById('teamSelect');
-  if(!sel) return;
-  if(!S.teams.length){ sel.innerHTML = '<option>— Nessuna squadra —</option>'; return; }
-  if(!myTeamId || !S.teams.some(t=>t.id===myTeamId)){
-    myTeamId = S.teams[0].id;
-    localStorage.setItem(MY_TEAM_KEY, myTeamId);
-  }
-  sel.innerHTML = S.teams.map(t=>{
-    const tag = !t.operational ? '⛔ ' : (t.mission?'🚨 ':'✅ ');
-    return '<option value="'+t.id+'"'+(t.id===myTeamId?' selected':'')+'>'+tag+esc(t.name)+'</option>';
-  }).join('');
-}
-
 function renderHero(){
-  const t = getMyTeam();
-  if(!t) return '<div class="card"><div class="empty">Nessuna squadra.</div></div>';
+  const t = getMyTeam(); if(!t) return '<div class="card"><div class="empty">Squadra non trovata.</div></div>';
   const col = statusColor(t);
   const type = TEAM_TYPES[t.type] || TEAM_TYPES.auto;
   const crew = crewInfo(t);
@@ -889,8 +890,7 @@ function renderHero(){
 }
 
 function renderMission(){
-  const t = getMyTeam();
-  if(!t || !t.mission) return '';
+  const t = getMyTeam(); if(!t || !t.mission) return '';
   const m = t.mission;
   const p = parseCode(m.code);
   const c = COLORS[p.color] || {hex:'#888',fg:'#fff'};
@@ -914,12 +914,20 @@ function renderMission(){
   return h;
 }
 
-function renderPhases(){
-  const t = getMyTeam();
-  if(!t || !t.mission) return '';
-  let h = '<div class="card">';
-  h += '<div class="section-title">🚦 Fase missione</div>';
-  h += '<div class="phase-grid">';
+function renderAccordion(id, icon, title, body, badge, open){
+  return '<div class="eq-acc'+(open?' open':'')+'" id="'+id+'">'+
+    '<button class="eq-acc-head">'+
+      '<span>'+icon+'</span><span>'+title+'</span>'+
+      (badge?'<span class="badge">'+badge+'</span>':'')+
+      '<span class="chev">▾</span>'+
+    '</button>'+
+    '<div class="eq-acc-body">'+body+'</div>'+
+  '</div>';
+}
+
+function renderPhasesBody(){
+  const t = getMyTeam(); if(!t || !t.mission) return '';
+  let h = '<div class="phase-grid">';
   MISSION_STATES.forEach(ms=>{
     const on = t.status === ms.key;
     h += '<button class="phase-btn '+(on?'on':'')+'" data-phase="'+esc(ms.key)+'" style="--c:'+ms.color+'">'+
@@ -930,13 +938,12 @@ function renderPhases(){
   h += '<button class="prev-btn" id="prevBtn" '+(prev?'':'disabled')+'>'+
        '<span class="big">⬅</span>'+(prev ? 'Torna a: <b>'+esc(prev)+'</b>' : 'Nessuno stato precedente')+
        '</button>';
-  h += '</div>';
   return h;
 }
 function getPreviousPhase(t){
   if(!t.history || t.history.length < 2) return null;
   const cur = t.status;
-  for(let i=1; i<t.history.length; i++){
+  for(let i=1;i<t.history.length;i++){
     const h = t.history[i];
     if(h.status === cur) continue;
     if(MISSION_STATE_MAP[h.status] && !MISSION_STATE_MAP[h.status].terminal) return h.status;
@@ -944,31 +951,28 @@ function getPreviousPhase(t){
   return null;
 }
 
-function renderReturnCodeAndCodeEditor(){
-  const t = getMyTeam();
-  if(!t || !t.mission) return '';
+function renderReturnCodeBody(){
+  const t = getMyTeam(); if(!t || !t.mission) return '';
   const tg = S.targets.find(x=>x.id===t.mission.targetId);
   const curRc = tg ? tg.returnCode : null;
   const p = parseCode(t.mission.code);
   const c = COLORS[p.color] || {hex:'#888',fg:'#fff'};
-
-  let h = '<div class="card">';
-  /* --- Codice di rientro --- */
-  h += '<div class="section-title">🔢 Codice di rientro (0–4)</div>';
+  let h = '';
   h += '<div class="retcode-grid">';
   Object.keys(RETURN_CODES).forEach(k=>{
     const rc = RETURN_CODES[k];
     h += '<button class="retcode-btn '+(curRc==k?'on':'')+'" data-rc="'+k+'" style="--c:'+rc.color+'" title="'+esc(rc.label)+'">'+k+'</button>';
   });
   h += '</div>';
-  const desc = curRc != null ? RETURN_CODES[curRc].icon+' <b>'+RETURN_CODES[curRc].label+'</b>' : 'Nessun codice selezionato';
-  h += '<div class="retcode-desc'+(curRc!=null?' sel':'')+'">'+desc+'</div>';
-
-  /* --- Divider --- */
+  if(curRc != null){
+    const rc = RETURN_CODES[curRc];
+    h += '<div class="retcode-desc sel">'+rc.icon+' <b>'+rc.label+'</b> → codice <b>'+esc(t.mission.code)+'</b></div>';
+  } else {
+    h += '<div class="retcode-desc">Nessun codice selezionato</div>';
+  }
+  h += '<div class="retcode-hint">ℹ️ Selezionando il codice di rientro, la lettera finale del codice intervento cambia automaticamente (0→N, 1→V, 2→G, 3→R, 4→B).</div>';
   h += '<div class="divider"></div>';
-
-  /* --- Codice intervento con editor protetto --- */
-  h += '<div class="section-title">✏️ Codice intervento</div>';
+  h += '<div class="section-title">✏️ Modifica codice intervento</div>';
   h += '<div class="code-row" id="codeRow">'+
        '<div class="code-cur">'+
          '<span class="code-cur-badge" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</span>'+
@@ -988,22 +992,16 @@ function renderReturnCodeAndCodeEditor(){
          const cc = COLORS[k];
          return '<button class="color-opt '+(p.color===k?'on':'')+'" data-color="'+k+'" style="--c:'+cc.hex+';--f:'+cc.fg+'">'+k+'</button>';
        }).join('')+'</div></div>';
-  h += '<div class="editor-warn">⚠️ Stai per modificare il codice intervento. La modifica verrà trasmessa alla Sala Operativa in tempo reale. Verifica bene prima di salvare.</div>';
-  h += '<div class="editor-actions">'+
-       '<button class="btn-cancel" id="codeCancel">Annulla</button>'+
-       '<button class="btn-save" id="codeSave">✓ Salva</button>'+
-       '</div>';
-  h += '</div>';
+  h += '<div class="editor-warn">⚠️ La modifica verrà trasmessa alla Sala Operativa in tempo reale.</div>';
+  h += '<div class="editor-actions"><button class="btn-cancel" id="codeCancel">Annulla</button>'+
+       '<button class="btn-save" id="codeSave">✓ Salva</button></div>';
   h += '</div>';
   return h;
 }
 
-function renderAvailability(){
-  const t = getMyTeam();
-  if(!t) return '';
-  let h = '<div class="card">';
-  h += '<div class="section-title">🟢 Stato equipaggio</div>';
-  h += '<div class="avail-grid">';
+function renderAvailabilityBody(){
+  const t = getMyTeam(); if(!t) return '';
+  let h = '<div class="avail-grid">';
   AVAIL_STATES.forEach(a=>{
     const on = !t.mission && t.status === a.key;
     h += '<button class="avail-btn '+(on?'on':'')+'" data-avail="'+esc(a.key)+'" style="--c:'+a.color+'">'+
@@ -1011,13 +1009,11 @@ function renderAvailability(){
   });
   h += '</div>';
   if(t.mission) h += '<div class="muted" style="font-size:11.5px;margin-top:9px;text-align:center">Disponibile solo dopo la chiusura della missione</div>';
-  h += '</div>';
   return h;
 }
 
-function renderGPS(){
-  const t = getMyTeam();
-  if(!t) return '';
+function renderGPSBody(){
+  const t = getMyTeam(); if(!t) return '';
   const age = t.gpsAt ? Math.floor((Date.now()-t.gpsAt)/1000) : null;
   let ago = '—';
   if(age != null){
@@ -1026,60 +1022,72 @@ function renderGPS(){
     else ago = Math.floor(age/3600)+'h fa';
   }
   const dot = gpsActive ? '<span class="gps-dot on"></span>' : '<span class="gps-dot"></span>';
-  return '<div class="card">'+
-    '<div class="section-title">📡 Posizione GPS</div>'+
-    '<div class="gps-info" id="gpsInfo">'+
+  return '<div class="gps-info" id="gpsInfo">'+
       dot+' <b>'+(gpsActive?'GPS attivo (automatico)':'GPS non attivo')+'</b><br>'+
       'Ultimo aggiornamento: <b>'+esc(ago)+'</b><br>'+
       'Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>'+
     '</div>'+
-    '<button class="gps-btn" id="gpsToggle">'+(gpsActive?'⏸️ Disattiva GPS automatico':'▶️ Attiva GPS automatico')+'</button>'+
-  '</div>';
+    '<button class="gps-btn" id="gpsToggle">'+(gpsActive?'⏸️ Disattiva GPS automatico':'▶️ Attiva GPS automatico')+'</button>';
 }
 
-function renderHistory(){
-  const t = getMyTeam();
-  if(!t) return '';
-  let h = '<div class="card">';
-  h += '<div class="section-title">🕓 Cronologia stati</div>';
-  if(!t.history || !t.history.length) h += '<div class="empty">Nessuna voce</div>';
-  else {
-    h += '<div class="hist">'+t.history.slice(0,40).map(x=>{
-      const ms = MISSION_STATE_MAP[x.status];
-      const icon = ms ? ms.icon : (x.status==='Disponibile' ? '✅'
-        : x.status==='In pausa' ? '⏸️'
-        : x.status==='Non operativa' ? '⛔'
-        : x.status==='Rientro' ? '↩️' : '•');
-      return '<div class="hist-row">'+
-        '<span class="h-t">'+fmtDateTime(x.ts)+'</span>'+
-        '<span class="h-ico">'+icon+'</span>'+
-        '<span><b>'+esc(x.status)+'</b>'+
-          (x.note?'<br><span class="muted" style="font-size:11.5px">'+esc(x.note)+'</span>':'')+
-        '</span></div>';
-    }).join('')+'</div>';
-  }
-  h += '</div>';
-  return h;
+function renderHistoryBody(){
+  const t = getMyTeam(); if(!t) return '';
+  if(!t.history || !t.history.length) return '<div class="empty">Nessuna voce</div>';
+  return '<div class="hist">'+t.history.slice(0,40).map(x=>{
+    const ms = MISSION_STATE_MAP[x.status];
+    const icon = ms ? ms.icon : (x.status==='Disponibile' ? '✅'
+      : x.status==='In pausa' ? '⏸️'
+      : x.status==='Non operativa' ? '⛔'
+      : x.status==='Rientro' ? '↩️' : '•');
+    return '<div class="hist-row">'+
+      '<span class="h-t">'+fmtDateTime(x.ts)+'</span>'+
+      '<span class="h-ico">'+icon+'</span>'+
+      '<span><b>'+esc(x.status)+'</b>'+
+        (x.note?'<br><span class="muted" style="font-size:11.5px">'+esc(x.note)+'</span>':'')+
+      '</span></div>';
+  }).join('')+'</div>';
 }
 
 function renderAll(){
-  renderTeamSelect();
-  const t = getMyTeam();
-  document.getElementById('teamIco').textContent = t ? (TEAM_TYPES[t.type]||TEAM_TYPES.auto).icon : '🚑';
+  const t = getMyTeam(); if(!t) return;
+  document.getElementById('teamIco').textContent = (TEAM_TYPES[t.type]||TEAM_TYPES.auto).icon;
+  document.getElementById('teamNameLabel').textContent = t.name;
+
+  /* Preserva quali accordion sono aperti */
+  const accOpen = {};
+  document.querySelectorAll('.eq-acc').forEach(a=>{ accOpen[a.id] = a.classList.contains('open'); });
 
   const el = document.getElementById('eqContent');
-  el.innerHTML =
-    renderHero() +
-    renderMission() +
-    (t && t.mission ? '<button class="gmap-btn" id="gmapBtn"><span class="gm-ico">🗺️</span> Naviga con Google Maps</button>' : '') +
-    (t && t.mission ? '<div class="map-mini" id="miniMap"></div>' : '') +
-    renderPhases() +
-    renderReturnCodeAndCodeEditor() +
-    renderAvailability() +
-    renderGPS() +
-    renderHistory();
+  let html = '';
+  html += renderHero();
+  html += renderMission();
+  if(t.mission){
+    html += '<button class="gmap-btn" id="gmapBtn"><span class="gm-ico">🗺️</span> Naviga con Google Maps</button>';
+    html += '<div class="map-mini" id="miniMap"></div>';
 
-  /* Bind eventi */
+    const phaseBadge = MISSION_STATE_MAP[t.status] ? MISSION_STATE_MAP[t.status].icon : '';
+    const phaseOpen = (accOpen.accPhase !== undefined) ? accOpen.accPhase : true;
+    html += renderAccordion('accPhase', '🚦', 'Fase missione', renderPhasesBody(), phaseBadge, phaseOpen);
+
+    const tg = S.targets.find(x=>x.id===t.mission.targetId);
+    const rcBadge = (tg && tg.returnCode != null) ? '✓ '+tg.returnCode : '';
+    html += renderAccordion('accReturn', '🔢', 'Codice rientro / intervento', renderReturnCodeBody(), rcBadge, accOpen.accReturn === true);
+
+    html += renderAccordion('accAvail', '🟢', 'Stato equipaggio', renderAvailabilityBody(), '', accOpen.accAvail === true);
+  } else {
+    html += renderAccordion('accAvail', '🟢', 'Stato equipaggio', renderAvailabilityBody(), statusIcon(t)+' '+esc(stateShort(t.status)), true);
+  }
+
+  html += renderAccordion('accGPS', '📡', 'Posizione GPS', renderGPSBody(), '', accOpen.accGPS === true);
+  html += renderAccordion('accHist', '🕓', 'Cronologia stati', renderHistoryBody(), '', accOpen.accHist === true);
+
+  el.innerHTML = html;
+
+  /* Bind accordion */
+  document.querySelectorAll('.eq-acc-head').forEach(h=>{
+    h.onclick = ()=>{ h.parentElement.classList.toggle('open'); };
+  });
+
   const gmapBtn = document.getElementById('gmapBtn');
   if(gmapBtn) gmapBtn.onclick = openGoogleMaps;
   const prevBtn = document.getElementById('prevBtn');
@@ -1091,46 +1099,41 @@ function renderAll(){
       if(MISSION_STATE_MAP[ph] && MISSION_STATE_MAP[ph].terminal){
         const tg = S.targets.find(x=>x.id===(getMyTeam().mission||{}).targetId);
         if(!tg || tg.returnCode == null){
-          if(!confirm('Stai chiudendo la missione.\n\nNon hai ancora selezionato un codice di rientro (0-4).\nProcedere comunque?')) return;
+          if(!confirm('Stai chiudendo la missione.\nNon hai selezionato un codice di rientro (0-4).\nProcedere comunque?')) return;
         } else {
           if(!confirm('Confermi la chiusura?\nCodice rientro: '+tg.returnCode+' — '+RETURN_CODES[tg.returnCode].label)) return;
         }
       }
       setStatus(ph, 'Aggiornato dall\'equipaggio');
       toast('✓ '+ph);
+      renderAll();
     };
   });
-
   document.querySelectorAll('.retcode-btn[data-rc]').forEach(b=>{
     b.onclick = ()=>{
       const rc = +b.getAttribute('data-rc');
-      /* Conferma per evitare selezione accidentale */
-      if(!confirm('Impostare il codice di rientro '+rc+'?\n'+RETURN_CODES[rc].label)) return;
+      const rcInfo = RETURN_CODES[rc];
+      const p = parseCode(t.mission.code);
+      const preview = (p.env||'')+(p.pat||'')+rcInfo.letter;
+      if(!confirm('Impostare il codice di rientro '+rc+'?\n'+rcInfo.label+'\n\nIl codice intervento diventerà: '+preview+' ('+COLORS[rcInfo.letter].label+')')) return;
       setReturnCode(rc);
     };
   });
-
   document.querySelectorAll('.avail-btn[data-avail]').forEach(b=>{
     b.onclick = ()=> setAvailability(b.getAttribute('data-avail'));
   });
 
-  /* Editor codice */
   const editBtn = document.getElementById('codeEditBtn');
   const editor = document.getElementById('codeEditor');
   const codeRow = document.getElementById('codeRow');
-  if(editBtn && editor && codeRow){
+  if(editBtn && editor && codeRow && t.mission){
     editBtn.onclick = ()=>{
-      /* Sicura: chiedi conferma prima di aprire */
       if(!confirm('⚠️ Aprire l\'editor del codice intervento?\n\nVerifica bene la modifica prima di salvare.')) return;
       codeRow.classList.add('hidden');
       editor.classList.remove('hidden');
     };
-    const closeEditor = ()=>{
-      editor.classList.add('hidden');
-      codeRow.classList.remove('hidden');
-    };
+    const closeEditor = ()=>{ editor.classList.add('hidden'); codeRow.classList.remove('hidden'); };
     document.getElementById('codeCancel').onclick = closeEditor;
-
     let selColor = parseCode(t.mission.code).color || 'R';
     document.querySelectorAll('#editColorGrid .color-opt').forEach(b=>{
       b.onclick = ()=>{
@@ -1144,29 +1147,20 @@ function renderAll(){
       const np = document.getElementById('editPat').value;
       const newCode = ne+np+selColor;
       if(newCode === t.mission.code){ toast('Nessuna modifica'); closeEditor(); return; }
-      if(!confirm('Confermi il cambio codice?\n\n'+
-                  'PRIMA: '+t.mission.code+' ('+describeCode(t.mission.code)+')\n'+
-                  'DOPO:  '+newCode+' ('+describeCode(newCode)+')')) return;
+      if(!confirm('Confermi il cambio codice?\n\nPRIMA: '+t.mission.code+'\nDOPO:  '+newCode)) return;
       applyInterventionCode(ne, np, selColor);
       closeEditor();
     };
   }
 
-  /* GPS toggle */
   const gpsToggle = document.getElementById('gpsToggle');
-  if(gpsToggle){
-    gpsToggle.onclick = ()=>{
-      if(gpsActive) stopAutoGPS();
-      else startAutoGPS();
-      renderAll();
-    };
-  }
+  if(gpsToggle){ gpsToggle.onclick = ()=>{ if(gpsActive) stopAutoGPS(); else startAutoGPS(); renderAll(); }; }
 
-  /* Mini-mappa */
-  if(t && t.mission){
+  /* Mini-map */
+  if(t.mission){
     setTimeout(()=>{
       if(!miniMap) initMiniMap();
-      else renderMiniMap();
+      else { renderMiniMap(); miniMap.invalidateSize(); }
     }, 60);
   } else if(miniMap){
     try { miniMap.remove(); }catch(e){}
@@ -1175,80 +1169,134 @@ function renderAll(){
 }
 
 /* =========================================================
-   9. TOAST
+   10. LOGIN / LOGOUT
+   ========================================================= */
+function updateLoginTeamSelect(){
+  const sel = document.getElementById('loginTeamSelect'); if(!sel) return;
+  const curr = sel.value;
+  if(!S.teams.length){
+    sel.innerHTML = '<option value="">— in attesa di connessione… —</option>';
+    document.getElementById('loginBtn').disabled = true;
+    document.getElementById('loginWait').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('loginWait').classList.add('hidden');
+  sel.innerHTML = '<option value="">— scegli la tua squadra —</option>' +
+    S.teams.map(t=>'<option value="'+t.id+'">'+(TEAM_TYPES[t.type]||TEAM_TYPES.auto).icon+' '+esc(t.name)+
+      (t.password?'':' (senza password)')+'</option>').join('');
+  if(curr && S.teams.some(t=>t.id===curr)) sel.value = curr;
+  updateLoginButtonState();
+}
+function updateLoginButtonState(){
+  const sel = document.getElementById('loginTeamSelect'), btn = document.getElementById('loginBtn'), pwdWrap = document.getElementById('loginPwdWrap');
+  if(!sel || !btn) return;
+  const tid = sel.value;
+  if(!tid){ btn.disabled = true; pwdWrap.classList.add('hidden'); return; }
+  const t = S.teams.find(x=>x.id===tid);
+  if(!t){ btn.disabled = true; return; }
+  if(!t.password){ pwdWrap.classList.add('hidden'); btn.disabled = false; btn.textContent = '▶️ Entra (nessuna password)'; }
+  else { pwdWrap.classList.remove('hidden'); btn.disabled = false; btn.textContent = '🔓 Accedi'; }
+}
+function showLogin(msg, isOk){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('appMain').classList.add('hidden');
+  const m = document.getElementById('loginMsg');
+  if(msg){ m.textContent = msg; m.className = 'login-msg show ' + (isOk?'ok':'err'); }
+  else { m.classList.remove('show'); }
+  updateLoginTeamSelect();
+  document.getElementById('loginPassword').value = '';
+}
+function tryLogin(){
+  const sel = document.getElementById('loginTeamSelect');
+  const pwdInp = document.getElementById('loginPassword');
+  const m = document.getElementById('loginMsg');
+  const tid = sel.value;
+  if(!tid){ m.textContent = 'Seleziona una squadra.'; m.className = 'login-msg show err'; return; }
+  const t = S.teams.find(x=>x.id===tid);
+  if(!t){ m.textContent = 'Squadra non trovata.'; m.className = 'login-msg show err'; return; }
+  const expected = t.password || '';
+  const got = pwdInp.value || '';
+  if(expected === ''){ saveAuth(tid, ''); startApp(); return; }
+  if(got === expected){ saveAuth(tid, got); startApp(); }
+  else { m.textContent = '❌ Password errata. Riprova.'; m.className = 'login-msg show err';
+    if(navigator.vibrate) try{ navigator.vibrate(180); }catch(e){}
+    pwdInp.value = ''; pwdInp.focus(); }
+}
+function startApp(){
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('appMain').classList.remove('hidden');
+  setTimeout(()=>{
+    startAutoGPS();
+    const me = getMyTeam();
+    if(me && me.mission) lastMissionId = me.mission.targetId;
+    renderAll();
+    publishState();
+  }, 100);
+}
+function doLogout(){
+  if(!confirm('Uscire dall\'account?')) return;
+  stopAutoGPS(); clearAuth();
+  if(miniMap){ try{miniMap.remove();}catch(e){} miniMap = null; }
+  showLogin('Disconnesso. Inserisci le credenziali per accedere.', true);
+}
+
+/* =========================================================
+   11. TOAST
    ========================================================= */
 let toastTimer = null;
 function toast(msg){
-  const el = document.getElementById('toast');
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
+  const el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
 }
 
 /* =========================================================
-   10. CLOCK + TICK
+   12. CLOCK
    ========================================================= */
-function tickClock(){
-  const d = new Date();
-  document.getElementById('clock').textContent = d.toLocaleTimeString('it-IT');
-}
-tickClock();
-setInterval(tickClock, 1000);
-setInterval(()=>{
-  /* Aggiorna elapsed */
-  const t = getMyTeam();
-  if(t && t.mission){
-    /* aggiorna solo i campi testuali per evitare di perdere focus */
-    const el = document.querySelector('.mc-time b:last-of-type');
-    if(el) el.textContent = elapsed(t.mission.activatedAt);
-  }
-}, 15000);
+function tickClock(){ const el = document.getElementById('clock'); if(el) el.textContent = new Date().toLocaleTimeString('it-IT'); }
+tickClock(); setInterval(tickClock, 1000);
+setInterval(()=>{ const t=getMyTeam(); if(t && t.mission){ const el = document.querySelector('.mc-time b:last-of-type'); if(el) el.textContent = elapsed(t.mission.activatedAt); } }, 15000);
 
 /* =========================================================
-   11. TEAM SELECT CHANGE
+   13. BIND UI LOGIN
    ========================================================= */
-document.getElementById('teamSelect').onchange = function(){
-  myTeamId = this.value || null;
-  localStorage.setItem(MY_TEAM_KEY, myTeamId||'');
-  lastMissionId = null;
-  renderAll();
+document.getElementById('loginTeamSelect').onchange = ()=>{
+  updateLoginButtonState();
+  const sel = document.getElementById('loginTeamSelect');
+  const t = S.teams.find(x=>x.id===sel.value);
+  if(t && t.password){ const pw = document.getElementById('loginPassword'); pw.value=''; setTimeout(()=>pw.focus(),100); }
+};
+document.getElementById('loginPassword').addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){ e.preventDefault(); if(!document.getElementById('loginBtn').disabled) tryLogin(); }
+});
+document.getElementById('loginBtn').onclick = tryLogin;
+document.getElementById('loginPwdToggle').onclick = ()=>{
+  const inp = document.getElementById('loginPassword');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  document.getElementById('loginPwdToggle').textContent = inp.type === 'password' ? '👁️' : '🙈';
+};
+document.getElementById('logoutBtn').onclick = doLogout;
+document.getElementById('roomLabel').textContent = SESSION_ROOM;
+document.getElementById('loginRoom').textContent = SESSION_ROOM;
+document.getElementById('roomBadge').onclick = ()=>{
+  const url = location.origin + location.pathname + '?room=' + SESSION_ROOM;
+  if(navigator.clipboard) navigator.clipboard.writeText(url).then(()=>toast('📋 Copiato: '+SESSION_ROOM));
+  else prompt('Stanza: '+SESSION_ROOM, url);
 };
 
-/* Room badge */
-const roomBadge = document.getElementById('roomBadge');
-const roomLabel = document.getElementById('roomLabel');
-if(roomLabel) roomLabel.textContent = SESSION_ROOM;
-if(roomBadge){
-  roomBadge.onclick = ()=>{
-    const url = location.origin + location.pathname + '?room=' + SESSION_ROOM;
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(url).then(()=> toast('📋 Copiato: '+SESSION_ROOM));
-    } else {
-      prompt('Stanza: '+SESSION_ROOM+'\nURL:', url);
-    }
-  };
-}
-
 /* =========================================================
-   12. INIT
+   14. INIT
    ========================================================= */
-renderAll();
-updateBadges();
-setTimeout(()=>{
-  /* Auto-avvio GPS */
-  startAutoGPS();
-  /* Mini-mappa se richiesta */
-  const t = getMyTeam();
-  if(t && t.mission){
-    if(!miniMap) initMiniMap();
-    else renderMiniMap();
-  }
-}, 300);
-
+currentAuth = loadAuth();
+if(currentAuth) myTeamId = currentAuth.teamId;
+updateLoginTeamSelect();
 initSyncChannels();
 initMqtt();
+setTimeout(()=>{
+  if(currentAuth && validateAuth()){ startApp(); }
+  else { if(currentAuth){ clearAuth(); } showLogin(null, false); }
+}, 250);
 updateBadges();
 
 })();
