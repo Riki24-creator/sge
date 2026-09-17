@@ -737,41 +737,124 @@ function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended'
 document.addEventListener('click',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
 document.addEventListener('touchstart',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
 
+/* =========================================================
+   SOUND ENGINE — con "Allerta Target" per missioni (molto forte)
+   ========================================================= */
+function playTone(freq, start, duration, type, gainPeak){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.type=type||'sine';
+    osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t0=audioCtx.currentTime+start;
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(gainPeak||0.3, t0+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+    osc.start(t0); osc.stop(t0+duration+0.05);
+  }catch(e){}
+}
+function playBuzz(freq, start, duration, gainPeak){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.type='square';
+    osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t0=audioCtx.currentTime+start;
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(gainPeak||0.3, t0+0.004);
+    gain.gain.setValueAtTime(gainPeak||0.3, t0+duration-0.006);
+    gain.gain.linearRampToValueAtTime(0, t0+duration);
+    osc.start(t0); osc.stop(t0+duration+0.02);
+  }catch(e){}
+}
+/* Sirena potente multi-oscillatore: fondamentale + armoniche, sweep continuo */
+function playAlertTarget(){
+  if(!audioCtx) return;
+  try{
+    const now=audioCtx.currentTime;
+    const TOTAL=4.2;                // durata totale ~4.2s
+    const SWEEP_PERIOD=0.7;         // ciclo su-giù
+    /* --- Layer 1: sirena principale (sweep 700↔1200 Hz) --- */
+    const o1=audioCtx.createOscillator();
+    const g1=audioCtx.createGain();
+    o1.type='sawtooth';
+    o1.frequency.setValueAtTime(700, now);
+    const cycles=Math.floor(TOTAL/SWEEP_PERIOD);
+    for(let i=0;i<cycles;i++){
+      const t0=now+i*SWEEP_PERIOD;
+      o1.frequency.linearRampToValueAtTime(1200, t0+SWEEP_PERIOD/2);
+      o1.frequency.linearRampToValueAtTime(700,  t0+SWEEP_PERIOD);
+    }
+    g1.gain.setValueAtTime(0, now);
+    g1.gain.linearRampToValueAtTime(0.55, now+0.05);
+    g1.gain.setValueAtTime(0.55, now+TOTAL-0.3);
+    g1.gain.linearRampToValueAtTime(0.001, now+TOTAL);
+    o1.connect(g1); g1.connect(audioCtx.destination);
+    o1.start(now); o1.stop(now+TOTAL+0.1);
+    /* --- Layer 2: armonica 2x (timbro metallico) --- */
+    const o2=audioCtx.createOscillator();
+    const g2=audioCtx.createGain();
+    o2.type='square';
+    o2.frequency.setValueAtTime(1400, now);
+    for(let i=0;i<cycles;i++){
+      const t0=now+i*SWEEP_PERIOD;
+      o2.frequency.linearRampToValueAtTime(2400, t0+SWEEP_PERIOD/2);
+      o2.frequency.linearRampToValueAtTime(1400, t0+SWEEP_PERIOD);
+    }
+    g2.gain.setValueAtTime(0, now);
+    g2.gain.linearRampToValueAtTime(0.22, now+0.05);
+    g2.gain.setValueAtTime(0.22, now+TOTAL-0.3);
+    g2.gain.linearRampToValueAtTime(0.001, now+TOTAL);
+    o2.connect(g2); g2.connect(audioCtx.destination);
+    o2.start(now); o2.stop(now+TOTAL+0.1);
+    /* --- Layer 3: sub-bass 90 Hz (vibrazione percepibile) --- */
+    const o3=audioCtx.createOscillator();
+    const g3=audioCtx.createGain();
+    o3.type='sine';
+    o3.frequency.value=90;
+    g3.gain.setValueAtTime(0, now);
+    g3.gain.linearRampToValueAtTime(0.35, now+0.05);
+    g3.gain.setValueAtTime(0.35, now+TOTAL-0.3);
+    g3.gain.linearRampToValueAtTime(0.001, now+TOTAL);
+    o3.connect(g3); g3.connect(audioCtx.destination);
+    o3.start(now); o3.stop(now+TOTAL+0.1);
+    /* --- Layer 4: impulsi d'attacco ogni 0.7s (buzz brevi che spiccano) --- */
+    for(let i=0;i<cycles;i++){
+      playBuzz(1800, i*SWEEP_PERIOD, 0.08, 0.35);
+    }
+  }catch(e){}
+}
+
 function playSound(type){
   if(!audioEnabled) return;
   initAudio(); if(!audioCtx) return;
   try{
-    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
     const now=audioCtx.currentTime;
     if(type==='mission'){
-      osc.type='sine';
-      [660,880,660,880].forEach((f,i)=> osc.frequency.setValueAtTime(f,now+i*0.15));
-      gain.gain.setValueAtTime(0.3,now);
-      gain.gain.exponentialRampToValueAtTime(0.001,now+0.6);
-      osc.start(now); osc.stop(now+0.6);
+      /* ALLERTA TARGET — nuovo suono potente */
+      playAlertTarget();
     } else if(type==='critical'){
-      osc.type='square';
-      for(let i=0;i<8;i++) osc.frequency.setValueAtTime(i%2===0?1100:600,now+i*0.13);
-      gain.gain.setValueAtTime(0.4,now);
-      gain.gain.exponentialRampToValueAtTime(0.001,now+1.1);
-      osc.start(now); osc.stop(now+1.1);
+      /* CODICE ROSSO — sirena ancora più aggressiva */
+      playAlertTarget();
+      setTimeout(()=>{ try{ playAlertTarget(); }catch(e){} }, 700);
     } else if(type==='sos'){
+      /* SOS (equipaggio): mantenuto simile ma più forte */
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
       osc.type='sawtooth';
-      for(let i=0;i<10;i++) osc.frequency.setValueAtTime(i%2===0?1400:500,now+i*0.15);
-      gain.gain.setValueAtTime(0.45,now);
-      gain.gain.exponentialRampToValueAtTime(0.001,now+1.6);
+      for(let i=0;i<10;i++) osc.frequency.setValueAtTime(i%2===0?1400:500, now+i*0.15);
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now+1.6);
       osc.start(now); osc.stop(now+1.6);
     } else if(type==='msg'){
-      osc.type='sine';
-      osc.frequency.setValueAtTime(800,now);
-      osc.frequency.setValueAtTime(1100,now+0.08);
-      gain.gain.setValueAtTime(0.15,now);
-      gain.gain.exponentialRampToValueAtTime(0.001,now+0.18);
-      osc.start(now); osc.stop(now+0.18);
+      playTone(800, 0, 0.09, 'sine', 0.18);
+      playTone(1100, 0.08, 0.14, 'sine', 0.18);
     }
   }catch(e){}
 }
+
 function vibrate(pattern){
   if(navigator.vibrate) try{ navigator.vibrate(pattern); }catch(e){}
 }
@@ -1004,7 +1087,10 @@ function applyRemoteState(incoming){
 function notifyNewMission(me){
   const isCritical = parseCode(me.mission.code).color === 'R';
   playSound(isCritical?'critical':'mission');
-  vibrate(isCritical?[400,150,400,150,400]:[300,100,300]);
+  vibrate(isCritical
+  ? [500,150,500,150,500,200,500,200,500,150,500,150,500]   // Codice Rosso: 7 impulsi forti
+  : [400,120,400,120,400,150,400,150,400]                    // Normale: 5 impulsi forti
+);
   const t2=document.getElementById('toast2');
   const ico=document.getElementById('toast2Ico');
   const msg=document.getElementById('toast2Msg');
