@@ -251,6 +251,33 @@ min-width:240px;pointer-events:auto;cursor:pointer;animation:ovSlideIn .3s ease}
 @keyframes ovSlideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes ovFadeOut{to{transform:translateX(120%);opacity:0;max-height:0;margin:0;padding:0}}
 @keyframes ovPulseRed{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.7)}50%{box-shadow:0 8px 24px rgba(0,0,0,.7),0 0 0 6px rgba(239,83,80,.35)}}
+
+/* ========= ZONE DRAWING BANNER =========
+   FIX: pointer-events:none sull'intero banner → i click passano alla mappa sotto.
+   Solo i pulsanti e il badge contatore hanno pointer-events:auto per restare utilizzabili. */
+.zone-banner{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+z-index:1000;background:linear-gradient(180deg,#ff9d00,#e68a00);color:#1a1200;
+padding:10px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(255,157,0,.55),
+0 0 0 3px rgba(255,157,0,.25);display:flex;align-items:center;gap:10px;
+font-weight:800;font-size:13px;max-width:calc(100% - 40px);flex-wrap:wrap;
+pointer-events:none; /* <-- click passano sotto */
+animation:zbPulse 2s infinite}
+@keyframes zbPulse{0%,100%{box-shadow:0 8px 30px rgba(255,157,0,.55),0 0 0 3px rgba(255,157,0,.25)}
+50%{box-shadow:0 8px 30px rgba(255,157,0,.55),0 0 0 8px rgba(255,157,0,.15)}}
+.zone-banner .zb-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.zone-banner .zb-count{background:rgba(0,0,0,.22);padding:4px 11px;border-radius:20px;font-size:12px;color:#fff}
+.zone-banner .zb-hint{font-size:11px;font-weight:600;opacity:.75}
+.zone-banner button{border:none;padding:8px 14px;border-radius:8px;font-weight:800;
+cursor:pointer;font-size:12.5px;transition:.15s;white-space:nowrap;
+pointer-events:auto; /* <-- pulsanti cliccabili */ }
+.zone-banner button:hover{transform:translateY(-1px)}
+.zone-banner button:active{transform:translateY(0)}
+.zone-banner button.zb-save{background:#2fa84f;color:#fff}
+.zone-banner button.zb-save:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.zone-banner button.zb-undo{background:rgba(0,0,0,.15);color:#1a1200}
+.zone-banner button.zb-undo:disabled{opacity:.35;cursor:not-allowed}
+.zone-banner button.zb-cancel{background:rgba(0,0,0,.35);color:#fff}
+
 .mk-pin{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
 font-weight:800;font-size:12.5px;position:relative;border:2.5px solid rgba(255,255,255,.9);
 box-shadow:0 4px 14px rgba(0,0,0,.6);background:var(--c);color:var(--f)}
@@ -284,7 +311,9 @@ display:flex;align-items:center;justify-content:center;background:var(--c);
 border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 10px rgba(0,0,0,.6)}
 .poi-pin span{transform:rotate(45deg);font-size:13px}
 .draft-pin{width:22px;height:22px;border-radius:50%;border:3px dashed var(--accent);background:rgba(255,167,38,.2)}
-.zone-vertex{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--accent);cursor:move}
+.zone-vertex{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #e68a00;cursor:move;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.zone-vertex.first{background:#2fa84f;border-color:#fff;animation:vertexPulse 1.4s infinite}
+@keyframes vertexPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,168,79,.7)}50%{box-shadow:0 0 0 8px rgba(47,168,79,0)}}
 .leaflet-popup-content-wrapper{background:#2a2a2a;color:var(--txt);border-radius:12px;
 box-shadow:var(--shadow-lg);border:1px solid #444}
 .leaflet-popup-tip{background:#2a2a2a;border:1px solid #444}
@@ -678,7 +707,7 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
             <button class="btn" id="zoneStartBtn">📍 Inizia disegno</button>
             <button class="btn primary" id="zoneSaveBtn" disabled>💾 Salva zona</button>
           </div>
-          <div class="warn hidden" id="zoneWarn">Clicca sulla mappa per aggiungere i vertici della zona. Poi premi Salva.</div>
+          <div class="warn hidden" id="zoneWarn">Clicca sulla mappa per aggiungere i vertici. Usa il banner in alto per <b>Salvare</b> o <b>Annullare</b>. <b>ESC</b> annulla.</div>
           <div class="zones-list" id="zonesList" style="margin-top:12px"></div>
         </div>
       </div>
@@ -699,6 +728,19 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
         <button data-layer="zones" class="on">🗺️ Zone</button>
         <button data-layer="tracks" class="">👣 Traccia</button>
       </div>
+
+      <!-- BANNER DISEGNO ZONA — pointer-events:none, i click passano alla mappa -->
+      <div id="zoneBanner" class="zone-banner hidden">
+        <span class="zb-info">
+          🚧 <span>Disegno zona</span>
+          <span class="zb-count" id="zoneBannerCount">0 punti</span>
+          <span class="zb-hint">· click mappa = vertice · doppio click = chiudi</span>
+        </span>
+        <button class="zb-undo" id="zoneBannerUndo" disabled>↶ Indietro</button>
+        <button class="zb-save" id="zoneBannerSave" disabled>💾 Salva</button>
+        <button class="zb-cancel" id="zoneBannerCancel">✕ Annulla (ESC)</button>
+      </div>
+
       <div class="map-overlays" id="mapOverlays"></div>
       <div class="map-hint">Clicca sulla mappa per scegliere il punto · <b>Ctrl+K</b> ricerca</div>
     </div>
@@ -1100,7 +1142,6 @@ try{
     if(tg.returnCode===undefined) tg.returnCode=null;
     if(!Array.isArray(tg.photos)) tg.photos=[];
     if(tg.ack===undefined) tg.ack=null;
-    /* Migrazione chat dal target al team */
     if(Array.isArray(tg.chat) && tg.chat.length){
       const t=S.teams.find(x=>x.id===tg.teamIds[0]);
       if(t){ if(!Array.isArray(t.chat)) t.chat=[]; t.chat=t.chat.concat(tg.chat.map(m=>Object.assign({},m,{teamId:t.id}))); }
@@ -1430,9 +1471,17 @@ function initMap(){
     if(zoneDrawing){
       zonePoints.push([e.latlng.lat,e.latlng.lng]);
       renderZoneDraft();
+      updateZoneBanner();
       return;
     }
     setDraft(e.latlng.lat,e.latlng.lng,'');
+  });
+  map.on('dblclick',e=>{
+    if(zoneDrawing){
+      L.DomEvent.stopPropagation(e);
+      if(zonePoints.length>=3){ saveZone(); }
+      else { toast('⚠️ Servono almeno 3 punti per chiudere la zona'); }
+    }
   });
   map.on('popupopen',e=>{
     const m=e.popup && e.popup._source;
@@ -1461,11 +1510,40 @@ function renderZoneDraft(){
   groups.zoneDraft.clearLayers();
   if(!zonePoints.length) return;
   zonePoints.forEach((p,i)=>{
-    L.marker(p,{icon:L.divIcon({className:'',html:'<div class="zone-vertex"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).addTo(groups.zoneDraft);
+    const isFirst=i===0;
+    L.marker(p,{icon:L.divIcon({className:'',html:'<div class="zone-vertex'+(isFirst?' first':'')+'"></div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(groups.zoneDraft);
   });
   if(zonePoints.length>=2){
     L.polyline(zonePoints,{color:'#ffa726',weight:2,dashArray:'5,5'}).addTo(groups.zoneDraft);
   }
+  if(zonePoints.length>=3){
+    L.polygon(zonePoints,{color:'#ffa726',weight:1.5,fillColor:'#ffa726',fillOpacity:.15,dashArray:'4,4'}).addTo(groups.zoneDraft);
+  }
+}
+function updateZoneBanner(){
+  const banner=document.getElementById('zoneBanner');
+  const count=document.getElementById('zoneBannerCount');
+  const saveBtn=document.getElementById('zoneBannerSave');
+  const undoBtn=document.getElementById('zoneBannerUndo');
+  if(!banner) return;
+  if(!zoneDrawing){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  if(count) count.textContent=zonePoints.length+(zonePoints.length===1?' punto':' punti');
+  if(saveBtn) saveBtn.disabled=zonePoints.length<3;
+  if(undoBtn) undoBtn.disabled=zonePoints.length===0;
+}
+function cancelZoneDrawing(){
+  zoneDrawing=false; zonePoints=[];
+  if(groups.zoneDraft) groups.zoneDraft.clearLayers();
+  const startBtn=document.getElementById('zoneStartBtn');
+  const saveBtn=document.getElementById('zoneSaveBtn');
+  if(startBtn) startBtn.disabled=false;
+  if(saveBtn) saveBtn.disabled=true;
+  const warn=document.getElementById('zoneWarn'); if(warn) warn.classList.add('hidden');
+  const nameInp=document.getElementById('zoneName'); if(nameInp) nameInp.value='';
+  if(map){ map.doubleClickZoom.enable(); }
+  updateZoneBanner();
+  toast('✕ Disegno zona annullato');
 }
 function targetIcon(tg){
   const pending=tg.status==='in_attesa', closed=tg.status==='chiuso';
@@ -1589,10 +1667,16 @@ function renderMap(){
     mk.addTo(groups.teams);
   }); }
   if(layerVis.zones){
+    /* FIX: le zone NON devono catturare i click — interactive:false e nessun popup.
+       Così cliccando dentro una zona si crea liberamente un draft/target. */
     S.zones.forEach(z=>{
-      const poly=L.polygon(z.points,{color:z.color||'#ab47bc',weight:2,fillOpacity:.12,fillColor:z.color||'#ab47bc'});
-      poly.bindPopup('<b>'+esc(z.name||'Zona')+'</b><br><span class="muted">Click destro per opzioni</span>');
-      poly.on('contextmenu',()=>{ if(confirm('Eliminare la zona "'+(z.name||'—')+'"?')){ S.zones=S.zones.filter(x=>x.id!==z.id); save(); render(); }});
+      const poly=L.polygon(z.points,{
+        color:z.color||'#ab47bc',
+        weight:2,
+        fillOpacity:.12,
+        fillColor:z.color||'#ab47bc',
+        interactive:false
+      });
       poly.addTo(groups.zones);
     });
   }
@@ -1917,7 +2001,6 @@ function renderTeamSelect(){
   });
   sel.innerHTML='<option value="">⏳ Nessuna (crea target in attesa)</option>'+sorted.map(t=>{
     const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;
-    const crew=crewInfo(t);
     const tag=!t.operational?'⛔ ':(t.mission?'🚨 ':'✅ ');
     let dist='';
     if(draft){ const d=haversine(t.lat,t.lng,draft.lat,draft.lng); dist=' · '+(d<1000?Math.round(d)+'m':(d/1000).toFixed(1)+'km'); }
@@ -2097,7 +2180,6 @@ function renderBroadcastView(){
     }).join('');
   }
   setTimeout(()=>{ wrap.scrollTop=wrap.scrollHeight; },30);
-  /* Mark as read */
   if(arr.length) localStorage.setItem('sge_bcast_read', Date.now());
   updateTabBadges();
 }
@@ -2160,18 +2242,15 @@ function renderDashboard(){
   const last24h=S.targets.filter(tg=>tg.activatedAt && (now-tg.activatedAt)<24*60*60*1000);
   const total=S.targets.length;
   const closed=S.targets.filter(tg=>tg.status==='chiuso');
-  /* Interventi per ora (ultime 24h) */
   const hours=new Array(24).fill(0);
   last24h.forEach(tg=>{
     const h = new Date(tg.activatedAt).getHours();
     hours[h]++;
   });
   const maxH=Math.max(1,...hours);
-  /* Distribuzione codici colore */
   const byColor={R:0,G:0,V:0,B:0,N:0};
   S.targets.forEach(tg=>{ const c=parseCode(tg.code).color; if(c) byColor[c]++; });
   const colorTot=Object.values(byColor).reduce((a,b)=>a+b,0)||1;
-  /* Tempi medi */
   const timesAcc={};
   closed.forEach(tg=>{
     const t=computeTimes(tg);
@@ -2179,7 +2258,6 @@ function renderDashboard(){
     if(t.t2 && t.t1){ const d=t.t2-t.t1; timesAcc.travel=(timesAcc.travel||[]); timesAcc.travel.push(d); }
   });
   const avg=arr=>arr&&arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
-  /* Squadre più attive */
   const teamCount={};
   S.targets.forEach(tg=>{ (tg.teamIds||[]).forEach(tid=>{ teamCount[tid]=(teamCount[tid]||0)+1; }); });
   const topTeams=Object.keys(teamCount).map(tid=>{
@@ -2187,7 +2265,6 @@ function renderDashboard(){
     return t?{name:t.name,count:teamCount[tid]}:null;
   }).filter(Boolean).sort((a,b)=>b.count-a.count).slice(0,6);
   let h='';
-  /* Card 1: statistiche generali */
   h+='<div class="dash-card"><h3>📊 Numeri</h3>'+
     '<div class="dash-stat-row"><span class="dsr-name">Interventi totali</span><span class="dsr-val">'+total+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Ultimi 24h</span><span class="dsr-val">'+last24h.length+'</span></div>'+
@@ -2197,12 +2274,10 @@ function renderDashboard(){
     '<div class="dash-stat-row"><span class="dsr-name">Tempo medio dispatch</span><span class="dsr-val">'+fmtDur(avg(timesAcc.dispatch))+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Tempo medio viaggio</span><span class="dsr-val">'+fmtDur(avg(timesAcc.travel))+'</span></div>'+
   '</div>';
-  /* Card 2: interventi per ora */
   h+='<div class="dash-card"><h3>🕐 Interventi per ora (ultime 24h)</h3>'+
     '<div class="dash-bar">'+
     hours.map((v,i)=>'<div class="bar" style="height:'+Math.max(4, (v/maxH)*140)+'px" title="'+i+':00 — '+v+' interventi"><span class="bar-lbl">'+i+'</span></div>').join('')+
     '</div></div>';
-  /* Card 3: distribuzione codici */
   h+='<div class="dash-card"><h3>🎨 Distribuzione codici</h3>'+
     '<div class="dash-bar-wrap">'+
     COLOR_ORDER.map(k=>{ const p=(byColor[k]/colorTot*100).toFixed(1); return byColor[k]?('<div class="seg" style="flex:'+byColor[k]+';background:'+COLORS[k].hex+'"></div>'):''; }).join('')+
@@ -2210,12 +2285,10 @@ function renderDashboard(){
     '<div class="dash-legend">'+
     COLOR_ORDER.map(k=>{ const p=colorTot?Math.round(byColor[k]/colorTot*100):0; return '<div class="dash-leg"><span class="dl-dot" style="background:'+COLORS[k].hex+'"></span>'+COLORS[k].label+' <b>'+byColor[k]+'</b> ('+p+'%)</div>'; }).join('')+
     '</div></div>';
-  /* Card 4: top squadre */
   h+='<div class="dash-card"><h3>🏆 Squadre più impegnate</h3>';
   if(!topTeams.length) h+='<div class="empty">Nessun dato</div>';
   else h+=topTeams.map(t=>'<div class="dash-stat-row"><span class="dsr-name">'+esc(t.name)+'</span><span class="dsr-val">'+t.count+' interventi</span></div>').join('');
   h+='</div>';
-  /* Card 5: distribuzione mezzi */
   const byType={};
   S.teams.forEach(t=>{ const k=TEAM_TYPES[t.type]?t.type:'auto'; byType[k]=(byType[k]||0)+1; });
   h+='<div class="dash-card"><h3>🚑 Flotta</h3>';
@@ -2480,7 +2553,6 @@ function renderTeamModal(id){
       const ack=ackStatus(t); if(ack) h+='<div class="info" style="margin-bottom:10px">Conferma: <b style="color:'+ack.color+'">'+ack.label+'</b></div>';
       h+='<div class="row"><button class="btn ghost" id="mCloseBtn">✔ Chiudi missione</button><button class="btn ghost" id="mFocusBtn">🎯 Vai al target</button></div>';
     } else h+='<div class="empty">Nessuna missione attiva</div>';
-    /* Fascia oraria */
     if(t.activeFrom||t.activeTo){
       const af=t.activeFrom?new Date(t.activeFrom).toLocaleString('it-IT'):'—';
       const at=t.activeTo?new Date(t.activeTo).toLocaleString('it-IT'):'—';
@@ -2915,24 +2987,37 @@ function switchView(v){
    ========================================================= */
 function startZoneDrawing(){
   zoneDrawing=true; zonePoints=[];
-  document.getElementById('zoneStartBtn').disabled=true;
-  document.getElementById('zoneSaveBtn').disabled=false;
-  document.getElementById('zoneWarn').classList.remove('hidden');
-  toast('📍 Clicca sulla mappa per aggiungere vertici');
+  const startBtn=document.getElementById('zoneStartBtn');
+  const saveBtn=document.getElementById('zoneSaveBtn');
+  const warn=document.getElementById('zoneWarn');
+  if(startBtn) startBtn.disabled=true;
+  if(saveBtn) saveBtn.disabled=true;
+  if(warn) warn.classList.remove('hidden');
+  if(map){ map.doubleClickZoom.disable(); }
+  updateZoneBanner();
+  toast('📍 Clicca sulla mappa per aggiungere vertici · doppio click o Salva per chiudere');
 }
+
 function saveZone(){
-  if(zonePoints.length<3){ alert('Servono almeno 3 punti.'); return; }
-  const name=document.getElementById('zoneName').value.trim()||('Zona '+(S.zones.length+1));
+  if(zonePoints.length<3){ alert('Servono almeno 3 punti per creare una zona.'); return; }
+  const nameInp=document.getElementById('zoneName');
+  const name=(nameInp&&nameInp.value.trim())||('Zona '+(S.zones.length+1));
   const colors=['#ab47bc','#4da3ff','#4caf50','#ffa726','#ef5350','#06b6d4'];
   const color=colors[S.zones.length%colors.length];
   S.zones.push({id:uid('z'),name,color,points:zonePoints.slice()});
-  zonePoints=[]; zoneDrawing=false;
-  document.getElementById('zoneStartBtn').disabled=false;
-  document.getElementById('zoneSaveBtn').disabled=true;
-  document.getElementById('zoneWarn').classList.add('hidden');
-  document.getElementById('zoneName').value='';
+  zoneDrawing=false; zonePoints=[];
+  if(groups.zoneDraft) groups.zoneDraft.clearLayers();
+  const startBtn=document.getElementById('zoneStartBtn');
+  const saveBtn=document.getElementById('zoneSaveBtn');
+  const warn=document.getElementById('zoneWarn');
+  if(startBtn) startBtn.disabled=false;
+  if(saveBtn) saveBtn.disabled=true;
+  if(warn) warn.classList.add('hidden');
+  if(nameInp) nameInp.value='';
+  if(map){ map.doubleClickZoom.enable(); }
+  updateZoneBanner();
   save(); render();
-  toast('🗺️ Zona salvata');
+  toast('🗺️ Zona "'+name+'" salvata');
 }
 
 /* =========================================================
@@ -3006,6 +3091,20 @@ document.getElementById('printReportBtn').onclick=printReport;
 document.getElementById('refreshDashBtn').onclick=renderDashboard;
 document.getElementById('zoneStartBtn').onclick=startZoneDrawing;
 document.getElementById('zoneSaveBtn').onclick=saveZone;
+(function(){
+  const saveB=document.getElementById('zoneBannerSave');
+  const cancelB=document.getElementById('zoneBannerCancel');
+  const undoB=document.getElementById('zoneBannerUndo');
+  if(saveB) saveB.onclick=()=>saveZone();
+  if(cancelB) cancelB.onclick=()=>cancelZoneDrawing();
+  if(undoB) undoB.onclick=()=>{
+    if(!zoneDrawing||!zonePoints.length) return;
+    zonePoints.pop();
+    renderZoneDraft();
+    updateZoneBanner();
+    toast('↶ Rimosso ultimo punto ('+zonePoints.length+' rimasti)');
+  };
+})();
 (function(){ const sel=document.getElementById('poiCat'); sel.innerHTML=Object.keys(POI_CATS).map(k=>'<option value="'+k+'">'+POI_CATS[k].icon+' '+POI_CATS[k].label+'</option>').join(''); })();
 document.getElementById('poiForm').onsubmit=e=>{
   e.preventDefault();
@@ -3020,6 +3119,9 @@ document.getElementById('poiForm').onsubmit=e=>{
 document.getElementById('resetBtn').onclick=()=>{
   if(!confirm('Ripristinare i dati demo?')) return;
   S=defaultState(); draft=null; filterColor=null; selection=null;
+  zoneDrawing=false; zonePoints=[];
+  if(groups.zoneDraft) groups.zoneDraft.clearLayers();
+  updateZoneBanner();
   save(); render();
   if(map) map.setView([S.center.lat,S.center.lng],15);
 };
@@ -3047,7 +3149,11 @@ document.addEventListener('keydown',e=>{
   const tag=(e.target.tagName||'').toLowerCase();
   const isInput=tag==='input'||tag==='textarea'||tag==='select';
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); showSearch(); return; }
-  if(e.key==='Escape'){ if(!searchModal.classList.contains('hidden')){ hideSearch(); } return; }
+  if(e.key==='Escape'){
+    if(zoneDrawing){ e.preventDefault(); cancelZoneDrawing(); return; }
+    if(!searchModal.classList.contains('hidden')){ hideSearch(); return; }
+    return;
+  }
   if(isInput) return;
   if(e.key==='n'||e.key==='N'){ e.preventDefault(); switchView('sala'); const acc=document.getElementById('accMission'); if(acc) acc.classList.add('open'); const inp=document.getElementById('addrInput'); if(inp){ inp.focus(); inp.scrollIntoView({behavior:'smooth',block:'center'}); } }
   if(e.key>='1'&&e.key<='5'){ const idx=+e.key-1; if(idx<COLOR_ORDER.length){ filterColor=COLOR_ORDER[idx]; render(); } }
@@ -3180,7 +3286,8 @@ updateSolEqBadge();
 updateTabBadges();
 
 if('Notification' in window && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); }
-idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } });
+idbLatestLoad();
+function idbLatestLoad(){ idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } }); }
 
 })();
 </script>
