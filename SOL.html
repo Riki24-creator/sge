@@ -563,6 +563,19 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
 background:#2d2d2d;border-radius:8px;padding:9px 11px;margin-top:12px;line-height:1.4}
 .qr-hint{font-size:11.5px;color:#ffcc80;background:rgba(255,167,38,.08);
 border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-top:12px;line-height:1.45;text-align:left}
+
+/* ===== MULTI-OPERATORE ===== */
+.op-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;
+  background:#2a2a2a;border:1px solid #3a3a3a;font-size:11px;font-weight:800;color:#ccc}
+.op-chip .op-dot{width:8px;height:8px;border-radius:50%;background:var(--c,#888);
+  box-shadow:0 0 6px var(--c,#888);animation:opPulse 2s infinite}
+@keyframes opPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.op-chip.me{border-color:var(--accent);color:#ffcc80}
+.op-log-item{padding:8px 12px;border-bottom:1px solid #2a2a30;font-size:12px;display:flex;gap:10px}
+.op-log-item:last-child{border-bottom:none}
+.op-log-item .op-time{color:var(--muted);flex-shrink:0;width:80px;font-variant-numeric:tabular-nums}
+.op-log-item .op-name{font-weight:800;flex-shrink:0;min-width:70px}
+
 @media print{
   body{background:#fff;color:#000}
   .topbar,.sidebar,.map-wrap,.modal,.toast,.sos-banner{display:none !important}
@@ -590,10 +603,12 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
     <span class="room-badge" id="roomBadge">🏷️ <span id="roomLabel">—</span></span>
     <span class="net-badge" id="netBadge"><span class="n-dot"></span><span id="netLabel">rete…</span></span>
     <span class="net-badge" id="solSyncDot"><span class="n-dot"></span><span id="eqLabel">EQ offline</span></span>
+    <div class="top-badges" id="opsOnlineBadge" style="margin-left:6px" title="Operatori online"></div>
   </div>
   <button class="btn-export" id="exportBtn">📥 CSV</button>
   <button class="btn-export" id="handoverBtn">📤 Handover</button>
   <button class="btn-export" id="configBtn">⚙️</button>
+  <button class="btn-export" id="opBtn" title="Operatore corrente">👤 <span id="opNameLbl">—</span></button>
   <span class="clock" id="clock"></span>
   <button class="btn ghost mini" id="resetBtn">↺</button>
 </header>
@@ -874,7 +889,56 @@ const BACKUP_PREFIX='sge_backup_';
 const IDB_NAME='sge_db';
 const IDB_STORE='backups';
 const NOTIF_TEMPLATES=['Paziente incosciente','Ustione grave','Trauma da caduta','Sospetto infarto','Difficoltà respiratoria','Emorragia attiva','Ferita da taglio','Intossicazione','Crisi epilettica','Accesso difficoltoso'];
-
+/* =========================================================
+   MULTI-OPERATORE — Identità + Presenza
+   ========================================================= */
+const OP_KEY='sge_op_identity';
+let opIdentity=(function(){
+  try{const r=localStorage.getItem(OP_KEY);return r?JSON.parse(r):null;}catch(e){return null;}
+})();
+function pickOpColor(){
+  const palette=['#ffa726','#4da3ff','#4caf50','#ab47bc','#ef5350','#06b6d4','#f59e0b','#8b5cf6'];
+  return palette[Math.floor(Math.random()*palette.length)];
+}
+function saveOpIdentity(name,color){
+  opIdentity={id:'op_'+Math.random().toString(36).slice(2,8),name:(name||'Anonimo').trim().slice(0,24),
+    color:color||pickOpColor(),joinedAt:Date.now()};
+  try{localStorage.setItem(OP_KEY,JSON.stringify(opIdentity));}catch(e){}
+}
+function ensureOpIdentity(){
+  if(opIdentity&&opIdentity.name) return opIdentity;
+  const name=prompt('👤 Nome operatore (per identificarti in sala):','Op'+(Math.floor(Math.random()*90)+10));
+  saveOpIdentity(name||'Anonimo');
+  return opIdentity;
+}
+function heartbeatOp(){
+  if(!opIdentity) return;
+  if(!S._operators||typeof S._operators!=='object') S._operators={};
+  S._operators[opIdentity.id]={
+    id:opIdentity.id,name:opIdentity.name,color:opIdentity.color,
+    joinedAt:opIdentity.joinedAt||Date.now(),lastSeen:Date.now()
+  };
+  /* cleanup stale > 45s */
+  const cutoff=Date.now()-45000;
+  Object.keys(S._operators).forEach(k=>{
+    if(!S._operators[k]||S._operators[k].lastSeen<cutoff) delete S._operators[k];
+  });
+}
+function getOnlineOps(){
+  const ops=S._operators||{};
+  const cutoff=Date.now()-45000;
+  return Object.values(ops).filter(o=>o.lastSeen>cutoff).sort((a,b)=>(a.joinedAt||0)-(b.joinedAt||0));
+}
+function renderOpsOnline(){
+  const el=document.getElementById('opsOnlineBadge');
+  if(!el) return;
+  const ops=getOnlineOps();
+  el.innerHTML=ops.map(o=>{
+    const me=opIdentity&&o.id===opIdentity.id;
+    return '<span class="op-chip'+(me?' me':'')+'" style="--c:'+o.color+'"><span class="op-dot"></span>'+esc(o.name)+(me?' (tu)':'')+'</span>';
+  }).join('');
+  el.title=ops.map(o=>o.name).join(', ')+' online';
+}
 const COLORS={
   R:{key:'R',label:'Rosso',hex:'#e53935',fg:'#ffffff',sev:5},
   G:{key:'G',label:'Giallo',hex:'#f2c200',fg:'#2a2200',sev:4},
@@ -1278,8 +1342,14 @@ async function handleIncomingMessage(payload){
 
 async function publishState(){
   if(_skipPublish) return;
+  heartbeatOp();
   const rev=Date.now()+Math.random();
   S._rev=rev; S._writer=MY_PAGE_ID; _lastRev=rev;
+  if(opIdentity){
+    S._opId=opIdentity.id;
+    S._opName=opIdentity.name;
+    S._opColor=opIdentity.color;
+  }
   const json=JSON.stringify(S);
   try{ localStorage.setItem(KEY,json); }catch(e){}
   idbSave(S);
@@ -1294,6 +1364,7 @@ async function publishState(){
   updateSolEqBadge();
 }
 function save(){ publishState(); }
+
 
 function applyRemoteState(incoming){
   if(!incoming || !incoming._rev) return;
@@ -1310,6 +1381,7 @@ function applyRemoteState(incoming){
     if(!S.chatRead || typeof S.chatRead!=='object') S.chatRead={};
     if(!S.center) S.center={lat:45.5195,lng:9.0784};
     if(!S.config) S.config={brokers:DEFAULT_BROKERS.slice(),activeBrokerIdx:0,encryptKey:'',requireEncryption:false};
+    if(!S._operators||typeof S._operators!=='object') S._operators={};
     if(!Array.isArray(S.config.brokers)) S.config.brokers=DEFAULT_BROKERS.slice();
     S.teams.forEach(t=>{
       if(!CREW_TYPES[t.crew]) t.crew='bravo';
@@ -1330,9 +1402,11 @@ function applyRemoteState(incoming){
     if(S.sos && S.sos.id !== lastSOSId){
       lastSOSId = S.sos.id;
       playSound('sos');
+      if(navigator.vibrate) try{ navigator.vibrate([300,80,300,80,300,80,300,80,300]); }catch(e){}
       showSosBanner(S.sos);
     }
     render();
+        renderOpsOnline();
   } finally { _skipPublish=false; }
   updateSolEqBadge();
 }
@@ -1406,7 +1480,8 @@ function generateNotificationsFromDiff(prev, next){
 function addNotification(type,teamId,targetId,text,sub,critical,chatTs){
   if(!S.notifications) S.notifications=[];
   const id='nt-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
-  const notif={id,ts:Date.now(),type,teamId:teamId||null,targetId:targetId||null,text,sub:sub||'',read:false,critical:!!critical,chatTs:chatTs||null};
+  const notif={id,ts:Date.now(),type,teamId:teamId||null,targetId:targetId||null,text,sub:sub||'',read:false,critical:!!critical,chatTs:chatTs||null,
+    opId:opIdentity?opIdentity.id:null, opName:opIdentity?opIdentity.name:null};
   S.notifications.push(notif);
   if(S.notifications.length>500) S.notifications=S.notifications.slice(-500);
   showOverlay(notif);
@@ -1450,19 +1525,86 @@ let audioCtx=null, audioEnabled=false;
 function initAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
 function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); audioEnabled=true; }
 document.addEventListener('click',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
+
+/* Helper: nota tonale */
+function solTone(freq, start, duration, type, gainPeak){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.type=type||'sine';
+    osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t0=audioCtx.currentTime+start;
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(gainPeak||0.3, t0+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+    osc.start(t0); osc.stop(t0+duration+0.05);
+  }catch(e){}
+}
+/* Helper: buzz quadra (per SOS) */
+function solBuzz(freq, start, duration, gainPeak){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    osc.type='square';
+    osc.frequency.value=freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t0=audioCtx.currentTime+start;
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(gainPeak||0.3, t0+0.004);
+    gain.gain.setValueAtTime(gainPeak||0.3, t0+duration-0.006);
+    gain.gain.linearRampToValueAtTime(0, t0+duration);
+    osc.start(t0); osc.stop(t0+duration+0.02);
+  }catch(e){}
+}
+/* === SUONO #2 del demo: SOS ===
+   buzz 1000 Hz e 500 Hz alternati, 5 cicli da 0.22s ciascuno
+   Molto insistente, tipo sirena d'allarme. */
+function playSOSAlert(){
+  if(!audioCtx) return;
+  try{
+    for(let i=0;i<5;i++){
+      solBuzz(1000, i*0.22,        0.12, 0.4);   // bip alto
+      solBuzz(500,  i*0.22 + 0.11, 0.12, 0.4);   // bip basso
+    }
+    /* Aggiungo un secondo passaggio per renderlo più "urgente" (ripetuto) */
+    for(let i=0;i<3;i++){
+      solBuzz(1200, 1.15 + i*0.22,        0.12, 0.42);
+      solBuzz(600,  1.15 + i*0.22 + 0.11, 0.12, 0.42);
+    }
+  }catch(e){}
+}
+
 function playSound(type){
   if(!audioEnabled) return;
   initAudio(); if(!audioCtx) return;
   try{
-    const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
     const now=audioCtx.currentTime;
-    if(type==='mission'){ osc.type='sine'; [880,660,880].forEach((f,i)=>osc.frequency.setValueAtTime(f,now+i*0.14)); gain.gain.setValueAtTime(0.25,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.45); osc.start(now); osc.stop(now+0.45); }
-    else if(type==='sos'){ osc.type='square'; for(let i=0;i<6;i++) osc.frequency.setValueAtTime(i%2===0?1200:400,now+i*0.18); gain.gain.setValueAtTime(0.35,now); gain.gain.exponentialRampToValueAtTime(0.001,now+1.1); osc.start(now); osc.stop(now+1.1); }
-    else if(type==='ack'){ osc.type='sine'; [600,900].forEach((f,i)=>osc.frequency.setValueAtTime(f,now+i*0.09)); gain.gain.setValueAtTime(0.15,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.2); osc.start(now); osc.stop(now+0.2); }
-    else if(type==='state'){ osc.type='sine'; osc.frequency.setValueAtTime(500,now); osc.frequency.linearRampToValueAtTime(700,now+0.15); gain.gain.setValueAtTime(0.12,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.2); osc.start(now); osc.stop(now+0.2); }
-    else if(type==='close'){ osc.type='sine'; [700,500].forEach((f,i)=>osc.frequency.setValueAtTime(f,now+i*0.08)); gain.gain.setValueAtTime(0.15,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.22); osc.start(now); osc.stop(now+0.22); }
-    else if(type==='msg'){ osc.type='sine'; osc.frequency.setValueAtTime(750,now); osc.frequency.setValueAtTime(1000,now+0.07); gain.gain.setValueAtTime(0.1,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.16); osc.start(now); osc.stop(now+0.16); }
+    if(type==='mission'){
+      solTone(880, 0, 0.15, 'sine', 0.25);
+      solTone(660, 0.14, 0.15, 'sine', 0.25);
+      solTone(880, 0.28, 0.18, 'sine', 0.25);
+    }
+    else if(type==='sos'){
+      /* SOS → SUONO #2 del demo */
+      playSOSAlert();
+    }
+    else if(type==='ack'){
+      solTone(600, 0, 0.09, 'sine', 0.15);
+      solTone(900, 0.09, 0.12, 'sine', 0.15);
+    }
+    else if(type==='state'){
+      solTone(500, 0, 0.15, 'sine', 0.12);
+      solTone(700, 0.15, 0.12, 'sine', 0.12);
+    }
+    else if(type==='close'){
+      solTone(700, 0, 0.09, 'sine', 0.15);
+      solTone(500, 0.08, 0.13, 'sine', 0.15);
+    }
+    else if(type==='msg'){
+      solTone(750, 0, 0.08, 'sine', 0.1);
+      solTone(1000, 0.07, 0.1, 'sine', 0.1);
+    }
   }catch(e){}
 }
 
@@ -3463,6 +3605,26 @@ updateSolEqBadge();
 updateTabBadges();
 
 if('Notification' in window && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); }
+/* ===== MULTI-OPERATORE INIT ===== */
+ensureOpIdentity();
+(function bindOpBtn(){
+  const btn=document.getElementById('opBtn');
+  const lbl=document.getElementById('opNameLbl');
+  if(lbl && opIdentity) lbl.textContent=opIdentity.name;
+  if(btn) btn.onclick=()=>{
+    const cur=opIdentity?opIdentity.name:'';
+    const name=prompt('👤 Nome operatore:', cur);
+    if(name===null) return;
+    if(!name.trim()) return;
+    saveOpIdentity(name.trim());
+    if(lbl) lbl.textContent=opIdentity.name;
+    publishState();
+    renderOpsOnline();
+    toast('👤 Benvenuto, '+opIdentity.name);
+  };
+})();
+renderOpsOnline();
+setInterval(()=>{ heartbeatOp(); publishState(); renderOpsOnline(); }, 15000);
 idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } });
 
 })();
