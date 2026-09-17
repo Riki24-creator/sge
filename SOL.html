@@ -181,6 +181,8 @@ background:rgba(76,175,80,.12);color:#81c784;white-space:nowrap;margin-top:2px}
 .ack-badge{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:20px;margin-left:auto}
 .shift-badge{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:20px;
 background:rgba(77,163,255,.15);color:#9fd0ff}
+.patient-badge{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:20px;
+background:rgba(139,92,246,.18);color:#c4b5fd;margin-left:4px}
 .disp-section{margin-bottom:14px}
 .disp-section h4{margin:0 0 9px;font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:800}
 .disp-card{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:var(--radius-xs);padding:11px 13px;margin-bottom:8px}
@@ -196,7 +198,7 @@ background:rgba(77,163,255,.15);color:#9fd0ff}
 .disp-leg.disp b{color:#81c784}.disp-leg.busy b{color:#ef9a9a}.disp-leg.noop b{color:#a0a0a0}
 .disp-leg::before{content:'';width:7px;height:7px;border-radius:2px;display:inline-block}
 .disp-leg.disp::before{background:var(--ok)}.disp-leg.busy::before{background:var(--err)}.disp-leg.noop::before{background:#5a5a5a}
-.tm-admin{display:flex;align-items:center;gap:10px;background:#2d2d2d;border:1px solid #3a3a3a;
+.tm-admin{display:flex;align-items:center;gap:8px;background:#2d2d2d;border:1px solid #3a3a3a;
 border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:7px}
 .tm-admin:hover{border-color:#4a4a4a}
 .tm-ico{font-size:18px;width:26px;text-align:center;flex-shrink:0}
@@ -252,24 +254,19 @@ min-width:240px;pointer-events:auto;cursor:pointer;animation:ovSlideIn .3s ease}
 @keyframes ovFadeOut{to{transform:translateX(120%);opacity:0;max-height:0;margin:0;padding:0}}
 @keyframes ovPulseRed{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.7)}50%{box-shadow:0 8px 24px rgba(0,0,0,.7),0 0 0 6px rgba(239,83,80,.35)}}
 
-/* ========= ZONE DRAWING BANNER =========
-   FIX: pointer-events:none sull'intero banner → i click passano alla mappa sotto.
-   Solo i pulsanti e il badge contatore hanno pointer-events:auto per restare utilizzabili. */
 .zone-banner{position:absolute;top:14px;left:50%;transform:translateX(-50%);
 z-index:1000;background:linear-gradient(180deg,#ff9d00,#e68a00);color:#1a1200;
 padding:10px 14px;border-radius:12px;box-shadow:0 8px 30px rgba(255,157,0,.55),
 0 0 0 3px rgba(255,157,0,.25);display:flex;align-items:center;gap:10px;
 font-weight:800;font-size:13px;max-width:calc(100% - 40px);flex-wrap:wrap;
-pointer-events:none; /* <-- click passano sotto */
-animation:zbPulse 2s infinite}
+pointer-events:none;animation:zbPulse 2s infinite}
 @keyframes zbPulse{0%,100%{box-shadow:0 8px 30px rgba(255,157,0,.55),0 0 0 3px rgba(255,157,0,.25)}
 50%{box-shadow:0 8px 30px rgba(255,157,0,.55),0 0 0 8px rgba(255,157,0,.15)}}
 .zone-banner .zb-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .zone-banner .zb-count{background:rgba(0,0,0,.22);padding:4px 11px;border-radius:20px;font-size:12px;color:#fff}
 .zone-banner .zb-hint{font-size:11px;font-weight:600;opacity:.75}
 .zone-banner button{border:none;padding:8px 14px;border-radius:8px;font-weight:800;
-cursor:pointer;font-size:12.5px;transition:.15s;white-space:nowrap;
-pointer-events:auto; /* <-- pulsanti cliccabili */ }
+cursor:pointer;font-size:12.5px;transition:.15s;white-space:nowrap;pointer-events:auto}
 .zone-banner button:hover{transform:translateY(-1px)}
 .zone-banner button:active{transform:translateY(0)}
 .zone-banner button.zb-save{background:#2fa84f;color:#fff}
@@ -291,6 +288,9 @@ font-size:12px;font-weight:900;border:2px solid #1a1a1a}
 .mk-pin .mk-count{position:absolute;bottom:-8px;right:-9px;min-width:20px;height:20px;border-radius:50%;
 background:var(--accent);color:#111;display:flex;align-items:center;justify-content:center;
 font-size:11px;font-weight:900;border:2px solid #1a1a1a;padding:0 5px}
+.mk-pin .mk-patient{position:absolute;top:-8px;left:-9px;width:20px;height:20px;border-radius:50%;
+background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;
+font-size:11px;font-weight:900;border:2px solid #1a1a1a}
 @keyframes pulse{0%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,.5)}
 70%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 13px rgba(255,255,255,0)}
 100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}}
@@ -331,6 +331,10 @@ padding:7px 10px;border-radius:8px;font-size:11.5px;margin-top:6px}
 .pp-team-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;cursor:pointer;font-size:12px}
 .pp-team-row:hover{background:rgba(255,167,38,.1)}
 .pp-team-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-patient{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);
+border-radius:10px;padding:9px 11px;margin-top:9px;font-size:12px;line-height:1.5}
+.pp-patient-t{font-size:10px;color:#c4b5fd;text-transform:uppercase;font-weight:800;margin-bottom:6px;letter-spacing:.5px}
+.pp-patient b{color:#c4b5fd}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:flex;
 align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .modal-box{background:#252525;border:1px solid #444;border-radius:16px;width:100%;
@@ -375,12 +379,19 @@ padding:9px 11px;border-radius:var(--radius-xs);outline:none;font-size:13px}
 .chat-input-row button{background:var(--accent);border:none;color:#111;padding:9px 14px;
 border-radius:var(--radius-xs);cursor:pointer;font-weight:700;font-size:13px}
 .chat-input-row button.icon{background:#333;color:var(--txt);border:1px solid #3d3d3d;padding:9px 12px}
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
-.photo-item{position:relative;aspect-ratio:1;border-radius:var(--radius-xs);overflow:hidden;
-background:#1e1e1e;border:1px solid #3a3a3a;cursor:pointer}
-.photo-item img{width:100%;height:100%;object-fit:cover}
-.photo-item .photo-meta{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));
-color:#fff;font-size:9.5px;padding:14px 6px 4px;text-align:center}
+.patient-view{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.35);
+border-radius:12px;padding:14px;margin-bottom:12px}
+.patient-view h4{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+color:#c4b5fd;font-weight:800}
+.patient-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.patient-cell{background:#1e1e1e;border-radius:8px;padding:9px 11px}
+.patient-cell .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.patient-cell .val{font-size:15px;font-weight:800}
+.patient-chief{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.patient-chip{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(139,92,246,.2);color:#c4b5fd;font-weight:700}
+.patient-notes{background:#1e1e1e;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-top:6px;white-space:pre-wrap}
+.avpu-badge{display:inline-flex;align-items:center;gap:5px;font-weight:900;font-size:14px}
+.avpu-badge .dot{width:10px;height:10px;border-radius:50%}
 .sos-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg,#c62828,#8e0000);
 color:#fff;padding:14px 20px;z-index:5000;display:flex;align-items:center;gap:14px;box-shadow:0 6px 20px rgba(0,0,0,.7)}
 .sos-banner .sos-ico{font-size:32px}
@@ -546,6 +557,12 @@ border:1px solid #3a3a3a;border-radius:var(--radius-xs);margin-bottom:6px}
 .zone-color{width:20px;height:20px;border-radius:6px;flex-shrink:0}
 .handover-content{background:#1e1e1e;border:1px solid #3a3a3a;border-radius:10px;
 padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.qr-wrap{text-align:center;padding:16px;background:#1e1e1e;border-radius:12px;border:1px solid #3a3a3a}
+.qr-wrap canvas{background:#fff;padding:10px;border-radius:8px;max-width:100%}
+.qr-url{font-family:monospace;font-size:10.5px;color:var(--muted);word-break:break-all;
+background:#2d2d2d;border-radius:8px;padding:9px 11px;margin-top:12px;line-height:1.4}
+.qr-hint{font-size:11.5px;color:#ffcc80;background:rgba(255,167,38,.08);
+border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-top:12px;line-height:1.45;text-align:left}
 @media print{
   body{background:#fff;color:#000}
   .topbar,.sidebar,.map-wrap,.modal,.toast,.sos-banner{display:none !important}
@@ -729,7 +746,6 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
         <button data-layer="tracks" class="">👣 Traccia</button>
       </div>
 
-      <!-- BANNER DISEGNO ZONA — pointer-events:none, i click passano alla mappa -->
       <div id="zoneBanner" class="zone-banner hidden">
         <span class="zb-info">
           🚧 <span>Disegno zona</span>
@@ -845,6 +861,7 @@ padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;line-heigh
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -890,6 +907,7 @@ const CREW_TYPES={
 };
 const POI_CATS={
   soccorso:{key:'soccorso',label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
+  ospedale:{key:'ospedale',label:'Ospedali',icon:'🏥',color:'#e53935'},
   chiusura:{key:'chiusura',label:'Strade chiuse',icon:'⛔',color:'#ff7043'},
   centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
   info:{key:'info',label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}
@@ -914,12 +932,19 @@ const RETURN_CODES={
   3:{label:'Trasporto codice rosso',icon:'🔴',color:'#e53935',letter:'R'},
   4:{label:'Altro / Trasferimento',icon:'🔀',color:'#8b5cf6',letter:'B'}
 };
+const AVPU_LIST = [
+  {key:'A', label:'Alert', color:'#2fa84f'},
+  {key:'V', label:'Verbal', color:'#f2c200'},
+  {key:'P', label:'Pain', color:'#ff9800'},
+  {key:'U', label:'Unresponsive', color:'#e53935'}
+];
 const TURNOS=['Full','Mattina','Pomeriggio','Notte'];
 const NOTIF_TYPES={
   mission:{icon:'🎯',label:'Missioni'},state:{icon:'🚦',label:'Stati'},
   chat:{icon:'💬',label:'Chat'},ack:{icon:'✅',label:'Conferme'},
   photo:{icon:'📷',label:'Foto'},close:{icon:'🏁',label:'Chiusure'},
-  sos:{icon:'🆘',label:'SOS'},broadcast:{icon:'📣',label:'Broadcast'},info:{icon:'ℹ️',label:'Info'}
+  sos:{icon:'🆘',label:'SOS'},broadcast:{icon:'📣',label:'Broadcast'},
+  patient:{icon:'🩺',label:'Pazienti'},info:{icon:'ℹ️',label:'Info'}
 };
 const TILE_PROVIDERS={
   esri:{label:'Esri Street',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',maxZoom:19},
@@ -981,6 +1006,27 @@ function chatUnreadFor(teamId){
 function totalChatUnread(){ let n=0; S.teams.forEach(t=>{n+=chatUnreadFor(t.id);}); return n; }
 function totalNotifUnread(){ return (S.notifications||[]).filter(n=>!n.read).length; }
 function ackStatus(t){ if(!t.mission) return null; const tg=S.targets.find(x=>x.id===t.mission.targetId); if(!tg||!tg.ack) return {state:'sent',label:'📤 Inviata',color:'#ffcc80'}; return {state:'ack',label:'✅ '+fmtTime(tg.ack.ts),color:'#81c784'}; }
+/* Verifica se target ha dati paziente utili */
+function hasPatientData(tg){
+  if(!tg || !tg.patient) return false;
+  const p=tg.patient;
+  return (p.age!=null)||p.sex||p.avpu||(Array.isArray(p.chief)&&p.chief.length>0)||(p.notes&&p.notes.length>0);
+}
+function patientSummaryText(tg){
+  if(!hasPatientData(tg)) return '';
+  const p=tg.patient; const bits=[];
+  if(p.age!=null) bits.push('Età: '+p.age);
+  if(p.sex) bits.push('Sesso: '+p.sex);
+  if(p.avpu) bits.push('AVPU: '+p.avpu);
+  if(Array.isArray(p.chief) && p.chief.length) bits.push('Motivo: '+p.chief.join(', '));
+  return bits.join(' · ');
+}
+/* Trova ospedale più vicino */
+function nearestHospital(lat,lng){
+  const hospitals=(S.pois||[]).filter(p=>p.cat==='ospedale');
+  if(!hospitals.length) return null;
+  return hospitals.map(p=>({poi:p,dist:haversine(lat,lng,p.lat,p.lng)})).sort((a,b)=>a.dist-b.dist)[0].poi;
+}
 
 /* =========================================================
    CRYPTO (AES-GCM)
@@ -1076,7 +1122,8 @@ function defaultState(){
       assignedAt:pending?null:now-minAgo*60000,
       teamIds:ids,teamName:ids.length?(teamRefs[0]&&teamRefs[0].name):null,
       status:pending?'in_attesa':'aperto',closedAt:null,closeNote:'',returnCode:null,
-      photos:[],ack:null};
+      photos:[],ack:null,
+      patient:{age:null,sex:null,avpu:null,chief:[],notes:'',ts:null}};
   }
   const targets=[
     mkTarget('K2R','Via Demo 12 — Palazzina A',0.0062,0.0021,[teams[0]],12,false),
@@ -1097,6 +1144,8 @@ function defaultState(){
     {id:uid('poi'),cat:'centrale',name:'Centrale Operativa',lat:C.lat-0.0010,lng:C.lng-0.0010,note:'Sala operativa principale'},
     {id:uid('poi'),cat:'soccorso',name:'PMA — Punto Medicazione Avanzata',lat:C.lat+0.0020,lng:C.lng-0.0035,note:'2 posti letto'},
     {id:uid('poi'),cat:'soccorso',name:'Postazione Sanitaria Nord',lat:C.lat+0.0075,lng:C.lng+0.0010,note:''},
+    {id:uid('poi'),cat:'ospedale',name:'Ospedale Civile — Pronto Soccorso',lat:C.lat-0.0065,lng:C.lng-0.0020,note:'DEA h24'},
+    {id:uid('poi'),cat:'ospedale',name:'Policlinico — PS Pediatrico',lat:C.lat+0.0085,lng:C.lng+0.0050,note:'PS Pediatrico'},
     {id:uid('poi'),cat:'chiusura',name:'Via Chiusa — Varco 4',lat:C.lat-0.0050,lng:C.lng+0.0025,note:'Transennata'},
     {id:uid('poi'),cat:'info',name:'Eliporto',lat:C.lat+0.0090,lng:C.lng-0.0060,note:'Atterraggio H24'}
   ];
@@ -1142,6 +1191,7 @@ try{
     if(tg.returnCode===undefined) tg.returnCode=null;
     if(!Array.isArray(tg.photos)) tg.photos=[];
     if(tg.ack===undefined) tg.ack=null;
+    if(!tg.patient) tg.patient={age:null,sex:null,avpu:null,chief:[],notes:'',ts:null};
     if(Array.isArray(tg.chat) && tg.chat.length){
       const t=S.teams.find(x=>x.id===tg.teamIds[0]);
       if(t){ if(!Array.isArray(t.chat)) t.chat=[]; t.chat=t.chat.concat(tg.chat.map(m=>Object.assign({},m,{teamId:t.id}))); }
@@ -1167,7 +1217,7 @@ let _lastSnapshot=null;
 
 function snapshotState(){
   return JSON.parse(JSON.stringify({
-    targets:S.targets.map(tg=>({id:tg.id,status:tg.status,teamIds:tg.teamIds||[],ack:tg.ack,closedAt:tg.closedAt,code:tg.code,address:tg.address,photos:(tg.photos||[]).length})),
+    targets:S.targets.map(tg=>({id:tg.id,status:tg.status,teamIds:tg.teamIds||[],ack:tg.ack,closedAt:tg.closedAt,code:tg.code,address:tg.address,photos:(tg.photos||[]).length,patient:tg.patient,patientTs:tg.patient?tg.patient.ts:null})),
     teams:S.teams.map(t=>({id:t.id,name:t.name,status:t.status,mission:t.mission?{targetId:t.mission.targetId,code:t.mission.code}:null,chatLen:(t.chat||[]).length,chatLast:(t.chat&&t.chat.length)?t.chat[t.chat.length-1]:null,photosLen:(t.photos||[]).length,trackLen:(t.track||[]).length})),
     broadcastLen:(S.broadcast||[]).length,
     broadcastLast:(S.broadcast&&S.broadcast.length)?S.broadcast[S.broadcast.length-1]:null,
@@ -1273,6 +1323,7 @@ function applyRemoteState(incoming){
       if(!Array.isArray(tg.teamIds)){ tg.teamIds=tg.teamId?[tg.teamId]:[]; delete tg.teamId; }
       if(!Array.isArray(tg.photos)) tg.photos=[];
       if(tg.ack===undefined) tg.ack=null;
+      if(!tg.patient) tg.patient={age:null,sex:null,avpu:null,chief:[],notes:'',ts:null};
     });
     generateNotificationsFromDiff(prevSnap, snapshotState());
     _lastSnapshot = snapshotState();
@@ -1295,6 +1346,16 @@ function generateNotificationsFromDiff(prev, next){
       return;
     }
     if(old.status!==ntg.status && ntg.status==='chiuso') events.push({type:'close',teamId:null,targetId:ntg.id,text:'Target '+ntg.code+' chiuso',sub:ntg.address||''});
+    /* Cambio dati paziente */
+    if(ntg.patient && ntg.patient.ts && (!old.patient || old.patient.ts !== ntg.patient.ts)){
+      const who = ntg.patient.by ? ntg.patient.by+': ' : '';
+      const summary = [];
+      if(ntg.patient.age!=null) summary.push(ntg.patient.age+' anni');
+      if(ntg.patient.sex) summary.push('sesso '+ntg.patient.sex);
+      if(ntg.patient.avpu) summary.push('AVPU '+ntg.patient.avpu);
+      if(Array.isArray(ntg.patient.chief) && ntg.patient.chief.length) summary.push(ntg.patient.chief.join(', '));
+      events.push({type:'patient',teamId:ntg.teamIds[0]||null,targetId:ntg.id,text:'🩺 '+who+ntg.code+' — scheda paziente',sub:summary.join(' · ')});
+    }
     const oldIds=new Set(old.teamIds||[]);
     (ntg.teamIds||[]).forEach(tid=>{
       if(!oldIds.has(tid)){
@@ -1552,7 +1613,8 @@ function targetIcon(tg){
   const cls=(closed?'closed ':'')+(!closed?'pulse':'');
   const n=(tg.teamIds||[]).length;
   const countBadge=n>1?'<span class="mk-count">'+n+'</span>':'';
-  return L.divIcon({className:'',html:'<div class="mk-pin '+cls+'" style="--c:'+c.hex+';--f:'+c.fg+'">'+esc(tg.code||'?')+countBadge+'</div>',iconSize:[42,42],iconAnchor:[21,21],popupAnchor:[0,-24]});
+  const patientBadge=hasPatientData(tg)?'<span class="mk-patient">🩺</span>':'';
+  return L.divIcon({className:'',html:'<div class="mk-pin '+cls+'" style="--c:'+c.hex+';--f:'+c.fg+'">'+esc(tg.code||'?')+countBadge+patientBadge+'</div>',iconSize:[42,42],iconAnchor:[21,21],popupAnchor:[0,-24]});
 }
 function teamIcon(t){
   const col=statusColor(t), type=TEAM_TYPES[t.type]||TEAM_TYPES.auto, crew=crewInfo(t);
@@ -1563,6 +1625,20 @@ function teamIcon(t){
   return L.divIcon({className:'',html:'<div class="team-pin'+sosCls+'" style="--c:'+col+'">'+type.icon+badge+crewTag+'</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-23]});
 }
 function poiIcon(p){ const c=POI_CATS[p.cat]||POI_CATS.info; return L.divIcon({className:'',html:'<div class="poi-pin" style="--c:'+c.color+'"><span>'+c.icon+'</span></div>',iconSize:[30,30],iconAnchor:[15,24],popupAnchor:[0,-24]}); }
+function patientBlockHTML(tg){
+  if(!hasPatientData(tg)) return '';
+  const p=tg.patient;
+  let h='<div class="pp-patient"><div class="pp-patient-t">🩺 Scheda paziente'+(p.ts?' · '+fmtTime(p.ts):'')+(p.by?' · da '+esc(p.by):'')+'</div>';
+  const bits=[];
+  if(p.age!=null) bits.push('<b>'+p.age+'</b> anni');
+  if(p.sex) bits.push('sesso <b>'+p.sex+'</b>');
+  if(p.avpu){ const a=AVPU_LIST.find(x=>x.key===p.avpu); if(a) bits.push('AVPU <b>'+a.key+'</b> ('+a.label+')'); }
+  if(bits.length) h+=bits.join(' · ');
+  if(Array.isArray(p.chief) && p.chief.length) h+='<div style="margin-top:6px">Motivo: <b>'+p.chief.map(esc).join(', ')+'</b></div>';
+  if(p.notes) h+='<div style="margin-top:6px;font-style:italic;color:var(--txt2)">"'+esc(p.notes)+'"</div>';
+  h+='</div>';
+  return h;
+}
 function targetPopup(tg){
   const pending=tg.status==='in_attesa', closed=tg.status==='chiuso';
   let h='';
@@ -1577,6 +1653,8 @@ function targetPopup(tg){
   const times=computeTimes(tg);
   if(times.t0 && times.t1) h+='<div class="pp-row"><span>⏱️ T0→T1</span><b>'+fmtDur(times.t1-times.t0)+'</b></div>';
   if(times.t1 && times.t2) h+='<div class="pp-row"><span>⏱️ T1→T2</span><b>'+fmtDur(times.t2-times.t1)+'</b></div>';
+  /* Scheda paziente */
+  h+=patientBlockHTML(tg);
   const teams=targetTeams(tg);
   if(teams.length){
     h+='<div class="pp-teams"><div class="pp-teams-t">🚑 Squadre ('+teams.length+')</div>';
@@ -1607,6 +1685,7 @@ function teamPopup(t){
     h+='<div class="pp-row"><span>Luogo</span><b>'+esc(t.mission.address||'—')+'</b></div>';
     const tg=S.targets.find(x=>x.id===t.mission.targetId);
     const eta=etaText(t,tg); if(eta) h+='<div class="pp-row"><span>Distanza</span><b>'+eta+'</b></div>';
+    if(tg && hasPatientData(tg)) h+=patientBlockHTML(tg);
   } else h+='<div class="muted" style="margin:6px 0">Nessuna missione</div>';
   h+='<div class="pp-row"><span>GPS</span><b>'+fmtTime(t.gpsAt)+'</b></div>';
   h+='<div class="pp-actions">';
@@ -1667,17 +1746,8 @@ function renderMap(){
     mk.addTo(groups.teams);
   }); }
   if(layerVis.zones){
-    /* FIX: le zone NON devono catturare i click — interactive:false e nessun popup.
-       Così cliccando dentro una zona si crea liberamente un draft/target. */
     S.zones.forEach(z=>{
-      const poly=L.polygon(z.points,{
-        color:z.color||'#ab47bc',
-        weight:2,
-        fillOpacity:.12,
-        fillColor:z.color||'#ab47bc',
-        interactive:false
-      });
-      poly.addTo(groups.zones);
+      L.polygon(z.points,{color:z.color||'#ab47bc',weight:2,fillOpacity:.12,fillColor:z.color||'#ab47bc',interactive:false}).addTo(groups.zones);
     });
   }
   if(layerVis.tracks){
@@ -1809,13 +1879,14 @@ function renderInterventions(){
     const rcTxt=(tg.returnCode!=null)?' · R'+tg.returnCode+' ('+RETURN_CODES[tg.returnCode].letter+')':'';
     const ackIcon=tg.ack?'✅':'';
     const photoCount=tg.photos&&tg.photos.length?'📷'+tg.photos.length:'';
+    const patientIcon=hasPatientData(tg)?'🩺':'';
     return '<div class="intv-item '+(tg.status==='chiuso'?'closed':'')+'" data-id="'+tg.id+'">'+
       '<div class="intv-stripe" style="--c:'+c.hex+'"></div>'+
       '<div class="intv-main">'+
         '<div class="intv-top">'+
           '<span class="intv-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(tg.code)+'</span>'+
           '<span class="intv-status '+statusCls+'">'+statusTxt+'</span>'+
-          '<span class="intv-badges">'+ackIcon+photoCount+'</span>'+
+          '<span class="intv-badges">'+patientIcon+ackIcon+photoCount+'</span>'+
         '</div>'+
         '<div class="intv-teams">📍 '+esc(tg.address||'—')+'<br>🚑 '+esc(teamsTxt)+rcTxt+'</div>'+
       '</div>'+
@@ -1874,7 +1945,7 @@ function renderOpsList(){
     const col=statusColor(t), crew=crewInfo(t);
     const crewBadge='<span class="crew-badge" style="background:'+crew.color+'">'+crew.short+'</span>';
     const offShift=!isTeamActiveNow(t);
-    let codeHtml='', sub='', right='', etaPill='';
+    let codeHtml='', sub='', right='', etaPill='', patientIcon='';
     if(t.mission){
       const pc=parseCode(t.mission.code); const cc=COLORS[pc.color]||{hex:'#888',fg:'#fff'};
       codeHtml='<span class="ops-code" style="background:'+cc.hex+';color:'+cc.fg+'">'+esc(t.mission.code)+'</span>';
@@ -1883,6 +1954,7 @@ function renderOpsList(){
       const tg=S.targets.find(x=>x.id===t.mission.targetId);
       const eta=etaText(t,tg);
       if(eta && t.status==='Partenza') etaPill='<span class="eta-pill">🚗 '+eta+'</span>';
+      if(tg && hasPatientData(tg)) patientIcon='<span class="patient-badge">🩺</span>';
       const ack=ackStatus(t);
       const ackBadge=ack?'<span class="ack-badge" style="background:'+ack.color+'22;color:'+ack.color+'">'+ack.label+'</span>':'';
       right='<span class="pill" style="background:rgba(255,167,38,.12);color:#ffcc80">'+elapsed(t.mission.activatedAt)+'</span>'+(etaPill||'')+(ackBadge||'');
@@ -1890,7 +1962,7 @@ function renderOpsList(){
       sub=(TEAM_TYPES[t.type]||{}).label+' · '+esc(t.turno||'Full');
       right='<span class="pill" style="background:rgba(0,0,0,.25);color:var(--muted)">'+esc(stateShort(t.status))+'</span>';
     }
-    return '<div class="ops-item'+(offShift?' off-shift':'')+'" data-id="'+t.id+'"><div class="ops-stripe" style="--c:'+col+'"></div><div class="ops-main"><div class="ops-top"><span class="ops-name">'+esc(t.name)+'</span>'+crewBadge+codeHtml+'</div><div class="ops-sub">'+sub+'</div></div><div class="ops-right">'+right+'</div></div>';
+    return '<div class="ops-item'+(offShift?' off-shift':'')+'" data-id="'+t.id+'"><div class="ops-stripe" style="--c:'+col+'"></div><div class="ops-main"><div class="ops-top"><span class="ops-name">'+esc(t.name)+'</span>'+crewBadge+codeHtml+patientIcon+'</div><div class="ops-sub">'+sub+'</div></div><div class="ops-right">'+right+'</div></div>';
   }).join('');
   el.querySelectorAll('.ops-item').forEach(node=>{ node.onclick=()=>openTeam(node.getAttribute('data-id')); });
 }
@@ -1930,10 +2002,11 @@ function renderAdminList(){
           '<span class="crew-badge" style="background:'+crew.color+';font-size:9.5px;padding:1px 6px">'+crew.short+'</span>'+
           '<span class="shift-badge">'+shiftTxt+esc(rangeTxt)+'</span>'+
           (t.mission?'· '+esc(t.mission.code):'')+pwdBadge+'</div></div>'+
-      '<button class="btn mini" data-act="edit" data-id="'+t.id+'">✏️</button>'+
-      '<button class="btn mini" data-act="chat" data-id="'+t.id+'">💬</button>'+
-      '<button class="btn mini ghost" data-act="hist" data-id="'+t.id+'">🕓</button>'+
-      '<button class="btn mini danger" data-act="del" data-id="'+t.id+'">🗑</button></div>';
+      '<button class="btn mini" data-act="qr" data-id="'+t.id+'" title="QR Login">📱</button>'+
+      '<button class="btn mini" data-act="edit" data-id="'+t.id+'" title="Modifica">✏️</button>'+
+      '<button class="btn mini" data-act="chat" data-id="'+t.id+'" title="Chat">💬</button>'+
+      '<button class="btn mini ghost" data-act="hist" data-id="'+t.id+'" title="Storico">🕓</button>'+
+      '<button class="btn mini danger" data-act="del" data-id="'+t.id+'" title="Elimina">🗑</button></div>';
   }).join('');
   el.querySelectorAll('button[data-act]').forEach(b=>{
     b.onclick=()=>{ const id=b.getAttribute('data-id'), act=b.getAttribute('data-act');
@@ -1941,8 +2014,65 @@ function renderAdminList(){
       if(act==='del') deleteTeam(id);
       if(act==='hist') openTeam(id);
       if(act==='chat'){ activeChatTeamId=id; switchView('chat'); }
+      if(act==='qr') showTeamQR(id);
     };
   });
+}
+
+/* QR login: genera e mostra QR code per la squadra */
+function showTeamQR(teamId){
+  const t=S.teams.find(x=>x.id===teamId); if(!t) return;
+  /* Costruisci URL equipaggio.html con parametri */
+  let baseUrl;
+  const path = location.pathname;
+  if(path.toLowerCase().endsWith('sol.html')){
+    baseUrl = location.origin + path.substring(0, path.length-8) + 'equipaggio.html';
+  } else {
+    baseUrl = location.origin + path.replace(/[^/]*$/,'') + 'equipaggio.html';
+  }
+  const url = new URL(baseUrl);
+  url.searchParams.set('room', SESSION_ROOM);
+  url.searchParams.set('team', t.id);
+  if(t.password) url.searchParams.set('pwd', t.password);
+  const qrUrl = url.toString();
+
+  let h='<div class="qr-wrap">';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:12px">Inquadra il QR con la fotocamera del dispositivo equipaggio per accedere automaticamente.</div>';
+  h+='<canvas id="qrCanvas"></canvas>';
+  h+='<div class="qr-url" id="qrUrl">'+esc(qrUrl)+'</div>';
+  h+='<div class="row" style="margin-top:12px;gap:8px">';
+  h+='<button class="btn ghost" id="qrCopyBtn">📋 Copia link</button>';
+  h+='<button class="btn ghost" id="qrDownloadBtn">⬇️ Scarica PNG</button>';
+  h+='</div>';
+  h+='<div class="qr-hint">⚠️ <b>Sicurezza</b>: il link contiene la password in chiaro. Usalo solo in ambienti controllati e non condividerlo pubblicamente. '+(t.password?'':'<br>💡 Questa squadra non ha password: chi ha il link può accedere direttamente.')+'</div>';
+  h+='</div>';
+  openModal('📱 QR Login — '+t.name, h);
+
+  const canvas = document.getElementById('qrCanvas');
+  if(typeof QRCode!=='undefined' && canvas){
+    QRCode.toCanvas(canvas, qrUrl, {width:260, margin:2, color:{dark:'#1a1a1a', light:'#ffffff'}}, (err)=>{
+      if(err){ canvas.outerHTML='<div class="empty">⚠️ Errore generazione QR</div>'; }
+    });
+  } else {
+    if(canvas) canvas.outerHTML='<div class="empty">⚠️ Libreria QR non caricata. Copia il link manualmente.</div>';
+  }
+
+  const copyB = document.getElementById('qrCopyBtn');
+  if(copyB) copyB.onclick=()=>{
+    navigator.clipboard.writeText(qrUrl).then(()=>toast('📋 Link QR copiato')).catch(()=>prompt('Copia manualmente:',qrUrl));
+  };
+  const dlB = document.getElementById('qrDownloadBtn');
+  if(dlB) dlB.onclick=()=>{
+    const c=document.getElementById('qrCanvas');
+    if(!c) return;
+    try{
+      const a=document.createElement('a');
+      a.href=c.toDataURL('image/png');
+      a.download='sge_qr_'+t.name.replace(/[^a-z0-9]+/gi,'_')+'.png';
+      a.click();
+      toast('⬇️ QR scaricato');
+    }catch(e){ toast('⚠️ Errore download'); }
+  };
 }
 function renderPoiList(){
   const el=document.getElementById('poiList');
@@ -2264,11 +2394,13 @@ function renderDashboard(){
     const t=S.teams.find(x=>x.id===tid);
     return t?{name:t.name,count:teamCount[tid]}:null;
   }).filter(Boolean).sort((a,b)=>b.count-a.count).slice(0,6);
+  const patientsWithData=S.targets.filter(hasPatientData);
   let h='';
   h+='<div class="dash-card"><h3>📊 Numeri</h3>'+
     '<div class="dash-stat-row"><span class="dsr-name">Interventi totali</span><span class="dsr-val">'+total+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Ultimi 24h</span><span class="dsr-val">'+last24h.length+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Chiusi</span><span class="dsr-val">'+closed.length+'</span></div>'+
+    '<div class="dash-stat-row"><span class="dsr-name">Scheda paziente compilata</span><span class="dsr-val">'+patientsWithData.length+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Squadre totali</span><span class="dsr-val">'+S.teams.length+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">In servizio adesso</span><span class="dsr-val">'+S.teams.filter(isTeamActiveNow).length+'</span></div>'+
     '<div class="dash-stat-row"><span class="dsr-name">Tempo medio dispatch</span><span class="dsr-val">'+fmtDur(avg(timesAcc.dispatch))+'</span></div>'+
@@ -2323,6 +2455,17 @@ function generateHandover(){
     lines.push('     Attivo da '+elapsed(tg.activatedAt)+' · Squadre: '+teams);
     const t=computeTimes(tg);
     if(t.t1&&t.t2) lines.push('     Tempo sul posto: '+fmtDur(t.t2-t.t1));
+    /* Scheda paziente */
+    if(hasPatientData(tg)){
+      const p=tg.patient;
+      lines.push('     🩺 PAZIENTE:');
+      if(p.age!=null) lines.push('        · Età: '+p.age+' anni');
+      if(p.sex) lines.push('        · Sesso: '+p.sex);
+      if(p.avpu){ const a=AVPU_LIST.find(x=>x.key===p.avpu); lines.push('        · AVPU: '+p.avpu+(a?' ('+a.label+')':'')); }
+      if(Array.isArray(p.chief) && p.chief.length) lines.push('        · Motivo: '+p.chief.join(', '));
+      if(p.notes) lines.push('        · Note: '+p.notes);
+      if(p.by) lines.push('        · Rilevato da: '+p.by+' · '+fmtTime(p.ts));
+    }
   });
   lines.push('');
   lines.push('🚑 STATO SQUADRE ('+S.teams.length+')');
@@ -2383,18 +2526,19 @@ function printReport(){
   const now=new Date();
   let h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report SGE</title>';
   h+='<style>body{font-family:Arial,sans-serif;padding:20px;color:#111}';
-  h+='table{width:100%;border-collapse:collapse;font-size:11px;margin-top:12px}';
-  h+='th,td{border:1px solid #999;padding:6px;text-align:left}';
+  h+='table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:12px}';
+  h+='th,td{border:1px solid #999;padding:5px;text-align:left}';
   h+='th{background:#eee}h1{margin:0 0 4px}.sub{color:#666;margin-bottom:20px}</style></head><body>';
   h+='<h1>⛑️ SGE — Report Interventi</h1>';
   h+='<div class="sub">Generato: '+now.toLocaleString('it-IT')+' · Stanza: '+SESSION_ROOM+'</div>';
   h+='<h3>Riepilogo</h3>';
-  h+='<p>Interventi totali: <b>'+S.targets.length+'</b> · Chiusi: <b>'+S.targets.filter(t=>t.status==='chiuso').length+'</b> · Squadre: <b>'+S.teams.length+'</b></p>';
+  h+='<p>Interventi totali: <b>'+S.targets.length+'</b> · Chiusi: <b>'+S.targets.filter(t=>t.status==='chiuso').length+'</b> · Squadre: <b>'+S.teams.length+'</b> · Con scheda paziente: <b>'+S.targets.filter(hasPatientData).length+'</b></p>';
   h+='<h3>Elenco interventi</h3>';
-  h+='<table><thead><tr><th>Codice</th><th>Indirizzo</th><th>Stato</th><th>Attivazione</th><th>Chiusura</th><th>Squadre</th><th>Rientro</th></tr></thead><tbody>';
+  h+='<table><thead><tr><th>Codice</th><th>Indirizzo</th><th>Stato</th><th>Attivazione</th><th>Chiusura</th><th>Squadre</th><th>Rientro</th><th>Paziente</th></tr></thead><tbody>';
   S.targets.slice().sort((a,b)=>(a.activatedAt||0)-(b.activatedAt||0)).forEach(tg=>{
     const rc=tg.returnCode!=null?(tg.returnCode+' — '+RETURN_CODES[tg.returnCode].label):'—';
-    h+='<tr><td><b>'+esc(tg.code)+'</b></td><td>'+esc(tg.address||'—')+'</td><td>'+esc(tg.status)+'</td><td>'+fmtDateTime(tg.activatedAt)+'</td><td>'+(tg.closedAt?fmtDateTime(tg.closedAt):'—')+'</td><td>'+esc(targetTeamNames(tg).join(', ')||'—')+'</td><td>'+esc(rc)+'</td></tr>';
+    const pt=hasPatientData(tg)?patientSummaryText(tg)+(tg.patient.notes?' | "'+tg.patient.notes+'"':''):'—';
+    h+='<tr><td><b>'+esc(tg.code)+'</b></td><td>'+esc(tg.address||'—')+'</td><td>'+esc(tg.status)+'</td><td>'+fmtDateTime(tg.activatedAt)+'</td><td>'+(tg.closedAt?fmtDateTime(tg.closedAt):'—')+'</td><td>'+esc(targetTeamNames(tg).join(', ')||'—')+'</td><td>'+esc(rc)+'</td><td>'+esc(pt)+'</td></tr>';
   });
   h+='</tbody></table>';
   h+='<h3>Statistiche squadre</h3>';
@@ -2434,7 +2578,8 @@ function createPendingTarget(data){
   const tg={id:uid('tg'),code:p.label,env:p.env,pat:p.pat,color:p.color,
     lat:+data.lat.toFixed(6),lng:+data.lng.toFixed(6),address:data.address||'',note:data.note||'',
     activatedAt:Date.now(),assignedAt:null,teamIds:[],teamName:null,
-    status:'in_attesa',closedAt:null,closeNote:'',returnCode:null,photos:[],ack:null};
+    status:'in_attesa',closedAt:null,closeNote:'',returnCode:null,photos:[],ack:null,
+    patient:{age:null,sex:null,avpu:null,chief:[],notes:'',ts:null}};
   S.targets.unshift(tg);
   return tg;
 }
@@ -2462,7 +2607,8 @@ function assignMission(teamId,data){
   const tg={id:uid('tg'),code:p.label,env:p.env,pat:p.pat,color:p.color,
     lat:+data.lat.toFixed(6),lng:+data.lng.toFixed(6),address:data.address||'',note:data.note||'',
     activatedAt:Date.now(),assignedAt:Date.now(),teamIds:[t.id],teamName:t.name,
-    status:'aperto',closedAt:null,closeNote:'',returnCode:null,photos:[],ack:null};
+    status:'aperto',closedAt:null,closeNote:'',returnCode:null,photos:[],ack:null,
+    patient:{age:null,sex:null,avpu:null,chief:[],notes:'',ts:null}};
   S.targets.unshift(tg);
   t.mission={targetId:tg.id,code:tg.code,lat:tg.lat,lng:tg.lng,address:tg.address,activatedAt:tg.activatedAt,note:tg.note};
   setStatus(t.id,'Partenza','Missione '+tg.code+' assegnata');
@@ -2551,6 +2697,22 @@ function renderTeamModal(id){
       const eta=etaText(t,tg); if(eta) h+='<div class="info" style="margin-bottom:10px">🚗 Distanza: <b>'+eta+'</b></div>';
       if(tg&&tg.teamIds&&tg.teamIds.length>1){ const others=tg.teamIds.filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean); h+='<div class="info" style="margin-bottom:10px">🚑 Sul target anche: <b>'+esc(others.map(o=>o.name).join(', '))+'</b></div>'; }
       const ack=ackStatus(t); if(ack) h+='<div class="info" style="margin-bottom:10px">Conferma: <b style="color:'+ack.color+'">'+ack.label+'</b></div>';
+      /* Scheda paziente */
+      if(tg && hasPatientData(tg)){
+        const p=tg.patient;
+        h+='<div class="patient-view"><h4>🩺 Scheda paziente'+(p.ts?' · '+fmtTime(p.ts):'')+(p.by?' · da '+esc(p.by):'')+'</h4>';
+        h+='<div class="patient-grid">';
+        if(p.age!=null) h+='<div class="patient-cell"><div class="lbl">Età</div><div class="val">'+p.age+' anni</div></div>';
+        if(p.sex) h+='<div class="patient-cell"><div class="lbl">Sesso</div><div class="val">'+esc(p.sex)+'</div></div>';
+        if(p.avpu){ const a=AVPU_LIST.find(x=>x.key===p.avpu); h+='<div class="patient-cell"><div class="lbl">Coscienza AVPU</div><div class="val"><span class="avpu-badge"><span class="dot" style="background:'+(a?a.color:'#888')+'"></span>'+esc(p.avpu)+(a?' — '+a.label:'')+'</span></div></div>'; }
+        h+='</div>';
+        if(Array.isArray(p.chief) && p.chief.length){
+          h+='<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800">Motivo principale</div>';
+          h+='<div class="patient-chief">'+p.chief.map(c=>'<span class="patient-chip">'+esc(c)+'</span>').join('')+'</div>';
+        }
+        if(p.notes) h+='<div class="patient-notes">'+esc(p.notes)+'</div>';
+        h+='</div>';
+      }
       h+='<div class="row"><button class="btn ghost" id="mCloseBtn">✔ Chiudi missione</button><button class="btn ghost" id="mFocusBtn">🎯 Vai al target</button></div>';
     } else h+='<div class="empty">Nessuna missione attiva</div>';
     if(t.activeFrom||t.activeTo){
@@ -2833,17 +2995,30 @@ searchInput.addEventListener('input',()=>renderSearchResults(searchInput.value))
 searchModal.addEventListener('click',e=>{ if(e.target===searchModal) hideSearch(); });
 
 /* =========================================================
-   EXPORT CSV
+   EXPORT CSV — include scheda paziente
    ========================================================= */
 function exportCSV(){
-  const rows=[['Codice','Ambiente','Patologia','Colore','Indirizzo','Stato','Attivazione','Assegnazione','Chiusura','Squadre','Cod. Rientro','Note','Conferma','T0','T1','T2','T3']];
+  const rows=[['Codice','Ambiente','Patologia','Colore','Indirizzo','Stato','Attivazione','Assegnazione','Chiusura','Squadre','Cod. Rientro','Note','Conferma','T0','T1','T2','T3','Pt_Età','Pt_Sesso','Pt_AVPU','Pt_Motivo','Pt_Note','Pt_By','Pt_TS']];
   S.targets.slice().sort((a,b)=>(a.activatedAt||0)-(b.activatedAt||0)).forEach(tg=>{
     const p=parseCode(tg.code);
     const teams=targetTeamNames(tg).join(' | ');
     const rcInfo=tg.returnCode!=null?tg.returnCode+' - '+RETURN_CODES[tg.returnCode].label:'';
     const ack=tg.ack?fmtDateTime(tg.ack.ts):'';
     const times=computeTimes(tg);
-    rows.push([tg.code||'',p.env?(ENV[p.env]||'').split('—')[0].trim():'',p.pat?(PAT[p.pat]||''):'',p.color?COLORS[p.color].label:'',tg.address||'',tg.status,fmtDateTime(tg.activatedAt),tg.assignedAt?fmtDateTime(tg.assignedAt):'',tg.closedAt?fmtDateTime(tg.closedAt):'',teams,rcInfo,(tg.note||'').replace(/[\r\n]+/g,' '),ack,times.t0?fmtDateTime(times.t0):'',times.t1?fmtDateTime(times.t1):'',times.t2?fmtDateTime(times.t2):'',times.t3?fmtDateTime(times.t3):'']);
+    const pt=tg.patient||{};
+    rows.push([
+      tg.code||'',p.env?(ENV[p.env]||'').split('—')[0].trim():'',p.pat?(PAT[p.pat]||''):'',p.color?COLORS[p.color].label:'',
+      tg.address||'',tg.status,fmtDateTime(tg.activatedAt),tg.assignedAt?fmtDateTime(tg.assignedAt):'',tg.closedAt?fmtDateTime(tg.closedAt):'',
+      teams,rcInfo,(tg.note||'').replace(/[\r\n]+/g,' '),ack,
+      times.t0?fmtDateTime(times.t0):'',times.t1?fmtDateTime(times.t1):'',times.t2?fmtDateTime(times.t2):'',times.t3?fmtDateTime(times.t3):'',
+      pt.age!=null?String(pt.age):'',
+      pt.sex||'',
+      pt.avpu||'',
+      (Array.isArray(pt.chief)?pt.chief.join(' | '):''),
+      (pt.notes||'').replace(/[\r\n]+/g,' '),
+      pt.by||'',
+      pt.ts?fmtDateTime(pt.ts):''
+    ]);
   });
   const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
@@ -3193,6 +3368,7 @@ function renderSquadreView(){
     if(tg&&(tg.teamIds||[]).length>1){ const others=tg.teamIds.filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean); extra='<div class="muted" style="margin-top:4px;font-size:12px">🚑 Insieme a: <b>'+esc(others.map(o=>o.name).join(', '))+'</b></div>'; }
     if(tg&&tg.returnCode!=null){ const rc=RETURN_CODES[tg.returnCode]; extra+='<div style="color:'+rc.color+';margin-top:4px;font-size:12.5px;font-weight:700">'+rc.icon+' Cod. rientro '+tg.returnCode+' → '+rc.letter+'</div>'; }
     if(tg&&tg.ack) extra+='<div style="color:#81c784;margin-top:4px;font-size:12px">✅ Confermata '+fmtTime(tg.ack.ts)+'</div>';
+    if(tg&&hasPatientData(tg)) extra+='<div style="color:#c4b5fd;margin-top:4px;font-size:12px">🩺 '+esc(patientSummaryText(tg))+'</div>';
     boxM.innerHTML='<div class="m-card m-mission" style="--c:'+c.hex+'"><div class="mc-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</div><div class="mc-info">'+(MISSION_STATE_MAP[t.status]?'<div style="font-weight:800;color:'+MISSION_STATE_MAP[t.status].color+';font-size:12.5px;margin-bottom:3px">'+MISSION_STATE_MAP[t.status].icon+' '+esc(MISSION_STATE_MAP[t.status].short)+'</div>':'')+'<div style="font-weight:700">'+esc(t.mission.address||'—')+'</div><div class="muted">Attivata '+fmtTime(t.mission.activatedAt)+' · da '+elapsed(t.mission.activatedAt)+'</div>'+extra+'</div></div><button class="btn primary block" id="sqComplete" style="margin-bottom:13px">✅ Missione completata</button>';
     setTimeout(()=>{ const b=document.getElementById('sqComplete'); if(b) b.onclick=()=>{ setStatus(t.id,'Arrivo in Sede / Fine Missione','Completata'); save(); render(); renderSquadreView(); }; },0);
   } else boxM.innerHTML='<div class="m-card"><div class="empty">Nessuna missione.</div></div>';
@@ -3235,7 +3411,8 @@ window.SGE={
     openModal('Foto — '+fmtDateTime(m.ts),'<div style="text-align:center"><img src="'+m.data+'" style="max-width:100%;border-radius:12px"></div>');
   },
   focusTarget:function(id){ const tg=S.targets.find(x=>x.id===id); if(tg&&map){ map.flyTo([tg.lat,tg.lng],18,{duration:.6}); setTimeout(()=>{ const mk=findTargetMarker(id); if(mk) mk.openPopup(); },700); } },
-  focusTeam:function(id){ const t=S.teams.find(x=>x.id===id); if(t&&map){ map.flyTo([t.lat,t.lng],18,{duration:.6}); setTimeout(()=>{ if(groups.teams){ let mk=null; groups.teams.eachLayer(l=>{ if(l.options && l.options.sgeId===id) mk=l; }); if(mk) mk.openPopup(); } },700); } }
+  focusTeam:function(id){ const t=S.teams.find(x=>x.id===id); if(t&&map){ map.flyTo([t.lat,t.lng],18,{duration:.6}); setTimeout(()=>{ if(groups.teams){ let mk=null; groups.teams.eachLayer(l=>{ if(l.options && l.options.sgeId===id) mk=l; }); if(mk) mk.openPopup(); } },700); } },
+  showTeamQR: showTeamQR
 };
 
 /* =========================================================
@@ -3286,8 +3463,7 @@ updateSolEqBadge();
 updateTabBadges();
 
 if('Notification' in window && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); }
-idbLatestLoad();
-function idbLatestLoad(){ idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } }); }
+idbLoadLatest().then(state=>{ if(state && !localStorage.getItem(KEY)){ S=state; render(); } });
 
 })();
 </script>
