@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SGE — Sala Coordinamento</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#0d0d0f;--panel:#161619;--panel2:#1f1f23;--line:#2a2a30;
+  --txt:#f0f0f2;--txt2:#b0b0b8;--muted:#6f6f78;
+  --accent:#ffa726;--ok:#4caf50;--warn:#ffb300;--err:#ef5350;
+  --purple:#ab47bc;--blue:#4da3ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none !important}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:#333;border-radius:6px}
+
+/* ========== LAYOUT ========== */
+.wall{display:grid;height:100vh;
+  grid-template-rows:64px 1fr 56px;
+  grid-template-columns:320px 1fr 380px;
+  grid-template-areas:
+    "header header header"
+    "left   map    right"
+    "ticker ticker ticker";}
+
+/* ========== HEADER ========== */
+.wall-header{grid-area:header;display:flex;align-items:center;gap:18px;
+  padding:0 24px;background:linear-gradient(180deg,#1a1a1f,#111114);
+  border-bottom:1px solid var(--line);box-shadow:0 2px 20px rgba(0,0,0,.5);
+  position:relative;z-index:10}
+.wall-brand{display:flex;align-items:center;gap:12px}
+.wall-brand .logo{width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#333,#1e1e1e);border:1px solid #444;
+  display:flex;align-items:center;justify-content:center;font-size:22px}
+.wall-brand b{font-size:20px;letter-spacing:.5px}
+.wall-brand small{display:block;color:var(--muted);font-size:11px;font-weight:600;
+  letter-spacing:1.2px;text-transform:uppercase;margin-top:2px}
+.wall-room{padding:6px 14px;border-radius:20px;background:rgba(255,167,38,.12);
+  border:1px solid rgba(255,167,38,.35);color:#ffcc80;font-weight:800;font-size:13px;
+  display:flex;align-items:center;gap:8px}
+.wall-net{padding:6px 14px;border-radius:20px;background:#1e1e22;border:1px solid var(--line);
+  color:var(--muted);font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px}
+.wall-net .dot{width:8px;height:8px;border-radius:50%;background:#555}
+.wall-net.on{color:var(--ok);border-color:rgba(76,175,80,.4);background:rgba(76,175,80,.08)}
+.wall-net.on .dot{background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.wall-clock{margin-left:auto;font-variant-numeric:tabular-nums;
+  font-size:32px;font-weight:200;letter-spacing:2px;color:#fff}
+.wall-date{color:var(--muted);font-size:13px;font-weight:600;margin-left:14px}
+.wall-ops{display:flex;gap:6px;align-items:center;margin-left:22px}
+.wall-op-chip{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;
+  background:#1e1e22;border:1px solid var(--line);color:var(--muted);
+  display:flex;align-items:center;gap:6px}
+.wall-op-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--c,#888);
+  box-shadow:0 0 6px var(--c,#888)}
+.wall-fs{background:#1e1e22;border:1px solid var(--line);color:var(--txt2);
+  width:44px;height:44px;border-radius:10px;font-size:20px;display:flex;
+  align-items:center;justify-content:center}
+.wall-fs:hover{background:#2a2a30;color:var(--txt)}
+
+/* ========== PANNELLO SINISTRO (KPI + SQUADRE) ========== */
+.wall-left{grid-area:left;background:var(--panel);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+  border-bottom:1px solid var(--line)}
+.kpi{background:var(--panel);padding:20px 14px;text-align:center;position:relative}
+.kpi-val{font-size:52px;font-weight:200;line-height:1;font-variant-numeric:tabular-nums;
+  color:#fff;letter-spacing:-1px}
+.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);
+  font-weight:800;margin-top:10px}
+.kpi.accent .kpi-val{color:var(--accent)}
+.kpi.err .kpi-val{color:var(--err)}
+.kpi.ok .kpi-val{color:var(--ok)}
+.kpi.warn .kpi-val{color:var(--warn)}
+.panel-head{padding:14px 20px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--muted);font-weight:800;background:#111114;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+.panel-head .cnt{margin-left:auto;background:#2a2a30;color:var(--txt);
+  font-size:11px;font-weight:800;padding:2px 10px;border-radius:20px}
+.teams-scroll{flex:1;overflow-y:auto}
+.team-row{display:flex;gap:12px;padding:13px 18px;border-bottom:1px solid #1e1e22;
+  align-items:center}
+.team-stripe{width:5px;height:40px;border-radius:3px;background:var(--c,#444);flex-shrink:0}
+.team-body{flex:1;min-width:0}
+.team-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.team-status{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;display:flex;gap:6px;align-items:center}
+.team-code{font-size:12px;font-weight:900;padding:4px 11px;border-radius:8px;
+  flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* ========== MAPPA ========== */
+.wall-map{grid-area:map;position:relative;background:#000}
+#wallmap{position:absolute;inset:0}
+.leaflet-container{background:#0a0a0c}
+.leaflet-control-attribution{background:rgba(0,0,0,.6) !important;color:#666 !important;
+  font-size:9px !important}
+.leaflet-control-attribution a{color:#888 !important}
+.leaflet-control-zoom a{background:#1e1e22 !important;color:#eee !important;
+  border-color:#333 !important}
+.leaflet-div-icon{background:transparent !important;border:none !important}
+.map-overlay-header{position:absolute;top:16px;left:16px;z-index:600;
+  background:rgba(13,13,15,.85);border:1px solid var(--line);border-radius:10px;
+  padding:10px 16px;backdrop-filter:blur(10px);font-size:13px;font-weight:700;
+  display:flex;gap:20px;align-items:center;color:var(--txt2)}
+.map-overlay-header b{color:#fff}
+.map-overlay-header .live{display:flex;align-items:center;gap:6px;color:var(--ok);
+  font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.map-overlay-header .live .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);
+  box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+
+/* ========== PANNELLO DESTRO (INTERVENTI) ========== */
+.wall-right{grid-area:right;background:var(--panel);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden}
+.missions-scroll{flex:1;overflow-y:auto;padding:10px}
+.mission-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+  padding:14px;margin-bottom:10px;border-left:5px solid var(--c,#ffa726);
+  position:relative;transition:.2s}
+.mission-card.closed{opacity:.35;filter:grayscale(.5)}
+.mission-card.pending{border-left-style:dashed}
+.mission-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mission-code{font-size:20px;font-weight:900;padding:5px 14px;border-radius:9px;
+  letter-spacing:.5px}
+.mission-elapsed{margin-left:auto;font-size:14px;font-weight:800;color:var(--accent);
+  font-variant-numeric:tabular-nums}
+.mission-addr{font-size:14px;font-weight:700;line-height:1.35;margin-bottom:8px;
+  word-break:break-word}
+.mission-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);
+  margin-top:4px;flex-wrap:wrap}
+.mission-row .tag{padding:3px 9px;border-radius:20px;background:#2a2a30;color:var(--txt);
+  font-weight:700;font-size:11px;white-space:nowrap}
+.mission-row .tag.ok{background:rgba(76,175,80,.15);color:#81c784}
+.mission-row .tag.ack{background:rgba(76,175,80,.15);color:#81c784}
+.mission-row .tag.patient{background:rgba(139,92,246,.15);color:#c4b5fd}
+.mission-row .tag.photo{background:rgba(77,163,255,.15);color:#9fd0ff}
+.missions-empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px;
+  line-height:1.6}
+
+/* ========== TICKER ========== */
+.wall-ticker{grid-area:ticker;background:#111114;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:0;overflow:hidden;position:relative}
+.ticker-label{background:linear-gradient(90deg,var(--purple),#7c3d99);color:#fff;
+  padding:0 22px;height:100%;display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;
+  flex-shrink:0;z-index:2}
+.ticker-track{flex:1;overflow:hidden;position:relative;height:100%}
+.ticker-content{position:absolute;top:0;left:0;height:100%;display:flex;
+  align-items:center;gap:60px;white-space:nowrap;padding-left:40px;
+  font-size:15px;font-weight:600;color:var(--txt);
+  animation:scroll linear infinite}
+.ticker-content.empty{color:var(--muted);font-style:italic;font-weight:500}
+@keyframes scroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(calc(-1 * var(--w,100%)))}
+}
+.ticker-item{display:flex;align-items:center;gap:8px}
+.ticker-item b{color:var(--accent);font-weight:800}
+
+/* ========== MARKERS ========== */
+.wk-target{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;font-weight:900;font-size:13px;
+  border:3px solid rgba(255,255,255,.95);box-shadow:0 6px 20px rgba(0,0,0,.7);
+  background:var(--c);color:var(--f);animation:tPulse 2.2s infinite}
+@keyframes tPulse{0%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 0 rgba(255,255,255,.55)}
+70%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 18px rgba(255,255,255,0)}
+100%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 0 rgba(255,255,255,0)}}
+.wk-target.closed{opacity:.4;filter:grayscale(.8);animation:none}
+.wk-target.pending{border:3px dashed #ff9d00;background:rgba(255,157,0,.3);
+  color:#ffb84d;animation:none}
+.wk-target .badge-n{position:absolute;bottom:-8px;right:-8px;min-width:22px;height:22px;
+  border-radius:50%;background:var(--accent);color:#111;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:900;border:2.5px solid #0d0d0f;
+  padding:0 5px}
+.wk-team{width:44px;height:44px;border-radius:50%;background:#0d0d0f;
+  border:3px solid var(--c);display:flex;align-items:center;justify-content:center;
+  font-size:20px;box-shadow:0 4px 16px rgba(0,0,0,.7);position:relative}
+.wk-team.sos{animation:sosPulse 1s infinite}
+@keyframes sosPulse{0%,100%{box-shadow:0 4px 16px rgba(0,0,0,.7),0 0 0 0 rgba(239,83,80,.85)}
+50%{box-shadow:0 4px 16px rgba(0,0,0,.7),0 0 0 22px rgba(239,83,80,0)}}
+.wk-team .tp-badge{position:absolute;top:-10px;right:-14px;font-size:10px;
+  font-weight:900;padding:2px 6px;border-radius:20px;color:#fff;border:2px solid #0d0d0f}
+.wk-poi{width:32px;height:32px;border-radius:9px 9px 9px 3px;transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;background:var(--c);
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 3px 12px rgba(0,0,0,.6)}
+.wk-poi span{transform:rotate(45deg);font-size:14px}
+
+/* ========== SOS OVERLAY ========== */
+.sos-overlay{position:fixed;inset:0;background:rgba(198,40,40,.15);z-index:9000;
+  pointer-events:none;animation:sosFlash 1.2s infinite;display:none}
+.sos-overlay.on{display:block}
+@keyframes sosFlash{0%,100%{background:rgba(198,40,40,.05)}50%{background:rgba(198,40,40,.28)}}
+.sos-banner{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg,#c62828,#8e0000);
+  color:#fff;padding:18px 30px;z-index:9100;display:flex;align-items:center;gap:20px;
+  box-shadow:0 8px 30px rgba(0,0,0,.8)}
+.sos-banner .ico{font-size:44px;animation:shake .6s infinite}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+.sos-banner .txt{flex:1;font-size:22px;font-weight:900;line-height:1.3;letter-spacing:.5px}
+.sos-banner .txt .sub{font-size:15px;opacity:.9;margin-top:4px;font-weight:600}
+.sos-banner button{background:#fff;color:#c62828;border:none;padding:12px 26px;
+  border-radius:10px;font-weight:900;font-size:14px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+<div class="sos-overlay" id="sosOverlay"></div>
+
+<div class="sos-banner hidden" id="sosBanner">
+  <span class="ico">🆘</span>
+  <div class="txt">
+    <div id="sosTitle">SOS — Squadra in emergenza</div>
+    <div class="sub" id="sosSub"></div>
+  </div>
+  <button onclick="document.getElementById('sosBanner').classList.add('hidden')">CHIUDI</button>
+</div>
+
+<div class="wall">
+
+  <!-- HEADER -->
+  <header class="wall-header">
+    <div class="wall-brand">
+      <div class="logo">⛑️</div>
+      <div><b>SGE</b><small>Sala Coordinamento</small></div>
+    </div>
+    <div class="wall-room">🏷️ <span id="roomLbl">—</span></div>
+    <div class="wall-net" id="netBadge"><span class="dot"></span><span id="netLbl">rete…</span></div>
+    <div class="wall-ops" id="opsOnline"></div>
+    <div style="margin-left:auto;display:flex;align-items:center">
+      <span class="wall-date" id="dateLbl"></span>
+      <span class="wall-clock" id="clockLbl">--:--:--</span>
+    </div>
+    <button class="wall-fs" id="fsBtn" title="Schermo intero">⛶</button>
+  </header>
+
+  <!-- LEFT -->
+  <aside class="wall-left">
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="kpi-val" id="kIntv">0</div><div class="kpi-lbl">Interventi</div></div>
+      <div class="kpi err"><div class="kpi-val" id="kBusy">0</div><div class="kpi-lbl">Impegnati</div></div>
+      <div class="kpi ok"><div class="kpi-val" id="kFree">0</div><div class="kpi-lbl">Disponibili</div></div>
+      <div class="kpi warn"><div class="kpi-val" id="kNoop">0</div><div class="kpi-lbl">Non op.</div></div>
+    </div>
+    <div class="panel-head">🚑 Squadre <span class="cnt" id="teamsCnt">0</span></div>
+    <div class="teams-scroll" id="teamsScroll"></div>
+  </aside>
+
+  <!-- MAP -->
+  <div class="wall-map">
+    <div id="wallmap"></div>
+    <div class="map-overlay-header">
+      <span class="live"><span class="dot"></span>LIVE</span>
+      <span>🎯 <b id="mapTargets">0</b> target</span>
+      <span>🚑 <b id="mapTeams">0</b> squadre</span>
+      <span id="mapUpdated" style="color:var(--muted);font-size:11px"></span>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <aside class="wall-right">
+    <div class="panel-head">🎯 Interventi attivi <span class="cnt" id="intvCnt">0</span></div>
+    <div class="missions-scroll" id="missionsScroll"></div>
+  </aside>
+
+  <!-- TICKER -->
+  <div class="wall-ticker">
+    <div class="ticker-label">📣 Annunci</div>
+    <div class="ticker-track"><div class="ticker-content" id="tickerContent">Nessun annuncio</div></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const KEY='sge_v4';
+const SESSION_ROOM=(function(){
+  const p=new URLSearchParams(location.search);
+  return p.get('room')||localStorage.getItem('sge_room')||'sge-demo-2024';
+})();
+const DEFAULT_BROKERS=[
+  {url:'wss://broker.hivemq.com:8884/mqtt',user:'',pass:'',label:'HiveMQ'},
+  {url:'wss://test.mosquitto.org:8081/mqtt',user:'',pass:'',label:'Mosquitto'},
+  {url:'wss://broker.emqx.io:8084/mqtt',user:'',pass:'',label:'EMQX'}
+];
+const MQTT_BASE='sge/'+SESSION_ROOM;
+
+const TILE_PROVIDERS={
+  esri:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',maxZoom:19},
+  esriSat:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',maxZoom:19},
+  osm:{url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',maxZoom:19}
+};
+const COLORS={
+  R:{hex:'#e53935',fg:'#fff',label:'Rosso',sev:5},
+  G:{hex:'#f2c200',fg:'#2a2200',label:'Giallo',sev:4},
+  V:{hex:'#2fa84f',fg:'#fff',label:'Verde',sev:3},
+  B:{hex:'#f2f2f2',fg:'#1a1a1a',label:'Bianco',sev:2},
+  N:{hex:'#1c1c1c',fg:'#fff',label:'Nero',sev:1}
+};
+const COLOR_ORDER=['R','G','V','B','N'];
+const ENV={K:'Casa',S:'Strada',P:'Uffici',Y:'Sport',L:'Lavoro'};
+const PAT={'1':'Traumatica','2':'Cardiocircolatoria','3':'Respiratoria','4':'Neurologica',
+  '5':'Psichiatrica','6':'Neoplastica','7':'Tossicologica','8':'Metabolica','9':'Altra'};
+const TEAM_TYPES={
+  piedi:{icon:'🚶',label:'A piedi'}, moto:{icon:'🏍️',label:'Moto'},
+  auto:{icon:'🚗',label:'Auto'}, ambulanza:{icon:'🚑',label:'Ambulanza'}
+};
+const CREW_TYPES={
+  bravo:{short:'B',label:'Bravo',color:'#8b5cf6'},
+  india:{short:'I',label:'India',color:'#06b6d4'},
+  mike:{short:'M',label:'Mike',color:'#f59e0b'}
+};
+const MISSION_STATES=[
+  {key:'Partenza',icon:'🚔',color:'#3d9bff',short:'Partenza'},
+  {key:'Sul Posto',icon:'📍',color:'#f2c200',short:'Sul Posto'},
+  {key:'Verso l\'Ospedale',icon:'🚑',color:'#e53935',short:'Vs Ospedale'},
+  {key:'Intervento Chiuso sul Posto',icon:'✅',color:'#2fa84f',short:'Chiuso Posto'},
+  {key:'In Ospedale',icon:'🏥',color:'#8b5cf6',short:'In Ospedale'},
+  {key:'In rientro',icon:'↩️',color:'#06b6d4',short:'Rientro'},
+  {key:'Arrivo in Sede / Fine Missione',icon:'🏁',color:'#2fa84f',short:'Fine',terminal:true}
+];
+const MS_MAP={}; MISSION_STATES.forEach(s=>MS_MAP[s.key]=s);
+const POI_CATS={
+  soccorso:{icon:'⛑️',color:'#00c2a8'},ospedale:{icon:'🏥',color:'#e53935'},
+  chiusura:{icon:'⛔',color:'#ff7043'},centrale:{icon:'🏢',color:'#7c8cff'},
+  info:{icon:'ℹ️',color:'#9aa7b8'}
+};
+
+/* =========================================================
+   UTILS
+   ========================================================= */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function parseCode(raw){const src=String(raw==null?'':raw).toUpperCase();let e=null,p=null,c=null;
+  for(let i=0;i<src.length;i++){const ch=src[i];if(!e&&ENV[ch]){e=ch;continue}if(!p&&PAT[ch]){p=ch;continue}if(!c&&COLORS[ch]){c=ch;continue}}
+  return {env:e,pat:p,color:c,label:(e||'')+(p||'')+(c||''),valid:!!c};}
+function fmtTime(ts){if(!ts)return'—';return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}
+function elapsed(ts){if(!ts)return'—';const s=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);const sec=s%60;
+  if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';
+  return m+'m '+String(sec).padStart(2,'0')+'s';}
+function isTeamActiveNow(t){
+  if(!t.operational) return false;
+  const now=Date.now();
+  if(t.activeFrom){try{if(new Date(t.activeFrom).getTime()>now)return false;}catch(e){}}
+  if(t.activeTo){try{if(new Date(t.activeTo).getTime()<now)return false;}catch(e){}}
+  return true;
+}
+function targetTeams(tg){if(!tg||!Array.isArray(tg.teamIds))return[];return tg.teamIds.map(id=>(S.teams||[]).find(x=>x.id===id)).filter(Boolean);}
+function hasPatientData(tg){if(!tg||!tg.patient)return false;const p=tg.patient;
+  return (p.age!=null)||p.sex||p.avpu||(Array.isArray(p.chief)&&p.chief.length>0)||(p.notes&&p.notes.length>0);}
+function statusColor(t){
+  const ms=MS_MAP[t.status];
+  if(t.mission){if(ms)return ms.color;const c=COLORS[parseCode(t.mission.code).color];return c?c.hex:'#e53935';}
+  if(!t.operational)return '#6b7280';
+  switch(t.status){case 'Disponibile':return '#2fa84f';case 'In pausa':return '#f2c200';default:return '#6b7280';}
+}
+function statusIcon(t){
+  const ms=MS_MAP[t.status];
+  if(t.mission)return ms?ms.icon:'🚨';
+  if(!t.operational)return '⛔';
+  switch(t.status){case 'Disponibile':return '✅';case 'In pausa':return '⏸️';default:return '⛔';}
+}
+function stateShort(s){const m=MS_MAP[s];return m?m.short:s;}
+
+/* =========================================================
+   STATO
+   ========================================================= */
+let S={center:{lat:45.5195,lng:9.0784},teams:[],targets:[],pois:[],zones:[],broadcast:[],sos:null,config:{brokers:DEFAULT_BROKERS}};
+let _lastRev=0;
+let mqttClient=null,mqttOnline=false,currentBrokerIdx=0;
+
+function loadFromLS(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw) return;
+    const p=JSON.parse(raw);
+    if(p._rev && p._rev>_lastRev){ applyState(p); }
+  }catch(e){}
+}
+function applyState(incoming){
+  if(!incoming||!incoming._rev)return;
+  if(incoming._rev<=_lastRev)return;
+  _lastRev=incoming._rev;
+  S=incoming;
+  S.teams=S.teams||[]; S.targets=S.targets||[]; S.pois=S.pois||[]; S.zones=S.zones||[];
+  S.broadcast=S.broadcast||[];
+  if(!S.config) S.config={brokers:DEFAULT_BROKERS};
+  if(!Array.isArray(S.config.brokers)||!S.config.brokers.length) S.config.brokers=DEFAULT_BROKERS;
+  if(!S.center) S.center={lat:45.5195,lng:9.0784};
+  handleSosTransition(incoming.sos);
+  renderAll();
+}
+
+/* =========================================================
+   MQTT
+   ========================================================= */
+function initMqtt(){
+  if(typeof mqtt==='undefined'){updateNet();return;}
+  tryConnect(0);
+}
+function tryConnect(idx){
+  const brokers=(S.config&&S.config.brokers)||DEFAULT_BROKERS;
+  if(idx>=brokers.length){mqttOnline=false;updateNet();return;}
+  currentBrokerIdx=idx;
+  const b=brokers[idx];
+  if(!b||!b.url) return tryConnect(idx+1);
+  try{
+    if(mqttClient){try{mqttClient.end(true);}catch(e){} mqttClient=null;}
+    const opts={clientId:'wall_'+Math.random().toString(16).slice(2,10),
+      clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:8000};
+    if(b.user) opts.username=b.user;
+    if(b.pass) opts.password=b.pass;
+    mqttClient=mqtt.connect(b.url,opts);
+    let ok=false;
+    mqttClient.on('connect',()=>{
+      ok=true; mqttOnline=true;
+      mqttClient.subscribe(MQTT_BASE+'/#',{qos:0});
+      updateNet();
+      setTimeout(loadFromLS,300);
+    });
+    mqttClient.on('close',()=>{mqttOnline=false;updateNet();});
+    mqttClient.on('error',()=>{mqttOnline=false;updateNet();});
+    mqttClient.on('message',(topic,payload)=>{
+      try{
+        const txt=payload.toString();
+        if(txt.startsWith('ENC:')) return;
+        applyState(JSON.parse(txt));
+      }catch(e){}
+    });
+    setTimeout(()=>{if(!ok&&currentBrokerIdx===idx) tryConnect(idx+1);},9000);
+  }catch(e){ tryConnect(idx+1); }
+}
+function updateNet(){
+  const b=document.getElementById('netBadge'), l=document.getElementById('netLbl');
+  if(!b||!l) return;
+  if(mqttOnline){b.classList.add('on'); l.textContent='rete OK';}
+  else {b.classList.remove('on'); l.textContent='rete…';}
+}
+
+/* =========================================================
+   SOS
+   ========================================================= */
+let lastSosId=null;
+function handleSosTransition(sos){
+  const banner=document.getElementById('sosBanner');
+  const overlay=document.getElementById('sosOverlay');
+  if(!sos){
+    banner.classList.add('hidden');
+    overlay.classList.remove('on');
+    lastSosId=null;
+    return;
+  }
+  if(sos.id===lastSosId) return;
+  lastSosId=sos.id;
+  const t=(S.teams||[]).find(x=>x.id===sos.teamId);
+  document.getElementById('sosTitle').textContent='SOS — '+(t?t.name:'Squadra');
+  document.getElementById('sosSub').textContent='Posizione: '+(sos.address||(sos.lat+', '+sos.lng))+' · '+fmtTime(sos.ts);
+  banner.classList.remove('hidden');
+  overlay.classList.add('on');
+  playSosSound();
+}
+
+/* =========================================================
+   AUDIO (suono SOS = buzz 1000/500 alternati, come da demo)
+   ========================================================= */
+let audioCtx=null,audioEnabled=false;
+function initAudio(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}}
+function enableAudio(){initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();audioEnabled=true;}
+document.addEventListener('click',()=>{if(!audioEnabled)enableAudio();},{once:true});
+function buzz(freq,start,duration,gainPeak){
+  if(!audioCtx)return;
+  try{
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.type='square';osc.frequency.value=freq;
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    const t0=audioCtx.currentTime+start;
+    gain.gain.setValueAtTime(0,t0);
+    gain.gain.linearRampToValueAtTime(gainPeak||0.4,t0+0.004);
+    gain.gain.setValueAtTime(gainPeak||0.4,t0+duration-0.006);
+    gain.gain.linearRampToValueAtTime(0,t0+duration);
+    osc.start(t0);osc.stop(t0+duration+0.02);
+  }catch(e){}
+}
+function playSosSound(){
+  if(!audioEnabled){enableAudio();}
+  if(!audioCtx) return;
+  /* Loop del suono SOS per 10 secondi (fino alla chiusura del banner) */
+  const loop=()=>{
+    if(document.getElementById('sosBanner').classList.contains('hidden')) return;
+    for(let i=0;i<5;i++){
+      buzz(1000,i*0.22,0.12,0.5);
+      buzz(500,i*0.22+0.11,0.12,0.5);
+    }
+    setTimeout(loop,1500);
+  };
+  loop();
+}
+
+/* =========================================================
+   MAP
+   ========================================================= */
+let map=null,currentTileLayer=null;
+const groups={};
+let currentProvider=localStorage.getItem('sge_provider')||'esri';
+
+function buildTile(key){const p=TILE_PROVIDERS[key]||TILE_PROVIDERS.esri;
+  return L.tileLayer(p.url,{maxZoom:p.maxZoom});}
+
+function initMap(){
+  if(typeof L==='undefined'){document.getElementById('wallmap').innerHTML='<div style="padding:40px;color:#888">⚠️ Mappa non disponibile</div>';return;}
+  const c=S.center||{lat:45.5195,lng:9.0784};
+  map=L.map('wallmap',{zoomControl:true,attributionControl:true})
+    .setView([c.lat,c.lng],14);
+  currentTileLayer=buildTile(currentProvider).addTo(map);
+  groups.targets=L.layerGroup().addTo(map);
+  groups.teams=L.layerGroup().addTo(map);
+  groups.pois=L.layerGroup().addTo(map);
+  groups.links=L.layerGroup().addTo(map);
+  groups.zones=L.layerGroup().addTo(map);
+}
+
+function targetIcon(tg){
+  const pending=tg.status==='in_attesa',closed=tg.status==='chiuso';
+  if(pending) return L.divIcon({className:'',
+    html:'<div class="wk-target pending">⏳</div>',
+    iconSize:[48,48],iconAnchor:[24,24]});
+  const c=COLORS[tg.color]||{hex:'#889',fg:'#fff'};
+  const cls=closed?'closed ':'';
+  const n=(tg.teamIds||[]).length;
+  const nBadge=n>1?'<span class="badge-n">'+n+'</span>':'';
+  return L.divIcon({className:'',
+    html:'<div class="wk-target '+cls+'" style="--c:'+c.hex+';--f:'+c.fg+'">'+esc(tg.code)+nBadge+'</div>',
+    iconSize:[48,48],iconAnchor:[24,24]});
+}
+function teamIcon(t){
+  const col=statusColor(t),type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+  const crew=CREW_TYPES[t.crew]||CREW_TYPES.bravo;
+  let badge='';
+  if(t.mission){
+    const cc=COLORS[parseCode(t.mission.code).color]||{hex:'#888'};
+    badge='<span class="tp-badge" style="background:'+cc.hex+'">'+esc(t.mission.code)+'</span>';
+  }
+  const sosCls=(S.sos&&S.sos.teamId===t.id)?' sos':'';
+  return L.divIcon({className:'',
+    html:'<div class="wk-team'+sosCls+'" style="--c:'+col+'">'+type.icon+badge+'</div>',
+    iconSize:[44,44],iconAnchor:[22,22]});
+}
+function poiIcon(p){
+  const c=POI_CATS[p.cat]||POI_CATS.info;
+  return L.divIcon({className:'',
+    html:'<div class="wk-poi" style="--c:'+c.color+'"><span>'+c.icon+'</span></div>',
+    iconSize:[32,32],iconAnchor:[16,26]});
+}
+
+function renderMap(){
+  if(!map)return;
+  groups.targets.clearLayers();groups.teams.clearLayers();
+  groups.pois.clearLayers();groups.links.clearLayers();groups.zones.clearLayers();
+  (S.targets||[]).forEach(tg=>{
+    if(tg.status==='chiuso')return;
+    const mk=L.marker([tg.lat,tg.lng],{icon:targetIcon(tg),zIndexOffset:500});
+    mk.addTo(groups.targets);
+    const t=tg.teamIds?tg.teamIds.map(id=>(S.teams||[]).find(x=>x.id===id)).filter(Boolean):[];
+    t.forEach(tm=>{
+      L.polyline([[tg.lat,tg.lng],[tm.lat,tm.lng]],{color:'#ffa726',weight:2,opacity:.7,dashArray:'8,8'}).addTo(groups.links);
+    });
+  });
+  (S.teams||[]).forEach(t=>{
+    if(!t.operational && !t.mission) return;
+    L.marker([t.lat,t.lng],{icon:teamIcon(t),zIndexOffset:600}).addTo(groups.teams);
+  });
+  (S.pois||[]).forEach(p=>{
+    L.marker([p.lat,p.lng],{icon:poiIcon(p)}).addTo(groups.pois);
+  });
+  (S.zones||[]).forEach(z=>{
+    L.polygon(z.points,{color:z.color||'#ab47bc',weight:2,fillOpacity:.1,interactive:false}).addTo(groups.zones);
+  });
+  document.getElementById('mapTargets').textContent=(S.targets||[]).filter(t=>t.status!=='chiuso').length;
+  document.getElementById('mapTeams').textContent=(S.teams||[]).filter(t=>t.operational).length;
+  const el=document.getElementById('mapUpdated');
+  if(el) el.textContent='· agg. '+new Date().toLocaleTimeString('it-IT');
+}
+
+/* =========================================================
+   RENDER PANNELLI
+   ========================================================= */
+function renderKPI(){
+  const active=(S.targets||[]).filter(t=>t.status!=='chiuso').length;
+  const busy=(S.teams||[]).filter(t=>t.operational&&t.mission).length;
+  const free=(S.teams||[]).filter(t=>t.operational&&!t.mission).length;
+  const noop=(S.teams||[]).filter(t=>!t.operational).length;
+  document.getElementById('kIntv').textContent=active;
+  document.getElementById('kBusy').textContent=busy;
+  document.getElementById('kFree').textContent=free;
+  document.getElementById('kNoop').textContent=noop;
+}
+function renderTeamsPanel(){
+  const el=document.getElementById('teamsScroll');
+  const teams=(S.teams||[]).slice().sort((a,b)=>{
+    // prima chi è in missione, poi chi è disponibile, poi non op.
+    const rank=x=>x.mission?0:(x.operational?1:2);
+    if(rank(a)!==rank(b)) return rank(a)-rank(b);
+    return (a.name||'').localeCompare(b.name||'','it');
+  });
+  document.getElementById('teamsCnt').textContent=teams.length;
+  if(!teams.length){el.innerHTML='<div style="padding:40px;text-align:center;color:#666;font-size:13px">Nessuna squadra</div>';return;}
+  el.innerHTML=teams.map(t=>{
+    const col=statusColor(t);
+    const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;
+    let codeHtml='';
+    if(t.mission){
+      const c=COLORS[parseCode(t.mission.code).color]||{hex:'#888',fg:'#fff'};
+      codeHtml='<span class="team-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(t.mission.code)+'</span>';
+    }
+    const sub=t.mission
+      ? '<b style="color:'+col+'">'+statusIcon(t)+' '+esc(stateShort(t.status))+'</b> · '+esc(t.mission.address||'')
+      : type.icon+' '+esc(stateShort(t.status));
+    return '<div class="team-row">'+
+      '<div class="team-stripe" style="--c:'+col+'"></div>'+
+      '<div class="team-body"><div class="team-name">'+esc(t.name)+'</div>'+
+      '<div class="team-status">'+sub+'</div></div>'+
+      codeHtml+'</div>';
+  }).join('');
+}
+function renderMissionsPanel(){
+  const el=document.getElementById('missionsScroll');
+  const active=(S.targets||[]).filter(t=>t.status!=='chiuso').sort((a,b)=>{
+    // prima codice rosso, poi per tempo attivazione
+    const sa=a.color?(COLORS[a.color]||{sev:0}).sev:0;
+    const sb=b.color?(COLORS[b.color]||{sev:0}).sev:0;
+    if(sa!==sb) return sb-sa;
+    return (a.activatedAt||0)-(b.activatedAt||0);
+  });
+  document.getElementById('intvCnt').textContent=active.length;
+  if(!active.length){el.innerHTML='<div class="missions-empty">✓<br>Nessun intervento in corso</div>';return;}
+  el.innerHTML=active.map(tg=>{
+    const c=COLORS[tg.color]||{hex:'#889',fg:'#fff'};
+    const teams=targetTeams(tg);
+    const tags=[];
+    if(tg.ack) tags.push('<span class="tag ack">✅ '+fmtTime(tg.ack.ts)+'</span>');
+    if(hasPatientData(tg)) tags.push('<span class="tag patient">🩺 Scheda</span>');
+    if(tg.photos&&tg.photos.length) tags.push('<span class="tag photo">📷 '+tg.photos.length+'</span>');
+    if(tg.returnCode!=null) tags.push('<span class="tag">↩️ R'+tg.returnCode+'</span>');
+    const teamsTxt=teams.length?teams.map(t=>t.name).join(' · '):'⏳ In attesa';
+    return '<div class="mission-card '+(tg.status==='in_attesa'?'pending':'')+'" style="--c:'+c.hex+'">'+
+      '<div class="mission-head">'+
+        '<span class="mission-code" style="background:'+c.hex+';color:'+c.fg+'">'+esc(tg.code)+'</span>'+
+        '<span class="mission-elapsed">'+elapsed(tg.activatedAt)+'</span>'+
+      '</div>'+
+      '<div class="mission-addr">📍 '+esc(tg.address||'—')+'</div>'+
+      '<div class="mission-row">🚑 <span style="color:#fff;font-weight:700">'+esc(teamsTxt)+'</span></div>'+
+      (tags.length?'<div class="mission-row">'+tags.join('')+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+function renderTicker(){
+  const el=document.getElementById('tickerContent');
+  const arr=(S.broadcast||[]).slice(-10).reverse();
+  if(!arr.length){el.textContent='Nessun annuncio dalla Centrale';el.classList.add('empty');return;}
+  el.classList.remove('empty');
+  const items=arr.map(b=>'<span class="ticker-item"><b>'+fmtTime(b.ts)+'</b> '+esc(b.text)+'</span>').join('');
+  el.innerHTML=items+items; // duplicato per loop continuo
+  /* calcola larghezza per durata animazione proporzionale */
+  requestAnimationFrame(()=>{
+    const w=el.scrollWidth/2;
+    el.style.setProperty('--w',w+'px');
+    const dur=Math.max(20,Math.min(120,w/60));
+    el.style.animationDuration=dur+'s';
+  });
+}
+
+/* =========================================================
+   RENDER MASTER
+   ========================================================= */
+function renderAll(){
+  renderKPI();
+  renderTeamsPanel();
+  renderMissionsPanel();
+  renderTicker();
+  renderMap();
+  renderOnlineOps();
+}
+function renderOnlineOps(){
+  const el=document.getElementById('opsOnline');
+  if(!el) return;
+  const ops=S._operators||{};
+  const cutoff=Date.now()-45000;
+  const list=Object.values(ops).filter(o=>o.lastSeen>cutoff).sort((a,b)=>(a.joinedAt||0)-(b.joinedAt||0));
+  if(!list.length){el.innerHTML='';return;}
+  el.innerHTML=list.slice(0,6).map(o=>'<div class="wall-op-chip" style="--c:'+o.color+'"><span class="dot"></span>'+esc(o.name)+'</div>').join('');
+}
+
+/* =========================================================
+   CLOCK + FULLSCREEN + TICK
+   ========================================================= */
+function tickClock(){
+  const d=new Date();
+  const c=document.getElementById('clockLbl'); if(c) c.textContent=d.toLocaleTimeString('it-IT');
+  const dl=document.getElementById('dateLbl'); if(dl) dl.textContent=d.toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'});
+}
+tickClock(); setInterval(tickClock,1000);
+setInterval(()=>{
+  /* refresh elapsed dei mission-card ogni 1s */
+  const cards=document.querySelectorAll('.mission-elapsed');
+  const acts=(S.targets||[]).filter(t=>t.status!=='chiuso');
+  cards.forEach((el,i)=>{ if(acts[i]) el.textContent=elapsed(acts[i].activatedAt); });
+},1000);
+
+document.getElementById('fsBtn').onclick=()=>{
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else document.exitFullscreen();
+};
+
+/* Aggiorna online ops e ticker ogni 5s (anche se non arriva nulla) */
+setInterval(()=>{renderOnlineOps();},5000);
+/* Refresh LS ogni 800ms per sync veloce anche se MQTT è lento */
+setInterval(loadFromLS,800);
+
+/* =========================================================
+   INIT
+   ========================================================= */
+document.getElementById('roomLbl').textContent=SESSION_ROOM;
+loadFromLS();
+initMap();
+renderAll();
+initMqtt();
+updateNet();
+
+})();
+</script>
+</body>
+</html>
