@@ -866,7 +866,9 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
   <span class="sos-ico">🆘</span>
   <div class="sos-txt"><div id="sosTitle">SOS — Squadra in emergenza</div><div class="sos-sub" id="sosSub"></div></div>
   <button class="sos-btn" id="sosFocusBtn">🎯 Vai</button>
-  <button class="sos-close" id="sosCloseBtn">✕</button>
+  <button class="sos-close" id="sosAckBtn" style="background:#2fa84f;border-color:#2fa84f;color:#fff">✓ PRESA IN CARICO</button>
+  <button class="sos-close" id="sosClearBtn" style="display:none">🗑 CHIUDI</button>
+  <button class="sos-close" id="sosCloseBtn" style="display:none">✕</button>
 </div>
 
 <input type="file" id="solPhotoInput" accept="image/*" style="display:none">
@@ -876,7 +878,7 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -972,6 +974,15 @@ const CREW_TYPES={
 const POI_CATS={
   soccorso:{key:'soccorso',label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
   ospedale:{key:'ospedale',label:'Ospedali',icon:'🏥',color:'#e53935'},
+  polizia:{key:'polizia',label:'Polizia / Forze ordine',icon:'👮',color:'#3b82f6'},
+  vigili:{key:'vigili',label:'Vigili del fuoco',icon:'🚒',color:'#dc2626'},
+  steward:{key:'steward',label:'Steward',icon:'🦺',color:'#f59e0b'},
+  personale:{key:'personale',label:'Altro personale',icon:'🧑‍💼',color:'#10b981'},
+  palco:{key:'palco',label:'Palcoscenico',icon:'🎭',color:'#8b5cf6'},
+  bar:{key:'bar',label:'Bar / Chiosco',icon:'🍔',color:'#f59e0b'},
+  ristoro:{key:'ristoro',label:'Area ristoro',icon:'🍕',color:'#f59e0b'},
+  bagni:{key:'bagni',label:'Bagni / Servizi',icon:'🚻',color:'#06b6d4'},
+  struttura:{key:'struttura',label:'Altra struttura',icon:'🏗️',color:'#8b5cf6'},
   chiusura:{key:'chiusura',label:'Strade chiuse',icon:'⛔',color:'#ff7043'},
   centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
   info:{key:'info',label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}
@@ -1763,7 +1774,7 @@ function teamIcon(t){
   let badge='';
   if(t.mission){ const cc=COLORS[parseCode(t.mission.code).color]||{hex:'#888'}; badge='<span class="tp-badge" style="background:'+cc.hex+'">'+esc(t.mission.code)+'</span>'; }
   const crewTag='<span class="tp-crew" style="background:'+crew.color+'">'+crew.short+'</span>';
-  const sosCls=(S.sos&&S.sos.teamId===t.id)?' sos':'';
+ const sosCls=(S.sos && S.sos.teamId===t.id && !S.sos.acknowledged)?' sos':'';
   return L.divIcon({className:'',html:'<div class="team-pin'+sosCls+'" style="--c:'+col+'">'+type.icon+badge+crewTag+'</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-23]});
 }
 function poiIcon(p){ const c=POI_CATS[p.cat]||POI_CATS.info; return L.divIcon({className:'',html:'<div class="poi-pin" style="--c:'+c.color+'"><span>'+c.icon+'</span></div>',iconSize:[30,30],iconAnchor:[15,24],popupAnchor:[0,-24]}); }
@@ -2164,14 +2175,10 @@ function renderAdminList(){
 /* QR login: genera e mostra QR code per la squadra */
 function showTeamQR(teamId){
   const t=S.teams.find(x=>x.id===teamId); if(!t) return;
-  /* Costruisci URL equipaggio.html con parametri */
-  let baseUrl;
-  const path = location.pathname;
-  if(path.toLowerCase().endsWith('sol.html')){
-    baseUrl = location.origin + path.substring(0, path.length-8) + 'equipaggio.html';
-  } else {
-    baseUrl = location.origin + path.replace(/[^/]*$/,'') + 'equipaggio.html';
-  }
+
+  /* Calcolo URL robusto, funziona sia da SOL.html che da qualunque nome file */
+  const dir = location.pathname.replace(/[^/]*$/,'');
+  const baseUrl = location.origin + dir + 'equipaggio.html';
   const url = new URL(baseUrl);
   url.searchParams.set('room', SESSION_ROOM);
   url.searchParams.set('team', t.id);
@@ -2180,42 +2187,58 @@ function showTeamQR(teamId){
 
   let h='<div class="qr-wrap">';
   h+='<div style="font-size:13px;color:var(--muted);margin-bottom:12px">Inquadra il QR con la fotocamera del dispositivo equipaggio per accedere automaticamente.</div>';
-  h+='<canvas id="qrCanvas"></canvas>';
+  h+='<div id="qrContainer" style="display:inline-block;background:#fff;padding:10px;border-radius:8px;line-height:0"></div>';
   h+='<div class="qr-url" id="qrUrl">'+esc(qrUrl)+'</div>';
   h+='<div class="row" style="margin-top:12px;gap:8px">';
   h+='<button class="btn ghost" id="qrCopyBtn">📋 Copia link</button>';
   h+='<button class="btn ghost" id="qrDownloadBtn">⬇️ Scarica PNG</button>';
   h+='</div>';
-  h+='<div class="qr-hint">⚠️ <b>Sicurezza</b>: il link contiene la password in chiaro. Usalo solo in ambienti controllati e non condividerlo pubblicamente. '+(t.password?'':'<br>💡 Questa squadra non ha password: chi ha il link può accedere direttamente.')+'</div>';
+  h+='<div class="qr-hint">⚠️ <b>Sicurezza</b>: il link contiene la password in chiaro. Usalo solo in ambienti controllati. '+(t.password?'':'<br>💡 Questa squadra non ha password: chi ha il link può accedere direttamente.')+'</div>';
   h+='</div>';
   openModal('📱 QR Login — '+t.name, h);
 
-  const canvas = document.getElementById('qrCanvas');
-  if(typeof QRCode!=='undefined' && canvas){
-    QRCode.toCanvas(canvas, qrUrl, {width:260, margin:2, color:{dark:'#1a1a1a', light:'#ffffff'}}, (err)=>{
-      if(err){ canvas.outerHTML='<div class="empty">⚠️ Errore generazione QR</div>'; }
-    });
-  } else {
-    if(canvas) canvas.outerHTML='<div class="empty">⚠️ Libreria QR non caricata. Copia il link manualmente.</div>';
+  const container = document.getElementById('qrContainer');
+  if(typeof QRCode!=='undefined' && container){
+    try{
+      container.innerHTML='';
+      new QRCode(container, {
+        text: qrUrl,
+        width: 240,
+        height: 240,
+        colorDark: '#1a1a1a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }catch(err){
+      container.innerHTML='<div class="empty">⚠️ Errore generazione QR</div>';
+    }
+  } else if(container){
+    container.innerHTML='<div class="empty">⚠️ Libreria QR non caricata. Copia il link manualmente.</div>';
   }
 
   const copyB = document.getElementById('qrCopyBtn');
   if(copyB) copyB.onclick=()=>{
-    navigator.clipboard.writeText(qrUrl).then(()=>toast('📋 Link QR copiato')).catch(()=>prompt('Copia manualmente:',qrUrl));
+    navigator.clipboard.writeText(qrUrl)
+      .then(()=>toast('📋 Link QR copiato'))
+      .catch(()=>prompt('Copia manualmente:',qrUrl));
   };
+
   const dlB = document.getElementById('qrDownloadBtn');
   if(dlB) dlB.onclick=()=>{
-    const c=document.getElementById('qrCanvas');
-    if(!c) return;
+    const canvas = container.querySelector('canvas');
+    const img = container.querySelector('img');
     try{
       const a=document.createElement('a');
-      a.href=c.toDataURL('image/png');
+      if(canvas){ a.href=canvas.toDataURL('image/png'); }
+      else if(img){ a.href=img.src; }
+      else { toast('⚠️ QR non disponibile'); return; }
       a.download='sge_qr_'+t.name.replace(/[^a-z0-9]+/gi,'_')+'.png';
       a.click();
       toast('⬇️ QR scaricato');
     }catch(e){ toast('⚠️ Errore download'); }
   };
 }
+
 function renderPoiList(){
   const el=document.getElementById('poiList');
   if(!S.pois.length){ el.innerHTML='<div class="empty">Nessun punto.</div>'; return; }
@@ -2703,11 +2726,10 @@ function setStatus(teamId,status,note){
   const t=S.teams.find(x=>x.id===teamId); if(!t||!status) return;
   const ms=MISSION_STATE_MAP[status];
   if(ms && ms.terminal){
-    if(t.mission){ closeMission(t.id, note||'Arrivo in sede', status); return; }
-    t.history=t.history||[];
-    if(t.status!==status){ t.history.unshift({ts:Date.now(),status,note:note||'Arrivo in sede'}); t.history=t.history.slice(0,120); }
-    t.status=status; t.updatedAt=Date.now(); return;
-  }
+  if(t.mission){ closeMission(t.id, note||'Arrivo in sede', status); return; }
+  t.track=[];                     // <—— AGGIUNTO
+  t.history=t.history||[];
+}
   if(t.status!==status){
     t.status=status; t.history=t.history||[];
     t.history.unshift({ts:Date.now(),status,note:note||''}); t.history=t.history.slice(0,120);
@@ -2715,6 +2737,7 @@ function setStatus(teamId,status,note){
   if(status==='Non operativa') t.operational=false;
   t.updatedAt=Date.now();
 }
+
 function createPendingTarget(data){
   const p=parseCode(data.code);
   const tg={id:uid('tg'),code:p.label,env:p.env,pat:p.pat,color:p.color,
@@ -2767,8 +2790,11 @@ function closeMission(teamId,note,finalStatus){
     }
   }
   t.mission=null;
+  t.track=[];                 // <—— AGGIUNTO: azzera traccia GPS
+  if(trackingTeamId===teamId) trackingTeamId=null;
   setStatus(t.id, finalStatus||(t.operational?'Disponibile':'Non operativa'), note||'Missione chiusa');
 }
+
 function deleteTarget(id){
   const tg=S.targets.find(x=>x.id===id); if(!tg) return;
   const teams=targetTeams(tg);
@@ -2777,6 +2803,7 @@ function deleteTarget(id){
   if(!confirm(msg)) return;
   teams.forEach(t=>{
     t.mission=null;
+    t.track=[];
     t.status=t.operational?'Disponibile':'Non operativa';
     t.history=t.history||[];
     t.history.unshift({ts:Date.now(),status:t.status,note:'Target '+tg.code+' eliminato'});
@@ -3107,7 +3134,31 @@ function showSosBanner(sos){
   sub.textContent='Posizione: '+(sos.address||(sos.lat+', '+sos.lng))+' · '+fmtTime(sos.ts);
   banner.classList.remove('hidden');
   document.getElementById('sosFocusBtn').onclick=()=>{ if(map&&t){ map.flyTo([t.lat,t.lng],18,{duration:.8}); } };
-  document.getElementById('sosCloseBtn').onclick=()=>{ banner.classList.add('hidden'); S.sos=null; save(); };
+
+  const ackBtn=document.getElementById('sosAckBtn');
+  const clearBtn=document.getElementById('sosClearBtn');
+  const closeBtn=document.getElementById('sosCloseBtn');
+  if(ackBtn){
+    ackBtn.style.display = sos.acknowledged ? 'none' : '';
+    ackBtn.onclick=()=>{
+      banner.classList.add('hidden');
+      if(S.sos && !S.sos.acknowledged){
+        S.sos.acknowledged={ts:Date.now(), by:(opIdentity&&opIdentity.name)||'SOL'};
+        save(); render();
+        toast('✅ SOS preso in carico');
+      }
+    };
+  }
+  if(clearBtn){
+    clearBtn.style.display = sos.acknowledged ? '' : 'none';
+    clearBtn.onclick=()=>{
+      if(!confirm('Chiudere definitivamente il SOS?')) return;
+      banner.classList.add('hidden');
+      S.sos=null;
+      save(); render();
+    };
+  }
+  if(closeBtn) closeBtn.style.display='none'; /* il vecchio ✕ viene sostituito dai due bottoni */
 }
 
 /* =========================================================
