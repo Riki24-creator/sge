@@ -203,6 +203,36 @@ button{font-family:inherit;cursor:pointer}
 .sos-banner .txt .sub{font-size:15px;opacity:.9;margin-top:4px;font-weight:600}
 .sos-banner button{background:#fff;color:#c62828;border:none;padding:12px 26px;
   border-radius:10px;font-weight:900;font-size:14px;letter-spacing:.5px}
+
+
+.qr-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9500;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.qr-modal-box{background:#161619;border:1px solid #333;border-radius:16px;
+  max-width:520px;width:100%;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.9)}
+.qr-modal-head{display:flex;align-items:center;padding:16px 20px;
+  border-bottom:1px solid #2a2a30;gap:10px}
+.qr-modal-head h3{margin:0;font-size:16px;flex:1;color:#fff}
+.qr-modal-head button{background:transparent;border:none;color:#888;
+  font-size:20px;cursor:pointer;padding:6px 10px;border-radius:8px}
+.qr-modal-head button:hover{color:#fff;background:#2a2a30}
+.qr-modal-body{padding:20px}
+.qr-modal-body label{display:block;font-size:11px;text-transform:uppercase;
+  letter-spacing:.7px;color:#888;margin-bottom:6px;font-weight:800}
+.qr-modal-body select{width:100%;background:#1e1e22;border:1px solid #333;
+  color:#f0f0f2;padding:10px 12px;border-radius:8px;font-size:14px;outline:none}
+.qr-modal-body select:focus{border-color:var(--accent)}
+
+.qr-canvas-wrap{text-align:center;padding:16px;background:#fff;border-radius:12px;
+  margin:16px 0;display:inline-block}
+.qr-url{font-family:monospace;font-size:11px;color:#888;word-break:break-all;
+  background:#1e1e22;border-radius:8px;padding:10px 12px;margin-top:10px;line-height:1.4}
+.qr-hint{font-size:11.5px;color:#ffcc80;background:rgba(255,167,38,.08);
+  border:1px solid rgba(255,167,38,.25);padding:10px;border-radius:8px;
+  margin-top:12px;line-height:1.5}
+
+
+
 </style>
 </head>
 <body>
@@ -215,7 +245,24 @@ button{font-family:inherit;cursor:pointer}
     <div id="sosTitle">SOS — Squadra in emergenza</div>
     <div class="sub" id="sosSub"></div>
   </div>
-  <button onclick="document.getElementById('sosBanner').classList.add('hidden')">CHIUDI</button>
+  <button id="sosAckBtn" style="background:#2fa84f;color:#fff">✓ PRESA IN CARICO</button>
+<button id="sosClearBtn" style="background:#fff;color:#c62828">🗑 CHIUDI</button>
+</div>
+
+<div id="qrModal" class="qr-modal hidden">
+  <div class="qr-modal-box">
+    <div class="qr-modal-head">
+      <h3>📱 QR Login equipaggio</h3>
+      <button id="qrModalClose">✕</button>
+    </div>
+    <div class="qr-modal-body">
+      <label>Seleziona squadra</label>
+      <select id="qrTeamSelect"></select>
+      <div id="qrContent" style="text-align:center;margin-top:14px">
+        <div style="color:#666;font-size:13px">Seleziona una squadra per generare il QR</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="wall">
@@ -233,6 +280,7 @@ button{font-family:inherit;cursor:pointer}
       <span class="wall-date" id="dateLbl"></span>
       <span class="wall-clock" id="clockLbl">--:--:--</span>
     </div>
+    <button class="wall-fs" id="qrOpenBtn" title="QR Login">📱</button>
     <button class="wall-fs" id="fsBtn" title="Schermo intero">⛶</button>
   </header>
 
@@ -275,9 +323,11 @@ button{font-family:inherit;cursor:pointer}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script> 
 <script>
 (function(){
 'use strict';
+
 
 /* =========================================================
    CONFIG
@@ -331,6 +381,11 @@ const MISSION_STATES=[
 const MS_MAP={}; MISSION_STATES.forEach(s=>MS_MAP[s.key]=s);
 const POI_CATS={
   soccorso:{icon:'⛑️',color:'#00c2a8'},ospedale:{icon:'🏥',color:'#e53935'},
+  polizia:{icon:'👮',color:'#3b82f6'},vigili:{icon:'🚒',color:'#dc2626'},
+  steward:{icon:'🦺',color:'#f59e0b'},personale:{icon:'🧑‍💼',color:'#10b981'},
+  palco:{icon:'🎭',color:'#8b5cf6'},bar:{icon:'🍔',color:'#f59e0b'},
+  ristoro:{icon:'🍕',color:'#f59e0b'},bagni:{icon:'🚻',color:'#06b6d4'},
+  struttura:{icon:'🏗️',color:'#8b5cf6'},
   chiusura:{icon:'⛔',color:'#ff7043'},centrale:{icon:'🏢',color:'#7c8cff'},
   info:{icon:'ℹ️',color:'#9aa7b8'}
 };
@@ -377,6 +432,17 @@ function stateShort(s){const m=MS_MAP[s];return m?m.short:s;}
 let S={center:{lat:45.5195,lng:9.0784},teams:[],targets:[],pois:[],zones:[],broadcast:[],sos:null,config:{brokers:DEFAULT_BROKERS}};
 let _lastRev=0;
 let mqttClient=null,mqttOnline=false,currentBrokerIdx=0;
+const MY_WRITER_ID='wall_'+Math.random().toString(36).slice(2,10);
+
+async function publishState(){
+  const rev=Date.now()+Math.random();
+  S._rev=rev; S._writer=MY_WRITER_ID; _lastRev=rev;
+  const json=JSON.stringify(S);
+  try{ localStorage.setItem(KEY,json); }catch(e){}
+  if(mqttClient && mqttOnline){
+    try{ mqttClient.publish(MQTT_BASE+'/sol', json, {qos:0,retain:true}); }catch(e){}
+  }
+}
 
 function loadFromLS(){
   try{
@@ -389,6 +455,7 @@ function loadFromLS(){
 function applyState(incoming){
   if(!incoming||!incoming._rev)return;
   if(incoming._rev<=_lastRev)return;
+  if(incoming._writer===MY_WRITER_ID) return;
   _lastRev=incoming._rev;
   S=incoming;
   S.teams=S.teams||[]; S.targets=S.targets||[]; S.pois=S.pois||[]; S.zones=S.zones||[];
@@ -549,7 +616,7 @@ function teamIcon(t){
     const cc=COLORS[parseCode(t.mission.code).color]||{hex:'#888'};
     badge='<span class="tp-badge" style="background:'+cc.hex+'">'+esc(t.mission.code)+'</span>';
   }
-  const sosCls=(S.sos&&S.sos.teamId===t.id)?' sos':'';
+  const sosCls=(S.sos && S.sos.teamId===t.id && !S.sos.acknowledged)?' sos':'';
   return L.divIcon({className:'',
     html:'<div class="wk-team'+sosCls+'" style="--c:'+col+'">'+type.icon+badge+'</div>',
     iconSize:[44,44],iconAnchor:[22,22]});
@@ -735,6 +802,129 @@ initMap();
 renderAll();
 initMqtt();
 updateNet();
+/* === Gestione bottoni SOS banner (ack + clear) === */
+(function bindSosButtons(){
+  const ackBtn=document.getElementById('sosAckBtn');
+  const clearBtn=document.getElementById('sosClearBtn');
+  if(ackBtn) ackBtn.onclick=()=>{
+    document.getElementById('sosBanner').classList.add('hidden');
+    document.getElementById('sosOverlay').classList.remove('on');
+    if(S.sos && !S.sos.acknowledged){
+      S.sos.acknowledged={ts:Date.now(), by:'Sala Wall'};
+      publishState();
+      renderMap();
+    }
+  };
+  if(clearBtn) clearBtn.onclick=()=>{
+    if(!confirm('Chiudere definitivamente il SOS su tutte le postazioni?')) return;
+    document.getElementById('sosBanner').classList.add('hidden');
+    document.getElementById('sosOverlay').classList.remove('on');
+    S.sos=null;
+    publishState();
+    renderMap();
+  };
+})();
+
+/* === QR Login per la Sala === */
+function renderWallQR(){
+  const sel=document.getElementById('qrTeamSelect');
+  const content=document.getElementById('qrContent');
+  if(!sel||!content) return;
+
+  const teams=(S.teams||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'','it'));
+  sel.innerHTML=teams.length
+    ? teams.map(t=>{
+        const type=(TEAM_TYPES[t.type]||{icon:'🚑'}).icon;
+        return '<option value="'+t.id+'">'+type+' '+esc(t.name)+'</option>';
+      }).join('')
+    : '<option value="">— Nessuna squadra disponibile —</option>';
+
+  const buildQR=(teamId)=>{
+    const t=(S.teams||[]).find(x=>x.id===teamId);
+    content.innerHTML='';
+    if(!t){
+      content.innerHTML='<div style="color:#666;font-size:13px;padding:20px">Nessuna squadra selezionata</div>';
+      return;
+    }
+
+    const dir = location.pathname.replace(/[^/]*$/,'');
+    const baseUrl = location.origin + dir + 'equipaggio.html';
+    const url = new URL(baseUrl);
+    url.searchParams.set('room', SESSION_ROOM);
+    url.searchParams.set('team', t.id);
+    if(t.password) url.searchParams.set('pwd', t.password);
+    const qrUrl = url.toString();
+
+    const wrap=document.createElement('div');
+    wrap.className='qr-canvas-wrap';
+    wrap.id='qrCanvasWrap';
+    content.appendChild(wrap);
+
+    if(typeof QRCode!=='undefined'){
+      try{
+        new QRCode(wrap, {
+          text: qrUrl,
+          width: 240,
+          height: 240,
+          colorDark: '#1a1a1a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }catch(err){
+        wrap.innerHTML='<div style="color:#c62828;padding:20px">⚠️ Errore generazione QR</div>';
+      }
+    } else {
+      wrap.innerHTML='<div style="color:#c62828;padding:20px">⚠️ Libreria QR non caricata</div>';
+    }
+
+    const urlBox=document.createElement('div');
+    urlBox.className='qr-url';
+    urlBox.textContent=qrUrl;
+    content.appendChild(urlBox);
+
+    const btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:8px;justify-content:center;margin-top:12px';
+    btnRow.innerHTML='<button class="wall-fs" id="qrWallCopy" style="width:auto;padding:0 16px;height:40px;font-size:13px">📋 Copia link</button>'+
+                     '<button class="wall-fs" id="qrWallDownload" style="width:auto;padding:0 16px;height:40px;font-size:13px">⬇️ Scarica</button>';
+    content.appendChild(btnRow);
+
+    document.getElementById('qrWallCopy').onclick=()=>{
+      navigator.clipboard.writeText(qrUrl).catch(()=>prompt('Copia manualmente:',qrUrl));
+    };
+    document.getElementById('qrWallDownload').onclick=()=>{
+      const cv=wrap.querySelector('canvas'), img=wrap.querySelector('img');
+      const a=document.createElement('a');
+      if(cv){ a.href=cv.toDataURL('image/png'); }
+      else if(img){ a.href=img.src; }
+      else return;
+      a.download='sge_qr_'+t.name.replace(/[^a-z0-9]+/gi,'_')+'.png';
+      a.click();
+    };
+
+    const hint=document.createElement('div');
+    hint.className='qr-hint';
+    hint.innerHTML='⚠️ Il link contiene la password in chiaro: usalo solo in ambienti controllati.'+
+      (t.password?'':'<br>💡 La squadra non ha password: chi ha il link può accedere direttamente.');
+    content.appendChild(hint);
+  };
+
+  sel.onchange=()=>buildQR(sel.value);
+  if(teams.length) buildQR(teams[0].id);
+}
+
+document.getElementById('qrOpenBtn').onclick=()=>{
+  document.getElementById('qrModal').classList.remove('hidden');
+  renderWallQR();
+};
+document.getElementById('qrModalClose').onclick=()=>{
+  document.getElementById('qrModal').classList.add('hidden');
+};
+document.getElementById('qrModal').addEventListener('click',(e)=>{
+  if(e.target.id==='qrModal') document.getElementById('qrModal').classList.add('hidden');
+});
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape') document.getElementById('qrModal').classList.add('hidden');
+});
 
 })();
 </script>
