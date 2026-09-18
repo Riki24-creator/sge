@@ -878,7 +878,19 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+  /* Fallback automatico se il CDN primario è bloccato */
+  if(typeof QRCode === 'undefined'){
+    document.write('<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"><\/script>');
+  }
+</script>
+<script>
+  /* Secondo fallback (Cloudflare) */
+  if(typeof QRCode === 'undefined'){
+    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"><\/script>');
+  }
+</script>
 <script>
 (function(){
 'use strict';
@@ -2176,7 +2188,7 @@ function renderAdminList(){
 function showTeamQR(teamId){
   const t=S.teams.find(x=>x.id===teamId); if(!t) return;
 
-  /* Calcolo URL robusto, funziona sia da SOL.html che da qualunque nome file */
+  /* URL robusto, funziona da qualunque pagina */
   const dir = location.pathname.replace(/[^/]*$/,'');
   const baseUrl = location.origin + dir + 'equipaggio.html';
   const url = new URL(baseUrl);
@@ -2187,7 +2199,7 @@ function showTeamQR(teamId){
 
   let h='<div class="qr-wrap">';
   h+='<div style="font-size:13px;color:var(--muted);margin-bottom:12px">Inquadra il QR con la fotocamera del dispositivo equipaggio per accedere automaticamente.</div>';
-  h+='<div id="qrContainer" style="display:inline-block;background:#fff;padding:10px;border-radius:8px;line-height:0"></div>';
+  h+='<canvas id="qrCanvas" style="background:#fff;padding:10px;border-radius:8px"></canvas>';
   h+='<div class="qr-url" id="qrUrl">'+esc(qrUrl)+'</div>';
   h+='<div class="row" style="margin-top:12px;gap:8px">';
   h+='<button class="btn ghost" id="qrCopyBtn">📋 Copia link</button>';
@@ -2197,24 +2209,44 @@ function showTeamQR(teamId){
   h+='</div>';
   openModal('📱 QR Login — '+t.name, h);
 
-  const container = document.getElementById('qrContainer');
-  if(typeof QRCode!=='undefined' && container){
-    try{
-      container.innerHTML='';
-      new QRCode(container, {
-        text: qrUrl,
-        width: 240,
-        height: 240,
-        colorDark: '#1a1a1a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    }catch(err){
-      container.innerHTML='<div class="empty">⚠️ Errore generazione QR</div>';
+  /* Genera il QR dopo che il modal è nel DOM */
+  setTimeout(()=>{
+    const canvas = document.getElementById('qrCanvas');
+    if(!canvas) return;
+
+    if(typeof QRCode === 'undefined'){
+      canvas.outerHTML = '<div style="padding:20px;background:#2d2d2d;border-radius:8px;color:#ffcc80;font-size:12.5px">⚠️ Libreria QR non caricata (rete bloccata).<br>Copia il link qui sotto manualmente.</div>';
+      return;
     }
-  } else if(container){
-    container.innerHTML='<div class="empty">⚠️ Libreria QR non caricata. Copia il link manualmente.</div>';
-  }
+
+    /* node-qrcode API */
+    if(typeof QRCode.toCanvas === 'function'){
+      QRCode.toCanvas(canvas, qrUrl, {
+        width: 240,
+        margin: 2,
+        color: { dark:'#1a1a1a', light:'#ffffff' },
+        errorCorrectionLevel: 'M'
+      }, (err)=>{
+        if(err){
+          canvas.outerHTML = '<div style="padding:20px;color:#ef9a9a">⚠️ Errore generazione QR</div>';
+        }
+      });
+    }
+    /* qrcode-generator API (fallback) */
+    else if(typeof qrcode === 'function'){
+      try{
+        const qr = qrcode(0,'M');
+        qr.addData(qrUrl);
+        qr.make();
+        canvas.outerHTML = qr.createImgTag(6, 16).replace('<img', '<img style="background:#fff;padding:10px;border-radius:8px"');
+      }catch(e){
+        canvas.outerHTML = '<div style="padding:20px;color:#ef9a9a">⚠️ Errore generazione QR</div>';
+      }
+    }
+    else {
+      canvas.outerHTML = '<div style="padding:20px;color:#ef9a9a">⚠️ API QR sconosciuta</div>';
+    }
+  }, 60);
 
   const copyB = document.getElementById('qrCopyBtn');
   if(copyB) copyB.onclick=()=>{
@@ -2225,11 +2257,11 @@ function showTeamQR(teamId){
 
   const dlB = document.getElementById('qrDownloadBtn');
   if(dlB) dlB.onclick=()=>{
-    const canvas = container.querySelector('canvas');
-    const img = container.querySelector('img');
+    const cv = document.getElementById('qrCanvas');
+    const img = document.querySelector('.qr-wrap img');
     try{
       const a=document.createElement('a');
-      if(canvas){ a.href=canvas.toDataURL('image/png'); }
+      if(cv){ a.href=cv.toDataURL('image/png'); }
       else if(img){ a.href=img.src; }
       else { toast('⚠️ QR non disponibile'); return; }
       a.download='sge_qr_'+t.name.replace(/[^a-z0-9]+/gi,'_')+'.png';
