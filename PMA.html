@@ -314,6 +314,20 @@ transition:.3s;max-width:calc(100vw - 32px);text-align:center;border:1px solid r
    ========================================================= */
 const KEY='sge_v4';
 const AUTH_KEY='sge_pma_auth';
+localStorage.setItem('sge_room',SESSION_ROOM);
+/* ===== Dati privati (solo locale, MAI condivisi) ===== */
+const PMA_PRIV_KEY='sge_pma_priv_v1';
+let pmaPrivate={};
+try{ pmaPrivate=JSON.parse(localStorage.getItem(PMA_PRIV_KEY)||'{}'); }catch(e){ pmaPrivate={}; }
+function getPrivate(id){ return pmaPrivate[id]||{name:'',surname:'',birthYear:null}; }
+function savePrivate(id,name,surname,birthYear){
+  pmaPrivate[id]={name:name||'',surname:surname||'',birthYear:birthYear||null};
+  try{ localStorage.setItem(PMA_PRIV_KEY,JSON.stringify(pmaPrivate)); }catch(e){}
+}
+function removePrivate(id){
+  delete pmaPrivate[id];
+  try{ localStorage.setItem(PMA_PRIV_KEY,JSON.stringify(pmaPrivate)); }catch(e){}
+}
 const MY_PAGE_ID='pma_'+Math.random().toString(36).slice(2,10);
 const SESSION_ROOM=(function(){
   const p=new URLSearchParams(location.search);
@@ -398,10 +412,12 @@ if(!S.teams)S.teams=[];if(!S.targets)S.targets=[];if(!S.pois)S.pois=[];
 if(!S.zones)S.zones=[];if(!S.broadcast)S.broadcast=[];
 if(!S.config)S.config={brokers:DEFAULT_BROKERS.slice(),encryptKey:''};
 if(!Array.isArray(S.config.brokers))S.config.brokers=DEFAULT_BROKERS.slice();
-if(!S.pma)S.pma={password:'',patients:[]};
+if(!S.pma)S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
 if(typeof S.pma.password!=='string')S.pma.password='';
+if(typeof S.pma.name!=='string')S.pma.name='PMA';
+if(S.pma.lat===undefined)S.pma.lat=null;
+if(S.pma.lng===undefined)S.pma.lng=null;
 if(!Array.isArray(S.pma.patients))S.pma.patients=[];
-/* Normalizza ogni paziente */
 S.pma.patients.forEach(p=>{
   if(!PMA_COLORS[p.code])p.code='V';
   if(!PMA_STATES[p.state])p.state='waiting';
@@ -410,9 +426,7 @@ S.pma.patients.forEach(p=>{
   if(p.closedAt===undefined)p.closedAt=null;
   if(!p.clinical)p.clinical={};
   const c=p.clinical;
-  if(typeof c.name!=='string')c.name='';
-  if(typeof c.surname!=='string')c.surname='';
-  if(c.birthYear==null)c.birthYear=null;
+  if(c.age===undefined)c.age=null;
   if(typeof c.sex!=='string')c.sex='';
   if(typeof c.complaint!=='string')c.complaint='';
   if(typeof c.allergies!=='string')c.allergies='';
@@ -420,7 +434,6 @@ S.pma.patients.forEach(p=>{
   if(!c.vitals)c.vitals={pa:'',fc:'',spo2:'',temp:'',gcs:''};
   ['pa','fc','spo2','temp','gcs'].forEach(k=>{if(typeof c.vitals[k]!=='string')c.vitals[k]='';});
 });
-
 /* =========================================================
    SYNC
    ========================================================= */
@@ -500,8 +513,9 @@ function applyRemoteState(incoming){
   _lastRev=incoming._rev;
   _skipPublish=true;
   try{
-    S=incoming;
-    if(!S.pma)S.pma={password:'',patients:[]};
+      S=incoming;
+    if(!S.pma)S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+    if(typeof S.pma.name!=='string')S.pma.name='PMA';
     if(!Array.isArray(S.pma.patients))S.pma.patients=[];
     S.pma.patients.forEach(p=>{
       if(!p.clinical)p.clinical={};
@@ -569,6 +583,7 @@ function deletePatient(id){
   const p=S.pma.patients.find(x=>x.id===id);
   if(!p)return;
   if(!confirm('Eliminare definitivamente il paziente '+p.code+'?\n\nTutti i dati clinici verranno rimossi.'))return;
+    removePrivate(id);
   S.pma.patients=S.pma.patients.filter(x=>x.id!==id);
   publishState();
   renderAll();
@@ -702,8 +717,9 @@ function renderPatientCard(p){
   const c=PMA_COLORS[p.code]||PMA_COLORS.V;
   const st=PMA_STATES[p.state]||PMA_STATES.waiting;
   const cl=p.clinical||{};
-  const name=((cl.surname||'')+(cl.name?' '+cl.name:'')).trim();
-  const age=cl.birthYear?((new Date()).getFullYear()-cl.birthYear):null;
+  const priv=getPrivate(p.id);
+  const name=((priv.surname||'')+(priv.name?' '+priv.name:'')).trim();
+  const age=cl.age!=null?cl.age:(priv.birthYear?((new Date()).getFullYear()-priv.birthYear):null);
   const metaBits=[];
   if(name)metaBits.push('<span><span class="lbl">Paziente</span>'+esc(name)+'</span>');
   if(age)metaBits.push('<span><span class="lbl">Età</span>~'+age+'</span>');
@@ -765,13 +781,12 @@ function bindActions(){
 function openClinicalModal(id){
   const p=S.pma.patients.find(x=>x.id===id);
   if(!p)return;
-  const c=PMA_COLORS[p.code];
-  const st=PMA_STATES[p.state];
   const cl=p.clinical||{};
   const v=cl.vitals||{};
+  const priv=getPrivate(p.id);
 
   let h='';
-  h+='<div class="privacy-note"><span class="ico">🔒</span><div><b>Dati sensibili</b> — questa cartella è visibile solo al personale PMA e alla Centrale Operativa. Non viene mai mostrata nella Sala Coordinamento (wall).</div></div>';
+  h+='<div class="privacy-note"><span class="ico">🔒</span><div><b>Dati sensibili</b> — Nome, cognome e anno di nascita restano <b>solo su questo dispositivo</b> e non vengono mai trasmessi. Età, sesso, parametri, motivo, allergie e note sono visibili alla Centrale per fini operativi.</div></div>';
 
   h+='<div class="form-field"><label>Codice triage</label><div class="color-switch" id="cfColor">';
   PMA_COLOR_ORDER.forEach(k=>{
@@ -787,22 +802,22 @@ function openClinicalModal(id){
   });
   h+='</div></div>';
 
+  h+='<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#c4b5fd;font-weight:800;margin:14px 0 6px">🔐 Dati locali (non condivisi)</div>';
   h+='<div class="form-grid">';
-  h+='<div class="form-field"><label>Cognome</label><input type="text" id="cfSurname" value="'+esc(cl.surname||'')+'" placeholder="—" autocomplete="off"></div>';
-  h+='<div class="form-field"><label>Nome</label><input type="text" id="cfName" value="'+esc(cl.name||'')+'" placeholder="—" autocomplete="off"></div>';
+  h+='<div class="form-field"><label>Cognome</label><input type="text" id="cfSurname" value="'+esc(priv.surname||'')+'" placeholder="—" autocomplete="off"></div>';
+  h+='<div class="form-field"><label>Nome</label><input type="text" id="cfName" value="'+esc(priv.name||'')+'" placeholder="—" autocomplete="off"></div>';
   h+='</div>';
-
-  h+='<div class="form-grid-3">';
-  h+='<div class="form-field"><label>Anno nascita</label><input type="number" min="1900" max="2100" id="cfBirth" value="'+(cl.birthYear!=null?cl.birthYear:'')+'" placeholder="—"></div>';
+  h+='<div class="form-grid">';
+  h+='<div class="form-field"><label>Anno nascita</label><input type="number" min="1900" max="2100" id="cfBirth" value="'+(priv.birthYear!=null?priv.birthYear:'')+'" placeholder="—"></div>';
   h+='<div class="form-field"><label>Sesso</label><select id="cfSex">'+
     '<option value=""'+(cl.sex?'':' selected')+'>—</option>'+
     '<option value="M"'+(cl.sex==='M'?' selected':'')+'>M</option>'+
     '<option value="F"'+(cl.sex==='F'?' selected':'')+'>F</option>'+
     '<option value="X"'+(cl.sex==='X'?' selected':'')+'>X</option>'+
   '</select></div>';
-  h+='<div class="form-field"><label>ID</label><input type="text" value="'+p.id.slice(-5).toUpperCase()+'" readonly style="background:#1a1a1a;color:#888"></div>';
   h+='</div>';
 
+  h+='<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);font-weight:800;margin:14px 0 6px">📋 Dati condivisi con SOL</div>';
   h+='<div class="form-field"><label>Motivo di accesso</label><input type="text" id="cfComplaint" value="'+esc(cl.complaint||'')+'" placeholder="es. dolore toracico, trauma…" autocomplete="off"></div>';
   h+='<div class="form-field"><label>Allergie</label><input type="text" id="cfAllergies" value="'+esc(cl.allergies||'')+'" placeholder="—" autocomplete="off"></div>';
 
@@ -815,7 +830,7 @@ function openClinicalModal(id){
   h+='<div class="form-field"><label>Note cliniche</label><textarea id="cfNotes" rows="3" placeholder="Anamnesi, farmaci, osservazioni…">'+esc(cl.notes||'')+'</textarea></div>';
 
   if(cl.updatedAt){
-    h+='<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Ultimo aggiornamento: '+fmtDateTime(cl.updatedAt)+(cl.by?' · da '+esc(cl.by):'')+'</div>';
+    h+='<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Ultimo aggiornamento: '+fmtDateTime(cl.updatedAt)+'</div>';
   }
 
   h+='<div class="modal-actions">';
@@ -827,27 +842,23 @@ function openClinicalModal(id){
   document.getElementById('modalBody').innerHTML=h;
   document.getElementById('modalOverlay').classList.remove('hidden');
 
-  /* Local state for color / state pickers */
   let selColor=p.code, selState=p.state;
   document.querySelectorAll('#cfColor button').forEach(b=>{
     b.onclick=()=>{
       document.querySelectorAll('#cfColor button').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      selColor=b.getAttribute('data-color');
+      b.classList.add('on'); selColor=b.getAttribute('data-color');
     };
   });
   document.querySelectorAll('#cfState button').forEach(b=>{
     b.onclick=()=>{
       document.querySelectorAll('#cfState button').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      selState=b.getAttribute('data-state');
+      b.classList.add('on'); selState=b.getAttribute('data-state');
     };
   });
 
   document.getElementById('cfCancel').onclick=closeModal;
   document.getElementById('cfSave').onclick=()=>{
-    /* Applica cambio colore / stato se diverso */
-    if(selColor!==p.code){ p.code=selColor; }
+    if(selColor!==p.code)p.code=selColor;
     if(selState!==p.state){
       p.state=selState;
       const now=Date.now();
@@ -855,11 +866,16 @@ function openClinicalModal(id){
       if(selState==='dimesso')p.closedAt=now;
       if(selState==='waiting'){p.startedAt=null;p.closedAt=null;}
     }
-    /* Salva dati clinici */
-    const data={
-      surname:document.getElementById('cfSurname').value.trim(),
-      name:document.getElementById('cfName').value.trim(),
-      birthYear:(function(){const v=document.getElementById('cfBirth').value;return v===''?null:+v;})(),
+    const name=document.getElementById('cfName').value.trim();
+    const surname=document.getElementById('cfSurname').value.trim();
+    const birthRaw=document.getElementById('cfBirth').value;
+    const birthYear=birthRaw===''?null:+birthRaw;
+    savePrivate(p.id, name, surname, birthYear);
+
+    const nowYear=new Date().getFullYear();
+    const computedAge=(birthYear&&birthYear>1900)?(nowYear-birthYear):null;
+    p.clinical={
+      age:computedAge,
       sex:document.getElementById('cfSex').value,
       complaint:document.getElementById('cfComplaint').value.trim(),
       allergies:document.getElementById('cfAllergies').value.trim(),
@@ -874,7 +890,6 @@ function openClinicalModal(id){
       updatedAt:Date.now(),
       by:'PMA'
     };
-    p.clinical=data;
     publishState();
     renderAll();
     closeModal();
