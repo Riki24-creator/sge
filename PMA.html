@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SGE PMA">
+<title>SGE — PMA</title>
+<style>
+:root{--bg:#1a1a1a;--bg2:#202020;--panel:#252525;--panel2:#2d2d2d;
+--line:#3a3a3a;--txt:#e8e8e8;--txt2:#c0c0c0;--muted:#858585;
+--accent:#ffa726;--accent-dim:rgba(255,167,38,.14);
+--ok:#4caf50;--warn:#f59e0b;--err:#ef5350;--blue:#3b82f6;--purple:#ab47bc;
+--r:#e53935;--g:#f2c200;--v:#2fa84f;--b:#f2f2f2;--n:#1c1c1c;
+--radius:14px;--radius-sm:10px;--radius-xs:8px;
+--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Inter','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+background:var(--bg);color:var(--txt);font-size:14px;-webkit-font-smoothing:antialiased;
+overflow-x:hidden;padding-bottom:calc(20px + var(--safe-bottom))}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+.hidden{display:none !important}.muted{color:var(--muted)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px}
+
+/* ===== TOPBAR ===== */
+.pma-top{position:sticky;top:0;z-index:500;background:linear-gradient(180deg,#252525,#1e1e1e);
+border-bottom:1px solid #2e2e2e;padding:calc(8px + var(--safe-top)) 10px 8px;
+display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.pma-title{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.pma-title .ico{font-size:22px;flex-shrink:0}
+.pma-title .lbl{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pma-badges{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.pma-badge{font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:20px;
+background:#2a2a2a;border:1px solid #3a3a3a;color:var(--muted);
+display:flex;align-items:center;gap:4px;white-space:nowrap}
+.pma-badge.on{color:var(--ok);border-color:rgba(76,175,80,.35)}
+.pma-badge .dot{width:7px;height:7px;border-radius:50%;background:#5a5a5a}
+.pma-badge.on .dot{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.pma-clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
+.pma-room{font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:20px;
+background:var(--accent-dim);border:1px solid rgba(255,167,38,.3);color:#ffcc80;cursor:pointer}
+.pma-logout{background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.4);
+color:#ef9a9a;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:17px;
+display:flex;align-items:center;justify-content:center;padding:0}
+.pma-logout:active{background:rgba(239,83,80,.28)}
+
+/* ===== MAIN ===== */
+.pma-main{max-width:1000px;margin:0 auto;padding:12px 12px 40px}
+
+/* ===== KPI ===== */
+.pma-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pma-kpi-card{background:#252525;border:1px solid #343434;border-radius:12px;
+padding:14px 8px;text-align:center}
+.pma-kpi-val{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:#fff}
+.pma-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-top:6px}
+.pma-kpi-sub{font-size:10px;color:var(--txt2);font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;opacity:.75}
+.pma-kpi-card.total{border-color:rgba(255,167,38,.35)}
+.pma-kpi-card.total .pma-kpi-val{color:var(--accent)}
+.pma-kpi-card.waiting .pma-kpi-val{color:var(--warn)}
+.pma-kpi-card.treating .pma-kpi-val{color:var(--blue)}
+.pma-kpi-card.discharged .pma-kpi-val{color:var(--ok)}
+
+/* ===== COLOR DIST ===== */
+.pma-colors{background:#252525;border:1px solid #343434;border-radius:12px;
+padding:14px;margin-bottom:12px}
+.pma-colors-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+color:var(--muted);font-weight:800;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.pma-colors-title .tot{margin-left:auto;color:var(--txt);font-size:11.5px;font-weight:800;letter-spacing:0;text-transform:none}
+.pma-color-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pma-color-card{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:10px;
+padding:12px 6px 10px;text-align:center;position:relative;overflow:hidden;transition:.15s}
+.pma-color-card .cc-chip{width:100%;height:4px;border-radius:3px;background:var(--c);margin-bottom:9px}
+.pma-color-card .cc-num{font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:#fff}
+.pma-color-card .cc-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:5px;letter-spacing:.5px}
+.pma-color-card .cc-pct{font-size:11px;color:var(--txt2);font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.pma-color-card .cc-empty{opacity:.35}
+
+/* ===== ADD PATIENT ===== */
+.pma-add{background:#252525;border:1px solid #343434;border-radius:14px;
+padding:14px;margin-bottom:12px}
+.pma-add-title{font-size:12px;text-transform:uppercase;letter-spacing:.7px;
+color:var(--muted);font-weight:800;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+.pma-add-title .hint{margin-left:auto;color:var(--accent);font-size:10.5px;
+text-transform:none;letter-spacing:0;font-weight:700}
+.pma-triage-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pma-triage-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;
+gap:3px;padding:14px 6px;border-radius:12px;border:2px solid var(--c);background:var(--c);
+color:var(--f);font-weight:900;cursor:pointer;min-height:78px;transition:.15s;letter-spacing:.4px}
+.pma-triage-btn:active{transform:scale(.94)}
+.pma-triage-btn .big{font-size:26px;line-height:1}
+.pma-triage-btn .sub{font-size:10px;font-weight:900;opacity:.95}
+
+/* ===== FILTERS ===== */
+.pma-filters{display:flex;gap:6px;margin-bottom:10px;background:#252525;
+border:1px solid #333;border-radius:10px;padding:5px}
+.pma-filter{flex:1;background:transparent;border:none;color:var(--muted);
+padding:10px 8px;border-radius:7px;cursor:pointer;font-weight:800;font-size:12px;
+white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px}
+.pma-filter:hover{background:#2d2d2d;color:var(--txt)}
+.pma-filter.on{background:var(--accent);color:#111}
+.pma-filter .f-cnt{background:rgba(0,0,0,.25);padding:1px 7px;border-radius:20px;
+font-size:10.5px;font-weight:800;color:inherit}
+.pma-filter.on .f-cnt{background:rgba(0,0,0,.15)}
+
+/* ===== PATIENT LIST ===== */
+.pma-list{display:flex;flex-direction:column;gap:8px}
+.pma-empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:13px;
+background:#252525;border:1px dashed #3a3a3a;border-radius:14px;line-height:1.6}
+
+.pma-card{background:#252525;border:1px solid #343434;border-radius:12px;
+overflow:hidden;border-left:6px solid var(--c);transition:.15s}
+.pma-card.dimesso{opacity:.55}
+.pma-card-body{padding:12px 14px 10px}
+.pma-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.pma-card-code{font-size:15px;font-weight:900;padding:4px 12px;border-radius:9px;letter-spacing:.5px}
+.pma-card-state{font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:20px;
+background:#2d2d2d;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px}
+.pma-card-state.waiting{background:rgba(245,158,11,.15);color:#fcd34d}
+.pma-card-state.in_cura{background:rgba(59,130,246,.18);color:#93c5fd}
+.pma-card-state.dimesso{background:rgba(16,185,129,.15);color:#6ee7b7}
+.pma-card-time{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.pma-card-id{font-size:15px;font-weight:800;letter-spacing:.3px;color:#fff}
+.pma-card-meta{font-size:12px;color:var(--txt2);margin-top:5px;display:flex;flex-wrap:wrap;gap:10px}
+.pma-card-meta .lbl{color:var(--muted);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;margin-right:4px}
+.pma-card-actions{display:flex;gap:6px;padding:10px 12px;background:#1e1e1e;border-top:1px solid #2a2a2a}
+.pma-card-actions button{flex:1;padding:10px 8px;border-radius:9px;border:1px solid;
+font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;
+justify-content:center;gap:5px;min-height:42px;transition:.12s}
+.pma-card-actions button:active{transform:scale(.96)}
+.pma-btn-start{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4);color:#93c5fd}
+.pma-btn-close{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#6ee7b7}
+.pma-btn-clinic{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.4);color:#c4b5fd}
+.pma-btn-reopen{background:rgba(255,167,38,.12);border-color:rgba(255,167,38,.4);color:#ffcc80}
+.pma-btn-del{background:rgba(120,120,120,.1);border-color:rgba(120,120,120,.3);color:#a0a0a0;
+max-width:52px;min-width:52px}
+.pma-btn-del:active{background:rgba(239,83,80,.22);color:#ef9a9a;border-color:rgba(239,83,80,.5)}
+
+/* ===== LOGIN ===== */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(160deg,#1a1a1a,#0f0f0f);
+z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.login-box{background:#252525;border:1px solid #3a3a3a;border-radius:20px;
+width:100%;max-width:440px;padding:28px 22px;box-shadow:0 30px 80px rgba(0,0,0,.7);
+margin-top:var(--safe-top);margin-bottom:var(--safe-bottom)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .lg{font-size:56px;line-height:1}
+.login-logo h1{margin:12px 0 6px;font-size:22px;letter-spacing:.4px;line-height:1.2}
+.login-logo h1 b{color:var(--accent)}
+.login-logo p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:11px;text-transform:uppercase;
+letter-spacing:.7px;color:var(--muted);margin-bottom:7px;font-weight:800}
+.login-field input{width:100%;background:#2d2d2d;border:1px solid #3a3a3a;color:var(--txt);
+padding:14px;border-radius:12px;outline:none;font-size:15px;font-weight:600;min-height:50px}
+.login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,167,38,.18)}
+.pwd-field{position:relative}
+.pwd-field input{padding-right:54px}
+.pwd-toggle2{position:absolute;top:50%;right:8px;transform:translateY(-50%);
+background:transparent;border:none;color:var(--muted);font-size:20px;cursor:pointer;
+padding:10px;border-radius:8px;min-width:44px;min-height:44px;
+display:flex;align-items:center;justify-content:center}
+.login-btn{width:100%;padding:16px;border-radius:12px;background:var(--accent);
+color:#111;border:none;font-weight:900;font-size:15px;cursor:pointer;margin-top:6px;min-height:52px}
+.login-btn:active{transform:scale(.98)}
+.login-msg{margin-top:14px;padding:12px 14px;border-radius:11px;font-size:13px;
+font-weight:700;text-align:center;line-height:1.45;display:none}
+.login-msg.show{display:block}
+.login-msg.err{background:rgba(239,83,80,.12);color:#ef9a9a;border:1px solid rgba(239,83,80,.4)}
+.login-msg.ok{background:rgba(76,175,80,.12);color:#81c784;border:1px solid rgba(76,175,80,.4)}
+.login-footer{margin-top:16px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.55}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;
+display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);padding:0}
+@media (min-width:700px){.modal-overlay{align-items:center;padding:20px}}
+.modal-box{background:#252525;border:1px solid #444;border-radius:18px 18px 0 0;
+width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column;
+box-shadow:0 30px 80px rgba(0,0,0,.75);overflow:hidden}
+@media (min-width:700px){.modal-box{border-radius:18px}}
+.modal-head{display:flex;align-items:center;gap:10px;padding:16px 20px;
+border-bottom:1px solid #2e2e2e;background:#252525;position:sticky;top:0;z-index:2}
+.modal-head h3{margin:0;font-size:16px;flex:1;font-weight:800;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-head button.close{background:transparent;border:none;color:var(--muted);
+font-size:20px;cursor:pointer;padding:8px 12px;border-radius:8px;min-width:44px;min-height:44px}
+.modal-head button.close:hover{color:var(--txt);background:#333}
+.modal-body{padding:16px 20px 20px;overflow-y:auto;flex:1}
+
+/* ===== FORM ===== */
+.form-field{margin-bottom:12px}
+.form-field label{display:block;font-size:10.5px;text-transform:uppercase;
+letter-spacing:.6px;color:var(--muted);margin-bottom:6px;font-weight:800}
+.form-field input,.form-field select,.form-field textarea{width:100%;
+background:#1e1e1e;border:1px solid #383838;color:var(--txt);
+padding:11px 12px;border-radius:10px;outline:none;font-size:14px;
+font-family:inherit;min-height:44px}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent)}
+.form-field textarea{resize:vertical;min-height:60px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.form-grid-vitals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.form-grid-vitals input{padding:9px 6px;text-align:center;font-size:13px;min-height:42px}
+.form-grid-vitals label{text-align:center;font-size:9.5px;margin-bottom:4px}
+.privacy-note{font-size:11.5px;color:#ffcc80;background:rgba(255,167,38,.08);
+border:1px solid rgba(255,167,38,.3);padding:10px 12px;border-radius:10px;
+margin-bottom:14px;line-height:1.5;display:flex;gap:9px;align-items:flex-start}
+.privacy-note .ico{font-size:16px;flex-shrink:0;line-height:1.2}
+.modal-actions{display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid #2e2e2e}
+.modal-actions button{flex:1;padding:14px;border-radius:12px;font-weight:800;
+font-size:14px;cursor:pointer;border:1px solid #3a3a3a;min-height:50px}
+.modal-actions .btn-cancel{background:transparent;color:var(--muted)}
+.modal-actions .btn-save{background:#43a047;border-color:#2e7d32;color:#fff}
+.modal-actions .btn-save:active{background:#2e7d32}
+.state-switch{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.state-switch button{padding:11px 8px;border-radius:10px;background:#2d2d2d;
+border:1px solid #3a3a3a;color:var(--txt2);font-weight:800;font-size:12px;cursor:pointer;min-height:46px}
+.state-switch button.on{background:var(--c);color:#fff;border-color:var(--c)}
+.color-switch{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.color-switch button{padding:12px 4px;border-radius:10px;border:2px solid transparent;
+background:var(--c);color:var(--f);font-weight:900;font-size:15px;cursor:pointer;min-height:48px}
+.color-switch button.on{border-color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 55%,transparent)}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;
+transform:translateX(-50%) translateY(10px);background:#333;color:#fff;
+padding:13px 22px;border-radius:12px;font-weight:700;font-size:13px;
+box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:3000;opacity:0;pointer-events:none;
+transition:.3s;max-width:calc(100vw - 32px);text-align:center;border:1px solid rgba(255,167,38,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:420px){
+  .pma-kpi{grid-template-columns:repeat(2,1fr)}
+  .pma-triage-grid{grid-template-columns:repeat(5,1fr);gap:5px}
+  .pma-triage-btn{padding:11px 2px;min-height:68px}
+  .pma-triage-btn .big{font-size:22px}
+  .pma-triage-btn .sub{font-size:9px}
+  .pma-color-row{grid-template-columns:repeat(5,1fr);gap:5px}
+  .pma-color-card{padding:9px 3px 8px}
+  .pma-color-card .cc-num{font-size:19px}
+  .pma-color-card .cc-lbl{font-size:8.5px}
+  .pma-color-card .cc-pct{font-size:10px}
+  .form-grid,.form-grid-3{grid-template-columns:1fr}
+  .form-grid-vitals{grid-template-columns:repeat(3,1fr)}
+}
+@media (min-width:900px){
+  .pma-main{padding:18px 24px 50px}
+}
+</style>
+</head>
+<body>
+
+<!-- ========= LOGIN ========= -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="lg">🏥</div>
+      <h1><b>PMA</b> — Postazione Medica Avanzata</h1>
+      <p>Accesso riservato al personale sanitario</p>
+    </div>
+    <div class="login-field pwd-field" id="loginPwdWrap">
+      <label>Codice di accesso</label>
+      <input type="password" id="loginPassword" placeholder="Inserisci il codice" autocomplete="off">
+      <button type="button" class="pwd-toggle2" id="loginPwdToggle">👁️</button>
+    </div>
+    <button class="login-btn" id="loginBtn">🔓 Accedi</button>
+    <div class="login-msg" id="loginMsg"></div>
+    <div class="login-footer">
+      Stanza: <b id="loginRoom">—</b><br>
+      Se non conosci il codice, contatta la Centrale Operativa.
+    </div>
+  </div>
+</div>
+
+<!-- ========= APP ========= -->
+<div id="appMain" class="hidden">
+  <header class="pma-top">
+    <div class="pma-title">
+      <span class="ico">🏥</span>
+      <span class="lbl">PMA — Postazione Medica Avanzata</span>
+    </div>
+    <div class="pma-badges">
+      <span class="pma-room" id="roomBadge">🏷️ <span id="roomLabel">—</span></span>
+      <span class="pma-badge" id="netBadge"><span class="dot"></span><span id="netLabel">rete…</span></span>
+      <span class="pma-clock" id="clock"></span>
+      <button class="pma-logout" id="logoutBtn" title="Esci">🚪</button>
+    </div>
+  </header>
+  <main class="pma-main" id="pmaMain"></main>
+</div>
+
+<!-- ========= MODAL ========= -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Cartella clinica</h3>
+      <button class="close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   COSTANTI
+   ========================================================= */
+const KEY='sge_v4';
+const AUTH_KEY='sge_pma_auth';
+const MY_PAGE_ID='pma_'+Math.random().toString(36).slice(2,10);
+const SESSION_ROOM=(function(){
+  const p=new URLSearchParams(location.search);
+  return p.get('room')||localStorage.getItem('sge_room')||'sge-demo-2024';
+})();
+localStorage.setItem('sge_room',SESSION_ROOM);
+
+const DEFAULT_BROKERS=[
+  {url:'wss://broker.hivemq.com:8884/mqtt',user:'',pass:'',label:'HiveMQ (pubblico)'},
+  {url:'wss://test.mosquitto.org:8081/mqtt',user:'',pass:'',label:'Mosquitto (pubblico)'},
+  {url:'wss://broker.emqx.io:8084/mqtt',user:'',pass:'',label:'EMQX (pubblico)'}
+];
+
+const PMA_COLORS={
+  R:{key:'R',label:'Rosso',hex:'#e53935',fg:'#fff'},
+  G:{key:'G',label:'Giallo',hex:'#f2c200',fg:'#2a2200'},
+  V:{key:'V',label:'Verde',hex:'#2fa84f',fg:'#fff'},
+  B:{key:'B',label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a'},
+  N:{key:'N',label:'Nero',hex:'#1c1c1c',fg:'#fff'}
+};
+const PMA_COLOR_ORDER=['R','G','V','B','N'];
+const PMA_STATES={
+  waiting:{key:'waiting',label:'In attesa',icon:'🕐',color:'#f59e0b'},
+  in_cura:{key:'in_cura',label:'In cura',icon:'🩺',color:'#3b82f6'},
+  dimesso:{key:'dimesso',label:'Dimesso',icon:'✅',color:'#10b981'}
+};
+
+/* =========================================================
+   UTILS
+   ========================================================= */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function uid(p){return (p||'id')+'-'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);}
+function fmtTime(ts){if(!ts)return'—';return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}
+function fmtDateTime(ts){if(!ts)return'—';const d=new Date(ts);return d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})+' '+fmtTime(ts);}
+function elapsed(ts){if(!ts)return'—';const s=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);const sec=s%60;
+  if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';
+  return m+'m '+String(sec).padStart(2,'0')+'s';}
+function todayStart(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+
+/* =========================================================
+   CRYPTO (AES-GCM, per compatibilità con SOL/wall)
+   ========================================================= */
+async function deriveKey(passphrase,salt){
+  const enc=new TextEncoder();
+  const km=await crypto.subtle.importKey('raw',enc.encode(passphrase),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},
+    km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function decryptText(text,passphrase){
+  if(!text||!text.startsWith('ENC:'))return text;
+  if(!passphrase)throw new Error('Chiave richiesta');
+  const combined=Uint8Array.from(atob(text.slice(4)),c=>c.charCodeAt(0));
+  const salt=combined.slice(0,16);const iv=combined.slice(16,28);const cipher=combined.slice(28);
+  const key=await deriveKey(passphrase,salt);
+  const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
+  return new TextDecoder().decode(plain);
+}
+async function encryptText(text,passphrase){
+  if(!passphrase)return text;
+  const enc=new TextEncoder();
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(passphrase,salt);
+  const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(text));
+  const combined=new Uint8Array(16+12+cipher.byteLength);
+  combined.set(salt,0);combined.set(iv,16);combined.set(new Uint8Array(cipher),28);
+  let b='';for(let i=0;i<combined.length;i++)b+=String.fromCharCode(combined[i]);
+  return 'ENC:'+btoa(b);
+}
+
+/* =========================================================
+   STATO
+   ========================================================= */
+let S={center:{lat:45.5195,lng:9.0784},teams:[],targets:[],pois:[],zones:[],broadcast:[],
+  pma:{password:'',patients:[]},config:{brokers:DEFAULT_BROKERS.slice(),encryptKey:''}};
+try{
+  const raw=localStorage.getItem(KEY);
+  if(raw)S=JSON.parse(raw);
+}catch(e){}
+if(!S.teams)S.teams=[];if(!S.targets)S.targets=[];if(!S.pois)S.pois=[];
+if(!S.zones)S.zones=[];if(!S.broadcast)S.broadcast=[];
+if(!S.config)S.config={brokers:DEFAULT_BROKERS.slice(),encryptKey:''};
+if(!Array.isArray(S.config.brokers))S.config.brokers=DEFAULT_BROKERS.slice();
+if(!S.pma)S.pma={password:'',patients:[]};
+if(typeof S.pma.password!=='string')S.pma.password='';
+if(!Array.isArray(S.pma.patients))S.pma.patients=[];
+/* Normalizza ogni paziente */
+S.pma.patients.forEach(p=>{
+  if(!PMA_COLORS[p.code])p.code='V';
+  if(!PMA_STATES[p.state])p.state='waiting';
+  if(!p.arrivedAt)p.arrivedAt=Date.now();
+  if(p.startedAt===undefined)p.startedAt=null;
+  if(p.closedAt===undefined)p.closedAt=null;
+  if(!p.clinical)p.clinical={};
+  const c=p.clinical;
+  if(typeof c.name!=='string')c.name='';
+  if(typeof c.surname!=='string')c.surname='';
+  if(c.birthYear==null)c.birthYear=null;
+  if(typeof c.sex!=='string')c.sex='';
+  if(typeof c.complaint!=='string')c.complaint='';
+  if(typeof c.allergies!=='string')c.allergies='';
+  if(typeof c.notes!=='string')c.notes='';
+  if(!c.vitals)c.vitals={pa:'',fc:'',spo2:'',temp:'',gcs:''};
+  ['pa','fc','spo2','temp','gcs'].forEach(k=>{if(typeof c.vitals[k]!=='string')c.vitals[k]='';});
+});
+
+/* =========================================================
+   SYNC
+   ========================================================= */
+let mqttClient=null,mqttOnline=false;
+let _lastRev=0,_skipPublish=false;
+if(S._rev)_lastRev=S._rev;
+const MQTT_BASE='sge/'+SESSION_ROOM;
+let _bc=null;try{_bc=new BroadcastChannel('sge_sync');}catch(e){}
+
+function updateBadges(){
+  const nb=document.getElementById('netBadge'),nl=document.getElementById('netLabel');
+  if(nb&&nl){
+    if(mqttOnline){nb.classList.add('on');nl.textContent='rete OK';}
+    else{nb.classList.remove('on');nl.textContent='rete…';}
+  }
+}
+function initMqtt(){
+  if(typeof mqtt==='undefined'){updateBadges();return;}
+  tryConnect(0);
+}
+function tryConnect(idx){
+  const brokers=(S.config&&S.config.brokers)||DEFAULT_BROKERS;
+  if(idx>=brokers.length){mqttOnline=false;updateBadges();return;}
+  const b=brokers[idx];
+  if(!b||!b.url)return tryConnect(idx+1);
+  try{
+    if(mqttClient){try{mqttClient.end(true);}catch(e){} mqttClient=null;}
+    const opts={clientId:'pma_'+Math.random().toString(16).slice(2,10),
+      clean:true,keepalive:30,reconnectPeriod:4000,connectTimeout:8000};
+    if(b.user)opts.username=b.user;
+    if(b.pass)opts.password=b.pass;
+    mqttClient=mqtt.connect(b.url,opts);
+    let connected=false;
+    mqttClient.on('connect',()=>{
+      connected=true;mqttOnline=true;
+      mqttClient.subscribe(MQTT_BASE+'/#',{qos:0});
+      updateBadges();
+      setTimeout(()=>publishState(),400);
+    });
+    mqttClient.on('close',()=>{mqttOnline=false;updateBadges();});
+    mqttClient.on('error',()=>{mqttOnline=false;updateBadges();});
+    mqttClient.on('message',(topic,payload)=>{
+      if(topic===MQTT_BASE+'/eq'||topic===MQTT_BASE+'/pma')return;
+      try{handleIncoming(payload.toString());}catch(e){}
+    });
+    setTimeout(()=>{if(!connected)tryConnect(idx+1);},9000);
+  }catch(e){tryConnect(idx+1);}
+}
+async function handleIncoming(payload){
+  let text=payload;
+  if(text.startsWith('ENC:')){
+    if(!S.config.encryptKey)return;
+    try{text=await decryptText(text,S.config.encryptKey);}catch(e){return;}
+  }
+  try{applyRemoteState(JSON.parse(text));}catch(e){}
+}
+async function publishState(){
+  if(_skipPublish)return;
+  const rev=Date.now()+Math.random();
+  S._rev=rev;S._writer=MY_PAGE_ID;S._lastEqTs=Date.now();_lastRev=rev;
+  const json=JSON.stringify(S);
+  try{localStorage.setItem(KEY,json);}catch(e){}
+  if(_bc)try{_bc.postMessage({type:'sync',rev});}catch(e){}
+  if(mqttClient&&mqttOnline){
+    try{
+      let payload=json;
+      if(S.config.encryptKey)payload=await encryptText(json,S.config.encryptKey);
+      mqttClient.publish(MQTT_BASE+'/pma',payload,{qos:0,retain:true});
+    }catch(e){}
+  }
+  updateBadges();
+}
+function applyRemoteState(incoming){
+  if(!incoming||!incoming._rev)return;
+  if(incoming._rev<=_lastRev)return;
+  if(incoming._writer===MY_PAGE_ID)return;
+  _lastRev=incoming._rev;
+  _skipPublish=true;
+  try{
+    S=incoming;
+    if(!S.pma)S.pma={password:'',patients:[]};
+    if(!Array.isArray(S.pma.patients))S.pma.patients=[];
+    S.pma.patients.forEach(p=>{
+      if(!p.clinical)p.clinical={};
+      if(!p.clinical.vitals)p.clinical.vitals={pa:'',fc:'',spo2:'',temp:'',gcs:''};
+    });
+    if(!localStorage.getItem(AUTH_KEY)){/* no auth yet */}
+    renderAll();
+  } finally {_skipPublish=false;}
+  updateBadges();
+}
+function initSyncChannels(){
+  window.addEventListener('storage',e=>{
+    if(e.key===KEY&&e.newValue){try{applyRemoteState(JSON.parse(e.newValue));}catch(err){}}
+  });
+  if(_bc){_bc.onmessage=e=>{
+    if(e.data&&e.data.type==='sync'){
+      const v=localStorage.getItem(KEY);
+      if(v)try{applyRemoteState(JSON.parse(v));}catch(err){}
+    }
+  };}
+  setInterval(()=>{
+    const v=localStorage.getItem(KEY);if(!v)return;
+    try{const p=JSON.parse(v);if(p._rev&&p._rev>_lastRev)applyRemoteState(p);}catch(err){}
+  },1000);
+  setInterval(updateBadges,2000);
+}
+
+/* =========================================================
+   AZIONI PAZIENTE
+   ========================================================= */
+function addPatient(code){
+  if(!PMA_COLORS[code])return;
+  const now=Date.now();
+  const p={
+    id:uid('pt'),
+    code:code,
+    state:'waiting',
+    arrivedAt:now,
+    startedAt:null,
+    closedAt:null,
+    createdAt:now,
+    clinical:{name:'',surname:'',birthYear:null,sex:'',complaint:'',allergies:'',
+      notes:'',vitals:{pa:'',fc:'',spo2:'',temp:'',gcs:''},updatedAt:null,by:''}
+  };
+  S.pma.patients.unshift(p);
+  publishState();
+  renderAll();
+  toast('✓ Paziente '+code+' aggiunto in attesa');
+}
+function setPatientState(id,newState){
+  const p=S.pma.patients.find(x=>x.id===id);
+  if(!p)return;
+  if(!PMA_STATES[newState])return;
+  const now=Date.now();
+  p.state=newState;
+  if(newState==='in_cura'&&!p.startedAt)p.startedAt=now;
+  if(newState==='dimesso')p.closedAt=now;
+  if(newState==='waiting'){p.startedAt=null;p.closedAt=null;}
+  if(newState==='in_cura')p.closedAt=null;
+  publishState();
+  renderAll();
+  toast(PMA_STATES[newState].icon+' '+p.code+' → '+PMA_STATES[newState].label);
+}
+function deletePatient(id){
+  const p=S.pma.patients.find(x=>x.id===id);
+  if(!p)return;
+  if(!confirm('Eliminare definitivamente il paziente '+p.code+'?\n\nTutti i dati clinici verranno rimossi.'))return;
+  S.pma.patients=S.pma.patients.filter(x=>x.id!==id);
+  publishState();
+  renderAll();
+  toast('🗑 Paziente eliminato');
+}
+function saveClinical(id,data){
+  const p=S.pma.patients.find(x=>x.id===id);
+  if(!p)return;
+  p.clinical=Object.assign({},p.clinical,data);
+  p.clinical.updatedAt=Date.now();
+  publishState();
+  renderAll();
+  toast('💾 Cartella salvata');
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+let pmaFilter='all'; // all | waiting | in_cura | dimesso
+
+function computeStats(){
+  const pats=S.pma.patients||[];
+  const waiting=pats.filter(p=>p.state==='waiting');
+  const inCura=pats.filter(p=>p.state==='in_cura');
+  const open=waiting.concat(inCura);
+  const today=todayStart();
+  const dimToday=pats.filter(p=>p.state==='dimesso'&&p.closedAt&&p.closedAt>=today);
+  const byColor={};
+  PMA_COLOR_ORDER.forEach(k=>{byColor[k]={waiting:0,in_cura:0,total:0};});
+  open.forEach(p=>{
+    if(byColor[p.code]){
+      byColor[p.code].total++;
+      if(p.state==='waiting')byColor[p.code].waiting++;
+      else if(p.state==='in_cura')byColor[p.code].in_cura++;
+    }
+  });
+  return {
+    waiting:waiting.length,
+    inCura:inCura.length,
+    open:open.length,
+    dimToday:dimToday.length,
+    total:pats.length,
+    byColor,
+    openList:open
+  };
+}
+
+function renderAll(){
+  const el=document.getElementById('pmaMain');
+  if(!el)return;
+  const stats=computeStats();
+  let h='';
+
+  /* KPI */
+  h+='<div class="pma-kpi">';
+  h+='<div class="pma-kpi-card total"><div class="pma-kpi-val">'+stats.open+'</div><div class="pma-kpi-lbl">Presenti</div><div class="pma-kpi-sub">in PMA adesso</div></div>';
+  h+='<div class="pma-kpi-card waiting"><div class="pma-kpi-val">'+stats.waiting+'</div><div class="pma-kpi-lbl">In attesa</div><div class="pma-kpi-sub">'+(stats.open?Math.round(stats.waiting/stats.open*100):0)+'% del totale</div></div>';
+  h+='<div class="pma-kpi-card treating"><div class="pma-kpi-val">'+stats.inCura+'</div><div class="pma-kpi-lbl">In cura</div><div class="pma-kpi-sub">'+(stats.open?Math.round(stats.inCura/stats.open*100):0)+'% del totale</div></div>';
+  h+='<div class="pma-kpi-card discharged"><div class="pma-kpi-val">'+stats.dimToday+'</div><div class="pma-kpi-lbl">Dimessi oggi</div><div class="pma-kpi-sub">totale storico '+stats.total+'</div></div>';
+  h+='</div>';
+
+  /* Color distribution */
+  h+='<div class="pma-colors">';
+  h+='<div class="pma-colors-title">🎨 Distribuzione codici <span class="tot">'+stats.open+' pazienti attivi</span></div>';
+  h+='<div class="pma-color-row">';
+  PMA_COLOR_ORDER.forEach(k=>{
+    const c=PMA_COLORS[k];
+    const d=stats.byColor[k];
+    const pct=stats.open?Math.round(d.total/stats.open*100):0;
+    h+='<div class="pma-color-card'+(d.total===0?' cc-empty':'')+'">';
+    h+='<div class="cc-chip" style="--c:'+c.hex+'"></div>';
+    h+='<div class="cc-num">'+d.total+'</div>';
+    h+='<div class="cc-lbl">'+c.label+'</div>';
+    h+='<div class="cc-pct">'+pct+'%</div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+
+  /* Add patient */
+  h+='<div class="pma-add">';
+  h+='<div class="pma-add-title">➕ Registra nuovo arrivo <span class="hint">1 tocco per registrare</span></div>';
+  h+='<div class="pma-triage-grid">';
+  PMA_COLOR_ORDER.forEach(k=>{
+    const c=PMA_COLORS[k];
+    h+='<button class="pma-triage-btn" data-add="'+k+'" style="--c:'+c.hex+';--f:'+c.fg+'">';
+    h+='<span class="big">'+k+'</span>';
+    h+='<span class="sub">'+c.label.toUpperCase()+'</span>';
+    h+='</button>';
+  });
+  h+='</div></div>';
+
+  /* Filters */
+  const allCount=S.pma.patients.length;
+  const dimCount=S.pma.patients.filter(p=>p.state==='dimesso').length;
+  h+='<div class="pma-filters">';
+  h+='<button class="pma-filter'+(pmaFilter==='all'?' on':'')+'" data-filter="all">Tutti <span class="f-cnt">'+allCount+'</span></button>';
+  h+='<button class="pma-filter'+(pmaFilter==='waiting'?' on':'')+'" data-filter="waiting">🕐 In attesa <span class="f-cnt">'+stats.waiting+'</span></button>';
+  h+='<button class="pma-filter'+(pmaFilter==='in_cura'?' on':'')+'" data-filter="in_cura">🩺 In cura <span class="f-cnt">'+stats.inCura+'</span></button>';
+  h+='<button class="pma-filter'+(pmaFilter==='dimesso'?' on':'')+'" data-filter="dimesso">✅ Dimessi <span class="f-cnt">'+dimCount+'</span></button>';
+  h+='</div>';
+
+  /* Patient list */
+  let list=S.pma.patients.slice();
+  if(pmaFilter!=='all')list=list.filter(p=>p.state===pmaFilter);
+  /* Sort: waiting first, then in_cura, then dimesso; within group, oldest first (FIFO) */
+  const stateOrder={waiting:0,in_cura:1,dimesso:2};
+  list.sort((a,b)=>{
+    const sa=stateOrder[a.state]||9,sb=stateOrder[b.state]||9;
+    if(sa!==sb)return sa-sb;
+    if(a.state==='dimesso'){
+      return (b.closedAt||0)-(a.closedAt||0);
+    }
+    return (a.arrivedAt||0)-(b.arrivedAt||0);
+  });
+
+  h+='<div class="pma-list">';
+  if(!list.length){
+    h+='<div class="pma-empty">Nessun paziente in questa vista.<br><span class="muted">Usa i pulsanti colorati sopra per registrare un nuovo arrivo.</span></div>';
+  } else {
+    list.forEach(p=>{
+      h+=renderPatientCard(p);
+    });
+  }
+  h+='</div>';
+
+  el.innerHTML=h;
+  bindActions();
+}
+
+function renderPatientCard(p){
+  const c=PMA_COLORS[p.code]||PMA_COLORS.V;
+  const st=PMA_STATES[p.state]||PMA_STATES.waiting;
+  const cl=p.clinical||{};
+  const name=((cl.surname||'')+(cl.name?' '+cl.name:'')).trim();
+  const age=cl.birthYear?((new Date()).getFullYear()-cl.birthYear):null;
+  const metaBits=[];
+  if(name)metaBits.push('<span><span class="lbl">Paziente</span>'+esc(name)+'</span>');
+  if(age)metaBits.push('<span><span class="lbl">Età</span>~'+age+'</span>');
+  if(cl.sex)metaBits.push('<span><span class="lbl">Sesso</span>'+esc(cl.sex)+'</span>');
+  if(cl.complaint)metaBits.push('<span><span class="lbl">Motivo</span>'+esc(cl.complaint)+'</span>');
+  const hasClinic=!!(name||cl.complaint||cl.notes||cl.allergies||cl.vitals.pa||cl.vitals.fc||cl.vitals.spo2||cl.vitals.temp||cl.vitals.gcs);
+
+  let h='<div class="pma-card '+(p.state==='dimesso'?'dimesso':'')+'" data-id="'+p.id+'" style="--c:'+c.hex+'">';
+  h+='<div class="pma-card-body">';
+  h+='<div class="pma-card-top">';
+  h+='<span class="pma-card-code" style="background:'+c.hex+';color:'+c.fg+'">'+c.key+'</span>';
+  h+='<span class="pma-card-state '+st.key+'">'+st.icon+' '+st.label+'</span>';
+  h+='<span class="pma-card-time">arrivo '+fmtTime(p.arrivedAt)+' · '+elapsed(p.arrivedAt)+'</span>';
+  h+='</div>';
+  h+='<div class="pma-card-id">🏷️ '+p.id.slice(-5).toUpperCase()+(hasClinic?'':' <span class="muted" style="font-size:11px;font-weight:600">— cartella vuota</span>')+'</div>';
+  if(metaBits.length)h+='<div class="pma-card-meta">'+metaBits.join('')+'</div>';
+  h+='</div>';
+  h+='<div class="pma-card-actions">';
+  if(p.state==='waiting'){
+    h+='<button class="pma-btn-start" data-action="start" data-id="'+p.id+'">🩺 Inizia cura</button>';
+    h+='<button class="pma-btn-close" data-action="dimetti" data-id="'+p.id+'">✅ Dimetti</button>';
+  } else if(p.state==='in_cura'){
+    h+='<button class="pma-btn-close" data-action="dimetti" data-id="'+p.id+'">✅ Dimetti</button>';
+    h+='<button class="pma-btn-reopen" data-action="wait" data-id="'+p.id+'">↩ Torna in attesa</button>';
+  } else {
+    h+='<button class="pma-btn-reopen" data-action="wait" data-id="'+p.id+'">↩ Riapri</button>';
+  }
+  h+='<button class="pma-btn-clinic" data-action="clinic" data-id="'+p.id+'">🩺 Cartella</button>';
+  h+='<button class="pma-btn-del" data-action="del" data-id="'+p.id+'">🗑</button>';
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
+function bindActions(){
+  document.querySelectorAll('.pma-triage-btn[data-add]').forEach(b=>{
+    b.onclick=()=>addPatient(b.getAttribute('data-add'));
+  });
+  document.querySelectorAll('.pma-filter[data-filter]').forEach(b=>{
+    b.onclick=()=>{pmaFilter=b.getAttribute('data-filter');renderAll();};
+  });
+  document.querySelectorAll('.pma-card-actions button[data-action]').forEach(b=>{
+    b.onclick=(e)=>{
+      e.stopPropagation();
+      const id=b.getAttribute('data-id');
+      const act=b.getAttribute('data-action');
+      if(act==='start')setPatientState(id,'in_cura');
+      else if(act==='dimetti')setPatientState(id,'dimesso');
+      else if(act==='wait')setPatientState(id,'waiting');
+      else if(act==='clinic')openClinicalModal(id);
+      else if(act==='del')deletePatient(id);
+    };
+  });
+}
+
+/* =========================================================
+   MODAL CARTELLA CLINICA
+   ========================================================= */
+function openClinicalModal(id){
+  const p=S.pma.patients.find(x=>x.id===id);
+  if(!p)return;
+  const c=PMA_COLORS[p.code];
+  const st=PMA_STATES[p.state];
+  const cl=p.clinical||{};
+  const v=cl.vitals||{};
+
+  let h='';
+  h+='<div class="privacy-note"><span class="ico">🔒</span><div><b>Dati sensibili</b> — questa cartella è visibile solo al personale PMA e alla Centrale Operativa. Non viene mai mostrata nella Sala Coordinamento (wall).</div></div>';
+
+  h+='<div class="form-field"><label>Codice triage</label><div class="color-switch" id="cfColor">';
+  PMA_COLOR_ORDER.forEach(k=>{
+    const cc=PMA_COLORS[k];
+    h+='<button type="button" data-color="'+k+'" class="'+(p.code===k?'on':'')+'" style="--c:'+cc.hex+';--f:'+cc.fg+'">'+k+'</button>';
+  });
+  h+='</div></div>';
+
+  h+='<div class="form-field"><label>Stato</label><div class="state-switch" id="cfState">';
+  ['waiting','in_cura','dimesso'].forEach(k=>{
+    const ss=PMA_STATES[k];
+    h+='<button type="button" data-state="'+k+'" class="'+(p.state===k?'on':'')+'" style="--c:'+ss.color+'">'+ss.icon+' '+ss.label+'</button>';
+  });
+  h+='</div></div>';
+
+  h+='<div class="form-grid">';
+  h+='<div class="form-field"><label>Cognome</label><input type="text" id="cfSurname" value="'+esc(cl.surname||'')+'" placeholder="—" autocomplete="off"></div>';
+  h+='<div class="form-field"><label>Nome</label><input type="text" id="cfName" value="'+esc(cl.name||'')+'" placeholder="—" autocomplete="off"></div>';
+  h+='</div>';
+
+  h+='<div class="form-grid-3">';
+  h+='<div class="form-field"><label>Anno nascita</label><input type="number" min="1900" max="2100" id="cfBirth" value="'+(cl.birthYear!=null?cl.birthYear:'')+'" placeholder="—"></div>';
+  h+='<div class="form-field"><label>Sesso</label><select id="cfSex">'+
+    '<option value=""'+(cl.sex?'':' selected')+'>—</option>'+
+    '<option value="M"'+(cl.sex==='M'?' selected':'')+'>M</option>'+
+    '<option value="F"'+(cl.sex==='F'?' selected':'')+'>F</option>'+
+    '<option value="X"'+(cl.sex==='X'?' selected':'')+'>X</option>'+
+  '</select></div>';
+  h+='<div class="form-field"><label>ID</label><input type="text" value="'+p.id.slice(-5).toUpperCase()+'" readonly style="background:#1a1a1a;color:#888"></div>';
+  h+='</div>';
+
+  h+='<div class="form-field"><label>Motivo di accesso</label><input type="text" id="cfComplaint" value="'+esc(cl.complaint||'')+'" placeholder="es. dolore toracico, trauma…" autocomplete="off"></div>';
+  h+='<div class="form-field"><label>Allergie</label><input type="text" id="cfAllergies" value="'+esc(cl.allergies||'')+'" placeholder="—" autocomplete="off"></div>';
+
+  h+='<div class="form-field"><label>Parametri vitali</label><div class="form-grid-vitals">';
+  [['pa','PA','120/80'],['fc','FC','bpm'],['spo2','SpO₂','%'],['temp','T°','°C'],['gcs','GCS','3-15']].forEach(([k,lbl,ph])=>{
+    h+='<div><label>'+lbl+'</label><input type="text" id="cfVit_'+k+'" value="'+esc(v[k]||'')+'" placeholder="'+ph+'"></div>';
+  });
+  h+='</div></div>';
+
+  h+='<div class="form-field"><label>Note cliniche</label><textarea id="cfNotes" rows="3" placeholder="Anamnesi, farmaci, osservazioni…">'+esc(cl.notes||'')+'</textarea></div>';
+
+  if(cl.updatedAt){
+    h+='<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Ultimo aggiornamento: '+fmtDateTime(cl.updatedAt)+(cl.by?' · da '+esc(cl.by):'')+'</div>';
+  }
+
+  h+='<div class="modal-actions">';
+  h+='<button class="btn-cancel" id="cfCancel">Annulla</button>';
+  h+='<button class="btn-save" id="cfSave">💾 Salva cartella</button>';
+  h+='</div>';
+
+  document.getElementById('modalTitle').textContent='Cartella clinica · '+p.code+' · '+p.id.slice(-5).toUpperCase();
+  document.getElementById('modalBody').innerHTML=h;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+
+  /* Local state for color / state pickers */
+  let selColor=p.code, selState=p.state;
+  document.querySelectorAll('#cfColor button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#cfColor button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      selColor=b.getAttribute('data-color');
+    };
+  });
+  document.querySelectorAll('#cfState button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#cfState button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      selState=b.getAttribute('data-state');
+    };
+  });
+
+  document.getElementById('cfCancel').onclick=closeModal;
+  document.getElementById('cfSave').onclick=()=>{
+    /* Applica cambio colore / stato se diverso */
+    if(selColor!==p.code){ p.code=selColor; }
+    if(selState!==p.state){
+      p.state=selState;
+      const now=Date.now();
+      if(selState==='in_cura'&&!p.startedAt)p.startedAt=now;
+      if(selState==='dimesso')p.closedAt=now;
+      if(selState==='waiting'){p.startedAt=null;p.closedAt=null;}
+    }
+    /* Salva dati clinici */
+    const data={
+      surname:document.getElementById('cfSurname').value.trim(),
+      name:document.getElementById('cfName').value.trim(),
+      birthYear:(function(){const v=document.getElementById('cfBirth').value;return v===''?null:+v;})(),
+      sex:document.getElementById('cfSex').value,
+      complaint:document.getElementById('cfComplaint').value.trim(),
+      allergies:document.getElementById('cfAllergies').value.trim(),
+      notes:document.getElementById('cfNotes').value.trim(),
+      vitals:{
+        pa:document.getElementById('cfVit_pa').value.trim(),
+        fc:document.getElementById('cfVit_fc').value.trim(),
+        spo2:document.getElementById('cfVit_spo2').value.trim(),
+        temp:document.getElementById('cfVit_temp').value.trim(),
+        gcs:document.getElementById('cfVit_gcs').value.trim()
+      },
+      updatedAt:Date.now(),
+      by:'PMA'
+    };
+    p.clinical=data;
+    publishState();
+    renderAll();
+    closeModal();
+    toast('💾 Cartella salvata');
+  };
+}
+function closeModal(){document.getElementById('modalOverlay').classList.add('hidden');}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return 'h'+Math.abs(h).toString(36);}
+function loadAuth(){try{const r=localStorage.getItem(AUTH_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function saveAuth(pwd){try{localStorage.setItem(AUTH_KEY,JSON.stringify({pwdHash:simpleHash(pwd||'')}));}catch(e){}}
+function validateAuth(){
+  const a=loadAuth();
+  if(!a)return false;
+  if(!S.pma||!S.pma.password)return true;
+  return a.pwdHash===simpleHash(S.pma.password);
+}
+function showLogin(msg){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('appMain').classList.add('hidden');
+  const m=document.getElementById('loginMsg');
+  if(msg){m.textContent=msg;m.className='login-msg show err';}
+  else{m.classList.remove('show');}
+}
+function tryLogin(){
+  const pwd=document.getElementById('loginPassword').value||'';
+  const expected=S.pma.password||'';
+  if(expected===''){saveAuth('');startApp();return;}
+  if(pwd===expected){saveAuth(pwd);startApp();}
+  else{
+    const m=document.getElementById('loginMsg');
+    m.textContent='❌ Codice errato.';m.className='login-msg show err';
+    document.getElementById('loginPassword').value='';
+    document.getElementById('loginPassword').focus();
+  }
+}
+function startApp(){
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('appMain').classList.remove('hidden');
+  renderAll();
+  publishState();
+}
+function doLogout(){
+  if(!confirm('Uscire dalla pagina PMA?'))return;
+  try{localStorage.removeItem(AUTH_KEY);}catch(e){}
+  showLogin(null);
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+function tickClock(){const el=document.getElementById('clock');if(el)el.textContent=new Date().toLocaleTimeString('it-IT');}
+tickClock();setInterval(tickClock,1000);
+setInterval(()=>{ if(!document.getElementById('appMain').classList.contains('hidden')) renderAll(); },30000);
+
+/* =========================================================
+   BIND
+   ========================================================= */
+document.getElementById('loginBtn').onclick=tryLogin;
+document.getElementById('loginPassword').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();tryLogin();}
+});
+document.getElementById('loginPwdToggle').onclick=()=>{
+  const i=document.getElementById('loginPassword');
+  i.type=i.type==='password'?'text':'password';
+  document.getElementById('loginPwdToggle').textContent=i.type==='password'?'👁️':'🙈';
+};
+document.getElementById('logoutBtn').onclick=doLogout;
+document.getElementById('modalClose').onclick=closeModal;
+document.getElementById('modalOverlay').onclick=e=>{
+  if(e.target.id==='modalOverlay')closeModal();
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.getElementById('roomLabel').textContent=SESSION_ROOM;
+document.getElementById('loginRoom').textContent=SESSION_ROOM;
+document.getElementById('roomBadge').onclick=()=>{
+  const url=location.origin+location.pathname+'?room='+SESSION_ROOM;
+  if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast('📋 Copiato: '+SESSION_ROOM));
+  else prompt('Stanza: '+SESSION_ROOM,url);
+};
+
+/* =========================================================
+   INIT
+   ========================================================= */
+updateBadges();
+initSyncChannels();
+initMqtt();
+setTimeout(()=>{
+  if(validateAuth())startApp();
+  else showLogin(null);
+},250);
+
+})();
+</script>
+</body>
+</html>
