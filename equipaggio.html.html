@@ -387,6 +387,11 @@ font-size:10px;font-weight:900;color:#fff;border:2px solid #1a1a1a}
 .mk-poi{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
 justify-content:center;background:var(--c);color:#fff;font-size:13px;
 border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.mk-pma-eq{width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;
+  border:3px solid #fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.7);font-size:18px;line-height:1}
+.mk-pma-eq small{font-size:8px;font-weight:900;letter-spacing:.5px;line-height:1;margin-top:-1px}
 .leaflet-popup-content-wrapper{background:#2a2a2a;color:var(--txt);border-radius:12px;border:1px solid #444}
 .leaflet-popup-tip{background:#2a2a2a}
 .leaflet-popup-content{margin:11px 13px;font-size:13px;line-height:1.5}
@@ -512,7 +517,7 @@ const KEY = 'sge_v4';
 const AUTH_KEY = 'sge_eq_auth';
 const CRYPTO_KEY = 'sge_eq_crypto';
 const MY_PAGE_ID = 'eq_' + Math.random().toString(36).slice(2,10);
-const MAX_CHAT_PHOTOS = 20; // cap foto in chat per non saturare localStorage
+const MAX_CHAT_PHOTOS = 20;
 const SESSION_ROOM = (function(){
   const p = new URLSearchParams(location.search);
   return p.get('room') || localStorage.getItem('sge_room') || 'sge-demo-2024';
@@ -589,7 +594,6 @@ const RETURN_CODES = {
   3:{label:'Trasporto codice rosso',    icon:'🔴', color:'#e53935', letter:'R'},
   4:{label:'Altro / Trasferimento',     icon:'🔀', color:'#8b5cf6', letter:'B'}
 };
-/* AVPU: coscienza paziente */
 const AVPU = [
   {key:'A', label:'Alert',        desc:'Vigile',              color:'#2fa84f'},
   {key:'V', label:'Verbal',       desc:'Risponde a voce',      color:'#f2c200'},
@@ -685,17 +689,15 @@ function fmtShiftRange(t){
   const at = t.activeTo ? new Date(t.activeTo).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : '--:--';
   return af+' → '+at;
 }
-/* ETA verso un target, basato sulla velocità del tipo mezzo */
 function computeETA(team, tgt){
   if(!team || !tgt) return null;
   if(!team.lat || !team.lng) return null;
   const dist = haversine(team.lat, team.lng, tgt.lat, tgt.lng);
-  const speed = (TEAM_TYPES[team.type] && TEAM_TYPES[team.type].speed) || 30; // km/h
+  const speed = (TEAM_TYPES[team.type] && TEAM_TYPES[team.type].speed) || 30;
   const etaMin = Math.max(1, Math.round(dist / (speed * 1000 / 60)));
   const distTxt = dist < 1000 ? Math.round(dist)+' m' : (dist/1000).toFixed(1)+' km';
   return {dist, distTxt, etaMin};
 }
-/* Trova l'ospedale più vicino (POI cat='ospedale') o in fallback i POI soccorso */
 function nearestHospital(lat,lng){
   const hospitals = (S.pois||[]).filter(p=>p.cat==='ospedale');
   const list = hospitals.length ? hospitals : (S.pois||[]).filter(p=>p.cat==='soccorso');
@@ -749,9 +751,6 @@ function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended'
 document.addEventListener('click',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
 document.addEventListener('touchstart',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
 
-/* =========================================================
-   SOUND ENGINE — con "Allerta Target" per missioni (molto forte)
-   ========================================================= */
 function playTone(freq, start, duration, type, gainPeak){
   if(!audioCtx) return;
   try{
@@ -781,14 +780,12 @@ function playBuzz(freq, start, duration, gainPeak){
     osc.start(t0); osc.stop(t0+duration+0.02);
   }catch(e){}
 }
-/* Sirena potente multi-oscillatore: fondamentale + armoniche, sweep continuo */
 function playAlertTarget(){
   if(!audioCtx) return;
   try{
     const now=audioCtx.currentTime;
-    const TOTAL=4.2;                // durata totale ~4.2s
-    const SWEEP_PERIOD=0.7;         // ciclo su-giù
-    /* --- Layer 1: sirena principale (sweep 700↔1200 Hz) --- */
+    const TOTAL=4.2;
+    const SWEEP_PERIOD=0.7;
     const o1=audioCtx.createOscillator();
     const g1=audioCtx.createGain();
     o1.type='sawtooth';
@@ -805,7 +802,6 @@ function playAlertTarget(){
     g1.gain.linearRampToValueAtTime(0.001, now+TOTAL);
     o1.connect(g1); g1.connect(audioCtx.destination);
     o1.start(now); o1.stop(now+TOTAL+0.1);
-    /* --- Layer 2: armonica 2x (timbro metallico) --- */
     const o2=audioCtx.createOscillator();
     const g2=audioCtx.createGain();
     o2.type='square';
@@ -821,7 +817,6 @@ function playAlertTarget(){
     g2.gain.linearRampToValueAtTime(0.001, now+TOTAL);
     o2.connect(g2); g2.connect(audioCtx.destination);
     o2.start(now); o2.stop(now+TOTAL+0.1);
-    /* --- Layer 3: sub-bass 90 Hz (vibrazione percepibile) --- */
     const o3=audioCtx.createOscillator();
     const g3=audioCtx.createGain();
     o3.type='sine';
@@ -832,7 +827,6 @@ function playAlertTarget(){
     g3.gain.linearRampToValueAtTime(0.001, now+TOTAL);
     o3.connect(g3); g3.connect(audioCtx.destination);
     o3.start(now); o3.stop(now+TOTAL+0.1);
-    /* --- Layer 4: impulsi d'attacco ogni 0.7s (buzz brevi che spiccano) --- */
     for(let i=0;i<cycles;i++){
       playBuzz(1800, i*SWEEP_PERIOD, 0.08, 0.35);
     }
@@ -845,14 +839,11 @@ function playSound(type){
   try{
     const now=audioCtx.currentTime;
     if(type==='mission'){
-      /* ALLERTA TARGET — nuovo suono potente */
       playAlertTarget();
     } else if(type==='critical'){
-      /* CODICE ROSSO — sirena ancora più aggressiva */
       playAlertTarget();
       setTimeout(()=>{ try{ playAlertTarget(); }catch(e){} }, 700);
     } else if(type==='sos'){
-      /* SOS (equipaggio): mantenuto simile ma più forte */
       const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
       osc.connect(gain); gain.connect(audioCtx.destination);
       osc.type='sawtooth';
@@ -877,6 +868,7 @@ function vibrate(pattern){
 let S = {
   center:{lat:45.5195,lng:9.0784},
   teams:[], targets:[], pois:[], zones:[], broadcast:[],
+  pma:{password:'',name:'PMA',lat:null,lng:null,patients:[]},
   config:{brokers:DEFAULT_BROKERS.slice(),encryptKey:''}
 };
 try{
@@ -890,6 +882,12 @@ if(!Array.isArray(S.zones)) S.zones=[];
 if(!Array.isArray(S.broadcast)) S.broadcast=[];
 if(!S.config) S.config={brokers:DEFAULT_BROKERS.slice(),encryptKey:''};
 if(!Array.isArray(S.config.brokers)) S.config.brokers=DEFAULT_BROKERS.slice();
+if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+if(typeof S.pma.password!=='string') S.pma.password='';
+if(typeof S.pma.name!=='string') S.pma.name='PMA';
+if(S.pma.lat===undefined) S.pma.lat=null;
+if(S.pma.lng===undefined) S.pma.lng=null;
+if(!Array.isArray(S.pma.patients)) S.pma.patients=[];
 S.teams.forEach(t=>{
   if(!CREW_TYPES[t.crew]) t.crew='bravo';
   if(typeof t.password!=='string') t.password='';
@@ -901,7 +899,6 @@ S.targets.forEach(tg=>{
   if(!Array.isArray(tg.teamIds)){ tg.teamIds=tg.teamId?[tg.teamId]:[]; delete tg.teamId; }
   if(!Array.isArray(tg.photos)) tg.photos=[];
   if(tg.ack===undefined) tg.ack=null;
-  /* Scheda paziente strutturata */
   if(!tg.patient) tg.patient={age:null,sex:null,avpu:null,chief:[],notes:'',ts:null};
 });
 
@@ -969,7 +966,6 @@ function tryConnect(idx){
       if(topic===MQTT_BASE+'/eq') return;
       try{ handleIncomingMessage(payload.toString()); }catch(e){}
     });
-    /* FIX: fallback coerente con l'indice corrente */
     setTimeout(()=>{
       if(!connected && currentIdx===idx){ tryConnect(idx+1); }
     }, 9000);
@@ -1026,6 +1022,10 @@ function applyRemoteState(incoming){
     if(!S.config) S.config={brokers:DEFAULT_BROKERS.slice(),encryptKey:''};
     if(!Array.isArray(S.config.brokers)) S.config.brokers=DEFAULT_BROKERS.slice();
     if(!S.center) S.center={lat:45.5195,lng:9.0784};
+    /* PMA */
+    if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+    if(typeof S.pma.name!=='string') S.pma.name='PMA';
+    if(!Array.isArray(S.pma.patients)) S.pma.patients=[];
     S.teams.forEach(t=>{
       if(!CREW_TYPES[t.crew]) t.crew='bravo';
       if(typeof t.password!=='string') t.password='';
@@ -1039,12 +1039,10 @@ function applyRemoteState(incoming){
       if(tg.ack===undefined) tg.ack=null;
       if(!tg.patient) tg.patient={age:null,sex:null,avpu:null,chief:[],notes:'',ts:null};
     });
-    /* Auto-config chiave cifratura dalla SOL se non presente */
     if(!localCryptoKey && S.config.encryptKey){
       localCryptoKey = S.config.encryptKey;
       localStorage.setItem(CRYPTO_KEY, localCryptoKey);
     }
-    /* FIX BUG: aggiorna lastSolAt quando lo stato arriva dalla SOL */
     if(incoming._writer && String(incoming._writer).startsWith('sol_')){
       lastSolAt = Date.now();
     }
@@ -1054,14 +1052,12 @@ function applyRemoteState(incoming){
       return;
     }
     const me = getMyTeam();
-    /* Nuova missione */
     if(me && me.mission && me.mission.targetId !== lastMissionId){
       lastMissionId = me.mission.targetId;
       notifyNewMission(me);
     } else if(me && !me.mission){
       lastMissionId = null;
     }
-    /* Nuovi messaggi chat dalla SOL */
     if(me && Array.isArray(me.chat) && me.chat.length > myOldChatLen){
       const newMsgs = me.chat.slice(myOldChatLen);
       const solMsgs = newMsgs.filter(m=>m.from==='sol');
@@ -1073,7 +1069,6 @@ function applyRemoteState(incoming){
         else toast('💬 '+last.text.slice(0,60));
       }
     }
-    /* Nuovo broadcast */
     if((S.broadcast||[]).length > oldBcastLen){
       const newB = S.broadcast[S.broadcast.length-1];
       if(newB && (newB.author==='sol'||!newB.author)){
@@ -1082,7 +1077,6 @@ function applyRemoteState(incoming){
         toast('📣 '+newB.text.slice(0,80));
       }
     }
-    /* SOS da altre squadre */
     if(S.sos && S.sos.teamId !== myTeamId && S.sos.id !== lastSOSId){
       lastSOSId = S.sos.id;
       const sosTeam = S.teams.find(x=>x.id===S.sos.teamId);
@@ -1100,9 +1094,9 @@ function notifyNewMission(me){
   const isCritical = parseCode(me.mission.code).color === 'R';
   playSound(isCritical?'critical':'mission');
   vibrate(isCritical
-  ? [500,150,500,150,500,200,500,200,500,150,500,150,500]   // Codice Rosso: 7 impulsi forti
-  : [400,120,400,120,400,150,400,150,400]                    // Normale: 5 impulsi forti
-);
+    ? [500,150,500,150,500,200,500,200,500,150,500,150,500]
+    : [400,120,400,120,400,150,400,150,400]
+  );
   const t2=document.getElementById('toast2');
   const ico=document.getElementById('toast2Ico');
   const msg=document.getElementById('toast2Msg');
@@ -1172,7 +1166,6 @@ function startAutoGPS(){
       if(gd) gd.classList.add('on');
       const gi = document.getElementById('gpsInfo');
       if(gi) gi.innerHTML = '<span class="gps-dot on"></span> <b>GPS attivo</b> — aggiornato '+fmtTime(t.gpsAt)+'<br>Coordinate: <b>'+t.lat.toFixed(5)+', '+t.lng.toFixed(5)+'</b>';
-      /* Ricalcola ETA nel riquadro missione */
       refreshMissionETA();
     },
     err=>{ console.warn('[GPS]', err.message); gpsActive=false; updateBadges(); },
@@ -1187,7 +1180,6 @@ function stopAutoGPS(){
     updateBadges();
   }
 }
-/* Aggiorna il riquadro ETA nella mission card senza render completo */
 function refreshMissionETA(){
   const t=getMyTeam(); if(!t||!t.mission) return;
   const el=document.getElementById('missionETABox');
@@ -1227,7 +1219,6 @@ function setStatus(status,note,silent){
     if(!silent) publishState();
     return;
   }
-  /* Suggerimento Ospedale quando si seleziona "Verso l'Ospedale" */
   if(status==='Verso l\'Ospedale' && t.mission){
     const tg=S.targets.find(x=>x.id===t.mission.targetId);
     const h=nearestHospital(t.lat,t.lng);
@@ -1345,7 +1336,6 @@ function sendChatMsg(text){
   renderAll();
 }
 
-/* Cap foto chat: elimina le più vecchie se superano MAX */
 function pruneChatPhotos(team){
   if(!team || !Array.isArray(team.chat)) return;
   const photoIdxs=[];
@@ -1471,8 +1461,7 @@ function renderPatientBody(){
     h+='<button type="button" class="tpl-btn '+(on?'on':'')+'" data-chief="'+esc(c)+'" style="'+(on?'background:var(--accent);color:#111;border-color:var(--accent)':'')+'">'+esc(c)+'</button>';
   });
   h+='</div></div>';
-  h+='<div class="pt-field" style="margin-bottom:10px"><label>Note cliniche (opzionale)</label><textarea id="ptNotes" rows="3" placeholder="Anamnesi, farmaci, allergie, parametri…">'+esc(p.notes||'')+'</textarea></div>';
-  /* Summary */
+  h+='<div class="pt-field" style="margin-bottom:10px"><label>Note cliniche (opzionale)</label><textarea id="ptNotes" rows="3" placeholder="Anamnesi, farmaci, allergie, parametri…" style="width:100%;background:#1e1e1e;border:1px solid #383838;color:var(--txt);padding:9px;border-radius:8px;outline:none;font-size:14px;min-height:60px;resize:vertical">'+esc(p.notes||'')+'</textarea></div>';
   const bits=[];
   if(p.age!=null) bits.push('<b>'+p.age+'</b> anni');
   if(p.sex) bits.push('sesso <b>'+p.sex+'</b>');
@@ -1583,6 +1572,17 @@ function renderMiniMap(){
   mgroups.line.clearLayers();
   mgroups.zones.clearLayers();
   const me=getMyTeam(); if(!me) return;
+
+  /* PMA marker */
+  if(S.pma && S.pma.lat!=null && S.pma.lng!=null){
+    const pmaIcon=L.divIcon({className:'',
+      html:'<div class="mk-pma-eq">🏥<small>PMA</small></div>',
+      iconSize:[44,44],iconAnchor:[22,22]});
+    const mk=L.marker([S.pma.lat,S.pma.lng],{icon:pmaIcon,zIndexOffset:800});
+    mk.bindPopup('<b>🏥 '+esc(S.pma.name||'PMA')+'</b>');
+    mk.addTo(mgroups.poi);
+  }
+
   S.teams.forEach(t=>{
     const isMine=(t.id===me.id);
     if(!isMine && !t.mission) return;
@@ -1591,6 +1591,9 @@ function renderMiniMap(){
     marker.addTo(mgroups.teams);
   });
   const bounds=[[me.lat,me.lng]];
+  if(S.pma && S.pma.lat!=null && S.pma.lng!=null){
+    bounds.push([S.pma.lat,S.pma.lng]);
+  }
   if(me.mission){
     const tg=S.targets.find(x=>x.id===me.mission.targetId);
     const tlat = tg ? tg.lat : me.mission.lat;
@@ -1605,12 +1608,14 @@ function renderMiniMap(){
       const d=miniMap.distance([tlat,tlng],[p.lat,p.lng]);
       const isClosing=(p.cat==='chiusura');
       const isHospital=(p.cat==='ospedale');
-      if(d<1200 || (isClosing && d<2500) || (isHospital && d<3000)){
+      const isPriority=(p.cat==='polizia'||p.cat==='vigili_fuoco'||p.cat==='steward'||p.cat==='personale');
+      const isStructure=(p.cat==='palco'||p.cat==='bar'||p.cat==='bagni'||p.cat==='ingresso'||p.cat==='parcheggio'||p.cat==='area');
+      if(d<1200 || (isClosing && d<2500) || (isHospital && d<3000) || (isPriority && d<1800) || (isStructure && d<1500)){
         const mk=L.marker([p.lat,p.lng],{icon:poiMiniIcon(p)});
         const cat=POI_CATS[p.cat]||POI_CATS.info;
         mk.bindPopup('<b>'+cat.icon+' '+esc(p.name)+'</b>'+(p.note?'<br>'+esc(p.note):''));
         mk.addTo(mgroups.poi);
-        if(d<1200 || isHospital) bounds.push([p.lat,p.lng]);
+        if(d<1200 || isHospital || isPriority) bounds.push([p.lat,p.lng]);
       }
     });
     S.targets.forEach(tg2=>{
@@ -1659,7 +1664,6 @@ function renderMission(){
   const tg=S.targets.find(x=>x.id===m.targetId);
   const others=tg?targetTeams(tg).filter(x=>x.id!==t.id):[];
   const ack = tg && tg.ack;
-  /* ETA live */
   const eta = tg ? computeETA(t, tg) : null;
   let h='<div class="eq-mission" style="--c:'+c.hex+'">';
   h+='<div class="mc-top">';
@@ -1668,7 +1672,6 @@ function renderMission(){
   if(ack) h+='<span class="mc-ack">✅ Ricevuta</span>';
   h+='</div>';
   h+='<div class="mc-addr">📍 '+esc(m.address || 'Posizione selezionata')+'</div>';
-  /* ETA box */
   if(eta){
     h+='<div class="mc-eta" id="missionETABox"><span class="big">🚗</span><div><span class="dist">'+eta.distTxt+'</span> · arrivo stimato in ~<b>'+eta.etaMin+' min</b></div></div>';
   } else {
@@ -1918,7 +1921,6 @@ function renderAll(){
     const phaseOpen=(accOpen.accPhase!==undefined)?accOpen.accPhase:true;
     html+=renderAccordion('accPhase','🚦','Fase missione',renderPhasesBody(),phaseBadge,phaseOpen);
 
-    /* Scheda paziente */
     const tg=S.targets.find(x=>x.id===t.mission.targetId);
     const pBadge = tg && tg.patient && (tg.patient.age!=null || tg.patient.sex || tg.patient.avpu || (tg.patient.chief&&tg.patient.chief.length)) ? '📋' : '';
     html+=renderAccordion('accPatient','🩺','Scheda paziente',renderPatientBody(),pBadge,accOpen.accPatient===true);
@@ -1927,13 +1929,11 @@ function renderAll(){
     html+=renderAccordion('accReturn','🔢','Codice rientro / intervento',renderReturnCodeBody(),rcBadge,accOpen.accReturn===true);
   }
 
-  /* BROADCAST */
   const bcastArr=S.broadcast||[];
   const bcastUnread=bcastArr.filter(b=>{ const lastRead=+(localStorage.getItem('sge_eq_bcast_read')||0); return b.ts>lastRead; }).length;
   const bcastBadge=bcastUnread>0?'🔴 '+bcastUnread:(bcastArr.length?String(bcastArr.length):'');
   html+=renderAccordion('accBroadcast','📣','Broadcast Centrale',renderBroadcastBody(),bcastBadge,accOpen.accBroadcast===true);
 
-  /* CHAT */
   const chatArr=Array.isArray(t.chat)?t.chat:[];
   const unreadCount=(()=>{
     if(!chatArr.length) return 0;
@@ -1991,7 +1991,6 @@ function renderAll(){
     b.onclick=()=>setAvailability(b.getAttribute('data-avail'));
   });
 
-  /* Editor codice */
   const editBtn=document.getElementById('codeEditBtn');
   const editor=document.getElementById('codeEditor');
   const codeRow=document.getElementById('codeRow');
@@ -2022,10 +2021,8 @@ function renderAll(){
     };
   }
 
-  /* Scheda paziente bind */
   bindPatientBody();
 
-  /* Chat bind */
   const chatInput=document.getElementById('chatInput');
   const chatSendBtn=document.getElementById('chatSendBtn');
   const chatPhotoBtn=document.getElementById('chatPhotoBtn');
@@ -2061,7 +2058,6 @@ function renderAll(){
     localStorage.setItem('sge_eq_bcast_read', Date.now());
   }
 
-  /* SOS */
   const sosBtn=document.getElementById('sosBtn');
   if(sosBtn){
     let holdTimer=null;
@@ -2088,11 +2084,9 @@ function renderAll(){
   const sosCancelBtn=document.getElementById('sosCancelBtn');
   if(sosCancelBtn) sosCancelBtn.onclick=triggerSOS;
 
-  /* GPS toggle */
   const gpsToggle=document.getElementById('gpsToggle');
   if(gpsToggle) gpsToggle.onclick=()=>{ if(gpsActive) stopAutoGPS(); else startAutoGPS(); renderAll(); };
 
-  /* Mini-map */
   if(t.mission){
     setTimeout(()=>{
       if(!miniMap) initMiniMap();
@@ -2191,12 +2185,11 @@ function doLogout(){
   showLogin('Disconnesso.',true);
 }
 
-/* QR login: prova ad autenticarsi dai parametri URL ?team=...&pwd=... */
+let QR_TEAM_MATCH = '';
 function tryQrLogin(){
   if(!QR_TEAM) return false;
   const t=S.teams.find(x=>x.id===QR_TEAM);
   if(!t){
-    /* potrebbe essere il team name */
     const byName=S.teams.find(x=>x.name===QR_TEAM);
     if(!byName) return false;
     QR_TEAM_MATCH = byName.id;
@@ -2209,7 +2202,6 @@ function tryQrLogin(){
   const got=QR_PWD||'';
   if(expected==='' || got===expected){
     saveAuth(tid, got);
-    /* pulisci l'URL per non lasciare la pwd in barra indirizzi */
     try{
       const url=new URL(location.href);
       url.searchParams.delete('team');
@@ -2220,7 +2212,6 @@ function tryQrLogin(){
   }
   return false;
 }
-let QR_TEAM_MATCH = '';
 
 /* =========================================================
    TOAST
@@ -2293,7 +2284,6 @@ initSyncChannels();
 initMqtt();
 
 setTimeout(()=>{
-  /* Priorità: QR login > auth salvata > login manuale */
   if(tryQrLogin()){
     startApp();
     toast('🔓 Accesso QR riuscito');
@@ -2311,7 +2301,7 @@ if('Notification' in window && Notification.permission === 'default'){
   Notification.requestPermission().catch(()=>{});
 }
 
-/* PWA: registra service worker inline (genera uno SW minimale) se in HTTPS */
+/* PWA: registra service worker inline se in HTTPS */
 try{
   if('serviceWorker' in navigator && location.protocol === 'https:'){
     const swCode = "self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{e.respondWith(caches.open('sge-eq-v1').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(res=>{try{c.put(e.request,res.clone())}catch(_){}} return res).catch(()=>c.match(e.request)))))});";
