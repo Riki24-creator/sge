@@ -548,19 +548,22 @@ const CREW_TYPES = {
 };
 const POI_CATS = {
   soccorso:{label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
-  ospedale:{label:'Ospedali',icon:'🏥',color:'#e53935'},
-  polizia:{label:'Polizia / Forze ordine',icon:'👮',color:'#3b82f6'},
-  vigili:{label:'Vigili del fuoco',icon:'🚒',color:'#dc2626'},
-  steward:{label:'Steward',icon:'🦺',color:'#f59e0b'},
-  personale:{label:'Altro personale',icon:'🧑‍💼',color:'#10b981'},
-  palco:{label:'Palcoscenico',icon:'🎭',color:'#8b5cf6'},
-  bar:{label:'Bar / Chiosco',icon:'🍔',color:'#f59e0b'},
-  ristoro:{label:'Area ristoro',icon:'🍕',color:'#f59e0b'},
-  bagni:{label:'Bagni / Servizi',icon:'🚻',color:'#06b6d4'},
-  struttura:{label:'Altra struttura',icon:'🏗️',color:'#8b5cf6'},
-  chiusura:{label:'Strade chiuse',icon:'⛔',color:'#ff7043'},
+  ospedale:{label:'Ospedali',         icon:'🏥',color:'#e53935'},
+  chiusura:{label:'Strade chiuse',     icon:'⛔',color:'#ff7043'},
   centrale:{label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
-  info:{label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'}
+  info:    {label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'},
+  /* Forze dell'ordine e personale */
+  polizia:{label:'Polizia / Carabinieri',icon:'🚓',color:'#3b82f6'},
+  vigili_fuoco:{label:'Vigili del fuoco',icon:'🚒',color:'#dc2626'},
+  steward:{label:'Steward / Sicurezza',icon:'🦺',color:'#eab308'},
+  personale:{label:'Personale / Volontari',icon:'👥',color:'#10b981'},
+  /* Strutture fisiche */
+  palco:{label:'Palco / Area evento',icon:'🎭',color:'#a855f7'},
+  bar:{label:'Bar / Chiosco',icon:'🍺',color:'#f97316'},
+  bagni:{label:'Bagni / Servizi',icon:'🚻',color:'#06b6d4'},
+  ingresso:{label:'Ingresso / Uscita',icon:'🚪',color:'#84cc16'},
+  parcheggio:{label:'Parcheggio',icon:'🅿️',color:'#64748b'},
+  area:{label:'Area generica',icon:'📦',color:'#6b7280'}
 };
 const MISSION_STATES = [
   {key:'Partenza',                       icon:'🚔', color:'#3d9bff', short:'Partenza'},
@@ -1215,9 +1218,8 @@ function setStatus(status,note,silent){
         }
       }
     }
-        t.mission=null;
+    t.mission=null;
     t.status=status;
-    t.track=[];                 // <—— AGGIUNTO: azzera traccia GPS
     t.history=t.history||[];
     t.history.unshift({ts:Date.now(),status,note:note||'Arrivo in sede'});
     t.history=t.history.slice(0,120);
@@ -1555,7 +1557,7 @@ function teamMiniIcon(t,isMine){
   const col=statusColor(t);
   const type=TEAM_TYPES[t.type]||TEAM_TYPES.auto;
   const crew=crewInfo(t);
-  const sosCls = (S.sos && S.sos.teamId===t.id && !S.sos.acknowledged) ? ' sos' : '';
+  const sosCls = (S.sos && S.sos.teamId===t.id) ? ' sos' : '';
   return L.divIcon({className:'',
     html:'<div class="mk-team '+(isMine?'mine':'')+sosCls+'" style="--c:'+col+'">'+type.icon+
       '<span class="crew" style="background:'+crew.color+'">'+crew.short+'</span></div>',
@@ -1695,15 +1697,10 @@ function renderSOS(){
   const t=getMyTeam(); if(!t) return '';
   const isActive = S.sos && S.sos.teamId===t.id;
   if(isActive){
-    const ackInfo = S.sos.acknowledged
-      ? '<div style="color:#a5d6a7;font-size:12.5px;margin-top:6px;font-weight:700">✅ Presa in carico dalla Centrale'+
-        (S.sos.acknowledged.by?' · '+esc(S.sos.acknowledged.by):'')+' · '+fmtTime(S.sos.acknowledged.ts)+'</div>'
-      : '<div style="color:#ffcc80;font-size:12px;margin-top:6px;font-weight:700">⏳ In attesa di presa in carico…</div>';
     return '<div class="sos-active">'+
       '<h3>🆘 SOS ATTIVO</h3>'+
       '<p>La Centrale è stata allertata · '+fmtTime(S.sos.ts)+'</p>'+
-      ackInfo+
-      '<button id="sosCancelBtn" style="margin-top:10px">Annulla allarme</button>'+
+      '<button id="sosCancelBtn">Annulla allarme</button>'+
     '</div>';
   }
   return '<div class="sos-section">'+
@@ -1714,8 +1711,6 @@ function renderSOS(){
     '<div class="sos-hint">Invia la tua posizione alla Centrale<br>e attiva l\'allarme sonoro</div>'+
   '</div>';
 }
-
-
 
 function renderAccordion(id,icon,title,body,badge,open){
   return '<div class="eq-acc'+(open?' open':'')+'" id="'+id+'">'+
