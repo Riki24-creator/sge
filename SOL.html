@@ -576,6 +576,51 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
 .op-log-item .op-time{color:var(--muted);flex-shrink:0;width:80px;font-variant-numeric:tabular-nums}
 .op-log-item .op-name{font-weight:800;flex-shrink:0;min-width:70px}
 
+/* ===== PMA PANEL ===== */
+.pma-panel{background:#252525;border:1px solid #333;border-radius:12px;
+  padding:14px;margin-bottom:10px}
+.pma-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pma-kpi-card{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:10px;
+  padding:10px 8px;text-align:center}
+.pma-kpi-v{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.pma-kpi-l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-top:5px}
+.pma-kpi-s{font-size:10px;color:var(--txt2);font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;opacity:.75}
+.pma-kpi-card.total .pma-kpi-v{color:var(--accent)}
+.pma-kpi-card.waiting .pma-kpi-v{color:#f59e0b}
+.pma-kpi-card.treating .pma-kpi-v{color:#3b82f6}
+.pma-kpi-card.discharged .pma-kpi-v{color:#10b981}
+.pma-colors-mini{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.pma-cc{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:8px;
+  padding:8px 4px;text-align:center;position:relative;overflow:hidden}
+.pma-cc .cc-chip{width:100%;height:3px;border-radius:3px;background:var(--c);margin-bottom:6px}
+.pma-cc .cc-num{font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.pma-cc .cc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:2px}
+.pma-cc .cc-pct{font-size:10px;color:var(--txt2);font-weight:700;font-variant-numeric:tabular-nums}
+.pma-patient-list{max-height:280px;overflow-y:auto;border-radius:8px;background:#1e1e1e;border:1px solid #2a2a30}
+.pma-patient-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border-bottom:1px solid #2a2a30;cursor:pointer;font-size:12px}
+.pma-patient-row:last-child{border-bottom:none}
+.pma-patient-row:hover{background:#252525}
+.pma-patient-code{font-size:13px;font-weight:900;padding:3px 9px;border-radius:7px;flex-shrink:0}
+.pma-patient-state{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.pma-patient-state.waiting{background:rgba(245,158,11,.15);color:#fcd34d}
+.pma-patient-state.in_cura{background:rgba(59,130,246,.18);color:#93c5fd}
+.pma-patient-state.dimesso{background:rgba(16,185,129,.15);color:#6ee7b7}
+.pma-patient-id{flex:1;min-width:0;font-family:monospace;font-size:12px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pma-patient-time{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700}
+.pma-clinic-btn{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);
+  color:#c4b5fd;font-weight:800;font-size:10.5px;padding:5px 9px;border-radius:7px;cursor:pointer;flex-shrink:0}
+.pma-clinic-btn:hover{background:rgba(139,92,246,.28)}
+.pma-clinic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.pma-clinic-cell{background:#1e1e1e;border-radius:8px;padding:10px 12px}
+.pma-clinic-cell .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.pma-clinic-cell .val{font-size:14px;font-weight:800}
+.pma-vitals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+.pma-vital{background:#1e1e1e;border-radius:8px;padding:8px 6px;text-align:center}
+.pma-vital .lbl{font-size:9.5px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:3px}
+.pma-vital .val{font-size:14px;font-weight:800;color:#fff}
+.pma-empty-mini{padding:24px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
+
 @media print{
   body{background:#fff;color:#000}
   .topbar,.sidebar,.map-wrap,.modal,.toast,.sos-banner{display:none !important}
@@ -608,6 +653,8 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
   <button class="btn-export" id="exportBtn">📥 CSV</button>
   <button class="btn-export" id="handoverBtn">📤 Handover</button>
   <button class="btn-export" id="configBtn">⚙️</button>
+  
+  <button class="btn-export" id="pmaTopBtn" title="Apri pagina PMA">🏥 PMA</button>
   <button class="btn-export" id="opBtn" title="Operatore corrente">👤 <span id="opNameLbl">—</span></button>
   <span class="clock" id="clock"></span>
   <button class="btn ghost mini" id="resetBtn">↺</button>
@@ -748,6 +795,20 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
         <button class="acc-head"><span class="acc-ico">📖</span><span class="title">Legenda Codici</span><span class="chev">▾</span></button>
         <div class="acc-body" id="legendBody"></div>
       </div>
+
+      <div class="acc open ic-red" id="accPMA">
+        <button class="acc-head"><span class="acc-ico">🏥</span><span class="title">PMA — Postazione Medica Avanzata</span><span class="badge" id="pmaBadge">0</span><span class="chev">▾</span></button>
+        <div class="acc-body">
+          <div class="pma-panel">
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn ghost" id="pmaOpenBtn" style="flex:1">🖥️ Apri PMA</button>
+              <button class="btn ghost mini" id="pmaRefreshBtn" title="Aggiorna">↻</button>
+            </div>
+            <div id="pmaContainer"><div class="pma-empty-mini">Nessun dato PMA</div></div>
+          </div>
+        </div>
+      </div>
+
     </aside>
 
     <div class="map-wrap">
@@ -1260,6 +1321,17 @@ try{
     if(!Array.isArray(t.track)) t.track=[];
     if(t.activeFrom===undefined) t.activeFrom=null;
     if(t.activeTo===undefined) t.activeTo=null;
+    /* PMA */
+    if(!S.pma)S.pma={password:'',patients:[]};
+    if(typeof S.pma.password!=='string')S.pma.password='';
+    if(!Array.isArray(S.pma.patients))S.pma.patients=[];
+    S.pma.patients.forEach(p=>{
+      if(!PMA_COLORS[p.code])p.code='V';
+      if(!PMA_STATES[p.state])p.state='waiting';
+      if(!p.arrivedAt)p.arrivedAt=Date.now();
+      if(!p.clinical)p.clinical={};
+      if(!p.clinical.vitals)p.clinical.vitals={pa:'',fc:'',spo2:'',temp:'',gcs:''};
+});
   });
   S.targets.forEach(tg=>{
     if(!tg.status) tg.status=(tg.teamIds&&tg.teamIds.length)||tg.teamId?'aperto':'in_attesa';
@@ -1349,7 +1421,10 @@ async function handleIncomingMessage(payload){
     if(!S.config.encryptKey){ console.warn('[SYNC] messaggio cifrato ma nessuna chiave'); return; }
     try{ text = await decryptText(text, S.config.encryptKey); }catch(e){ console.warn('[SYNC] decrypt failed', e.message); return; }
   }
-  try{ applyRemoteState(JSON.parse(text)); }catch(e){}
+  try{ applyRemoteState(JSON.parse(text)); 
+    if(!S.pma)S.pma={password:'',patients:[]};
+if(!Array.isArray(S.pma.patients))S.pma.patients=[];
+  }catch(e){}
 }
 
 async function publishState(){
@@ -2341,6 +2416,173 @@ function renderLegend(){
   h+='<div class="warn" style="margin-top:10px">Esempio: <b>K2R</b> = Casa · Cardiocircolatoria · Codice Rosso</div>';
   document.getElementById('legendBody').innerHTML=h;
 }
+
+/* =========================================================
+   PMA — Vista in SOL
+   ========================================================= */
+const PMA_COLORS={
+  R:{label:'Rosso',hex:'#e53935',fg:'#fff'},
+  G:{label:'Giallo',hex:'#f2c200',fg:'#2a2200'},
+  V:{label:'Verde',hex:'#2fa84f',fg:'#fff'},
+  B:{label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a'},
+  N:{label:'Nero',hex:'#1c1c1c',fg:'#fff'}
+};
+const PMA_COLOR_ORDER=['R','G','V','B','N'];
+const PMA_STATES={
+  waiting:{label:'In attesa',icon:'🕐'},
+  in_cura:{label:'In cura',icon:'🩺'},
+  dimesso:{label:'Dimesso',icon:'✅'}
+};
+
+function renderPMA(){
+  const el=document.getElementById('pmaContainer');
+  if(!el)return;
+  if(!S.pma)S.pma={password:'',patients:[]};
+  if(!Array.isArray(S.pma.patients))S.pma.patients=[];
+  const pats=S.pma.patients;
+  const waiting=pats.filter(p=>p.state==='waiting');
+  const inCura=pats.filter(p=>p.state==='in_cura');
+  const open=waiting.concat(inCura);
+  const today=new Date();today.setHours(0,0,0,0);
+  const dimToday=pats.filter(p=>p.state==='dimesso'&&p.closedAt&&p.closedAt>=today.getTime());
+
+  /* Aggiorna badge accordion */
+  const badge=document.getElementById('pmaBadge');
+  if(badge)badge.textContent=open.length;
+
+  const byColor={};
+  PMA_COLOR_ORDER.forEach(k=>{byColor[k]={total:0,waiting:0,in_cura:0};});
+  open.forEach(p=>{
+    if(byColor[p.code]){
+      byColor[p.code].total++;
+      if(p.state==='waiting')byColor[p.code].waiting++;
+      if(p.state==='in_cura')byColor[p.code].in_cura++;
+    }
+  });
+
+  let h='';
+  /* KPI */
+  h+='<div class="pma-kpi-row">';
+  h+='<div class="pma-kpi-card total"><div class="pma-kpi-v">'+open.length+'</div><div class="pma-kpi-l">Presenti</div><div class="pma-kpi-s">adesso</div></div>';
+  h+='<div class="pma-kpi-card waiting"><div class="pma-kpi-v">'+waiting.length+'</div><div class="pma-kpi-l">In attesa</div><div class="pma-kpi-s">'+(open.length?Math.round(waiting.length/open.length*100):0)+'%</div></div>';
+  h+='<div class="pma-kpi-card treating"><div class="pma-kpi-v">'+inCura.length+'</div><div class="pma-kpi-l">In cura</div><div class="pma-kpi-s">'+(open.length?Math.round(inCura.length/open.length*100):0)+'%</div></div>';
+  h+='<div class="pma-kpi-card discharged"><div class="pma-kpi-v">'+dimToday.length+'</div><div class="pma-kpi-l">Dimessi oggi</div><div class="pma-kpi-s">storico '+pats.length+'</div></div>';
+  h+='</div>';
+
+  /* Colors with % */
+  h+='<div class="pma-colors-mini">';
+  PMA_COLOR_ORDER.forEach(k=>{
+    const c=PMA_COLORS[k];
+    const d=byColor[k];
+    const pct=open.length?Math.round(d.total/open.length*100):0;
+    h+='<div class="pma-cc" style="--c:'+c.hex+'">';
+    h+='<div class="cc-chip"></div>';
+    h+='<div class="cc-num">'+d.total+'</div>';
+    h+='<div class="cc-lbl">'+c.label+'</div>';
+    h+='<div class="cc-pct">'+pct+'%</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  /* Patient list (open only + recent discharged) */
+  const list=open.slice().sort((a,b)=>{
+    const sa=a.state==='waiting'?0:1,sb=b.state==='waiting'?0:1;
+    if(sa!==sb)return sa-sb;
+    return (a.arrivedAt||0)-(b.arrivedAt||0);
+  }).concat(
+    pats.filter(p=>p.state==='dimesso').sort((a,b)=>(b.closedAt||0)-(a.closedAt||0)).slice(0,5)
+  );
+
+  if(!list.length){
+    h+='<div class="pma-empty-mini">Nessun paziente in PMA.<br>La pagina PMA è pronta per ricevere arrivi.</div>';
+  } else {
+    h+='<div class="pma-patient-list">';
+    list.forEach(p=>{
+      const c=PMA_COLORS[p.code]||PMA_COLORS.V;
+      const st=PMA_STATES[p.state]||PMA_STATES.waiting;
+      const cl=p.clinical||{};
+      const hasClinic=!!(cl.name||cl.surname||cl.complaint||cl.notes||cl.allergies||cl.vitals&&(cl.vitals.pa||cl.vitals.fc));
+      h+='<div class="pma-patient-row" data-pid="'+p.id+'">';
+      h+='<span class="pma-patient-code" style="background:'+c.hex+';color:'+c.fg+'">'+p.code+'</span>';
+      h+='<span class="pma-patient-state '+p.state+'">'+st.icon+' '+st.label+'</span>';
+      h+='<span class="pma-patient-id">'+(hasClinic?'🩺 ':'')+p.id.slice(-5).toUpperCase()+'</span>';
+      h+='<span class="pma-patient-time">'+elapsed(p.arrivedAt)+'</span>';
+      h+='<button class="pma-clinic-btn" data-clinic="'+p.id+'" title="Apri cartella clinica">📋</button>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  el.innerHTML=h;
+
+  /* Bind */
+  el.querySelectorAll('.pma-clinic-btn').forEach(b=>{
+    b.onclick=(e)=>{
+      e.stopPropagation();
+      openPMAClinic(b.getAttribute('data-clinic'));
+    };
+  });
+  el.querySelectorAll('.pma-patient-row').forEach(row=>{
+    row.onclick=()=>openPMAClinic(row.getAttribute('data-pid'));
+  });
+}
+
+function openPMAClinic(id){
+  if(!S.pma||!Array.isArray(S.pma.patients))return;
+  const p=S.pma.patients.find(x=>x.id===id);
+  if(!p)return;
+  if(!confirm('⚠️ DATI SENSIBILI\n\nStai per aprire la cartella clinica del paziente.\nQuesta informazione è protetta e visibile solo al personale autorizzato.\n\nProcedere?'))return;
+
+  const c=PMA_COLORS[p.code]||PMA_COLORS.V;
+  const st=PMA_STATES[p.state]||PMA_STATES.waiting;
+  const cl=p.clinical||{};
+  const v=cl.vitals||{};
+  const age=cl.birthYear?((new Date()).getFullYear()-cl.birthYear):null;
+
+  let h='';
+  h+='<div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.5;color:#c4b5fd">🔒 <b>Dati protetti</b> — visibile solo a SOL e PMA. Non registrare, non fotografare.</div>';
+  h+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">';
+  h+='<span style="font-size:18px;font-weight:900;padding:6px 14px;border-radius:10px;background:'+c.hex+';color:'+c.fg+'">'+p.code+'</span>';
+  h+='<span class="pma-patient-state '+p.state+'" style="font-size:11px;padding:4px 10px">'+st.icon+' '+st.label+'</span>';
+  h+='<span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:700">ID '+p.id.slice(-5).toUpperCase()+' · '+elapsed(p.arrivedAt)+'</span>';
+  h+='</div>';
+
+  h+='<div class="pma-clinic-grid">';
+  h+='<div class="pma-clinic-cell"><div class="lbl">Cognome</div><div class="val">'+esc(cl.surname||'—')+'</div></div>';
+  h+='<div class="pma-clinic-cell"><div class="lbl">Nome</div><div class="val">'+esc(cl.name||'—')+'</div></div>';
+  h+='<div class="pma-clinic-cell"><div class="lbl">Età</div><div class="val">'+(age?('~'+age+' anni'+(cl.birthYear?' ('+cl.birthYear+')':'')):'—')+'</div></div>';
+  h+='<div class="pma-clinic-cell"><div class="lbl">Sesso</div><div class="val">'+esc(cl.sex||'—')+'</div></div>';
+  h+='</div>';
+
+  if(cl.complaint||cl.allergies){
+    h+='<div class="pma-clinic-grid">';
+    if(cl.complaint)h+='<div class="pma-clinic-cell"><div class="lbl">Motivo di accesso</div><div class="val">'+esc(cl.complaint)+'</div></div>';
+    if(cl.allergies)h+='<div class="pma-clinic-cell" style="background:rgba(239,83,80,.08)"><div class="lbl" style="color:#ef9a9a">Allergie</div><div class="val" style="color:#ef9a9a">'+esc(cl.allergies)+'</div></div>';
+    h+='</div>';
+  }
+
+  const hasV=v.pa||v.fc||v.spo2||v.temp||v.gcs;
+  if(hasV){
+    h+='<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:800;margin-bottom:6px">Parametri vitali</div>';
+    h+='<div class="pma-vitals">';
+    [['pa','PA'],['fc','FC'],['spo2','SpO₂'],['temp','T°'],['gcs','GCS']].forEach(([k,lbl])=>{
+      h+='<div class="pma-vital"><div class="lbl">'+lbl+'</div><div class="val">'+esc(v[k]||'—')+'</div></div>';
+    });
+    h+='</div>';
+  }
+
+  if(cl.notes){
+    h+='<div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:800;margin:12px 0 6px">Note cliniche</div>';
+    h+='<div style="background:#1e1e1e;border-radius:10px;padding:12px;font-size:13px;line-height:1.5;white-space:pre-wrap">'+esc(cl.notes)+'</div>';
+  }
+
+  if(cl.updatedAt){
+    h+='<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px">Ultimo aggiornamento: '+fmtDateTime(cl.updatedAt)+(cl.by?' · da '+esc(cl.by):'')+'</div>';
+  }
+
+  openModal('📋 Cartella clinica — '+p.code+' · ID '+p.id.slice(-5).toUpperCase(),h);
+}
+
 
 /* =========================================================
    TAB BADGES
@@ -3414,6 +3656,12 @@ document.getElementById('addTeamBtn').onclick=()=>editTeam(null);
 document.getElementById('exportBtn').onclick=exportCSV;
 document.getElementById('handoverBtn').onclick=openHandoverModal;
 document.getElementById('configBtn').onclick=openConfigModal;
+
+/* 🏥 Apri pagina PMA in nuova scheda */
+document.getElementById('pmaTopBtn').onclick=()=>{
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
+  window.open(url,'_blank');
+};
 document.getElementById('printReportBtn').onclick=printReport;
 document.getElementById('refreshDashBtn').onclick=renderDashboard;
 document.getElementById('zoneStartBtn').onclick=startZoneDrawing;
@@ -3468,6 +3716,16 @@ document.getElementById('broadcastSendBtn').onclick=()=>{
   renderBroadcastView();
 };
 document.getElementById('broadcastInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('broadcastSendBtn').click(); } });
+
+document.getElementById('pmaOpenBtn').onclick=()=>{
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
+  window.open(url,'_blank');
+};
+document.getElementById('pmaRefreshBtn').onclick=()=>{
+  const v=localStorage.getItem(KEY);
+  if(v){ try{applyRemoteState(JSON.parse(v));}catch(e){} }
+  renderPMA();
+};
 
 /* =========================================================
    SHORTCUT TASTIERA
@@ -3590,6 +3848,7 @@ function render(){
   renderAdminList();
   renderPoiList();
   renderZonesList();
+  renderPMA();
   renderTeamSelect();
   updateDraftUI();
   renderSquadreView();
