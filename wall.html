@@ -238,6 +238,32 @@ button{font-family:inherit;cursor:pointer}
   width:38px;height:38px;border-radius:9px;font-size:16px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .team-qr-btn:hover{background:rgba(77,163,255,.15);border-color:#4da3ff;color:#fff} 
+
+/* ===== PMA PANEL (wall) ===== */
+.pma-wall-panel{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 18px}
+.pma-wall-head{display:flex;align-items:center;gap:8px;font-size:11px;text-transform:uppercase;
+  letter-spacing:1.4px;color:var(--muted);font-weight:800;margin-bottom:12px}
+.pma-wall-head .icon{font-size:16px;letter-spacing:0}
+.pma-wall-head .cnt{margin-left:auto;background:#2a2a30;color:#fff;font-size:11px;font-weight:800;padding:2px 10px;border-radius:20px}
+.pma-wall-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pma-wall-kpi-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:12px 10px;text-align:center}
+.pma-wall-kpi-v{font-size:32px;font-weight:200;line-height:1;font-variant-numeric:tabular-nums;color:#fff;letter-spacing:-1px}
+.pma-wall-kpi-l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-top:6px}
+.pma-wall-kpi-s{font-size:11px;color:var(--txt2);font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;opacity:.8}
+.pma-wall-kpi-card.waiting .pma-wall-kpi-v{color:#f59e0b}
+.pma-wall-kpi-card.treating .pma-wall-kpi-v{color:#3b82f6}
+.pma-wall-colors{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pma-wall-cc{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+  padding:8px 4px;text-align:center;position:relative;overflow:hidden}
+.pma-wall-cc .cc-chip{height:3px;border-radius:3px;background:var(--c);margin-bottom:7px}
+.pma-wall-cc .cc-num{font-size:20px;font-weight:800;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
+.pma-wall-cc .cc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:3px;letter-spacing:.5px}
+.pma-wall-cc .cc-pct{font-size:10.5px;color:var(--txt2);font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.pma-wall-cc.empty{opacity:.35}
+.pma-wall-empty{padding:20px;text-align:center;color:var(--muted);font-size:12px;
+  border:1px dashed var(--line);border-radius:8px;line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -279,6 +305,14 @@ button{font-family:inherit;cursor:pointer}
       <div class="kpi ok"><div class="kpi-val" id="kFree">0</div><div class="kpi-lbl">Disponibili</div></div>
       <div class="kpi warn"><div class="kpi-val" id="kNoop">0</div><div class="kpi-lbl">Non op.</div></div>
     </div>
+    <div class="pma-wall-panel" id="pmaWallPanel">
+  <div class="pma-wall-head">
+    <span class="icon">🏥</span>
+    <span>PMA</span>
+    <span class="cnt" id="pmaWallCnt">0</span>
+  </div>
+  <div id="pmaWallContent"><div class="pma-wall-empty">Nessun dato PMA</div></div>
+</div>
     <div class="panel-head">🚑 Squadre <span class="cnt" id="teamsCnt">0</span></div>
     <div class="teams-scroll" id="teamsScroll"></div>
   </aside>
@@ -816,10 +850,71 @@ function renderTicker(){
 }
 
 /* =========================================================
+   PMA — Vista aggregata (privacy: solo numeri, nessun dato personale)
+   ========================================================= */
+const PMA_COLORS={
+  R:{label:'Rosso',hex:'#e53935'},
+  G:{label:'Giallo',hex:'#f2c200'},
+  V:{label:'Verde',hex:'#2fa84f'},
+  B:{label:'Bianco',hex:'#f2f2f2'},
+  N:{label:'Nero',hex:'#1c1c1c'}
+};
+const PMA_COLOR_ORDER=['R','G','V','B','N'];
+
+function renderPMAWall(){
+  const el=document.getElementById('pmaWallContent');
+  const cnt=document.getElementById('pmaWallCnt');
+  if(!el)return;
+  if(!S.pma||!Array.isArray(S.pma.patients)){
+    if(cnt)cnt.textContent='0';
+    el.innerHTML='<div class="pma-wall-empty">Nessun dato PMA</div>';
+    return;
+  }
+  const pats=S.pma.patients;
+  const waiting=pats.filter(p=>p.state==='waiting');
+  const inCura=pats.filter(p=>p.state==='in_cura');
+  const open=waiting.concat(inCura);
+  if(cnt)cnt.textContent=open.length;
+
+  const byColor={};
+  PMA_COLOR_ORDER.forEach(k=>{byColor[k]=0;});
+  open.forEach(p=>{if(byColor[p.code]!=null)byColor[p.code]++;});
+  const total=open.length;
+
+  let h='';
+  h+='<div class="pma-wall-kpi">';
+  h+='<div class="pma-wall-kpi-card waiting"><div class="pma-wall-kpi-v">'+waiting.length+'</div><div class="pma-wall-kpi-l">In attesa</div><div class="pma-wall-kpi-s">'+(total?Math.round(waiting.length/total*100):0)+'% del totale</div></div>';
+  h+='<div class="pma-wall-kpi-card treating"><div class="pma-wall-kpi-v">'+inCura.length+'</div><div class="pma-wall-kpi-l">In cura</div><div class="pma-wall-kpi-s">'+(total?Math.round(inCura.length/total*100):0)+'% del totale</div></div>';
+  h+='</div>';
+
+  h+='<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:7px">Distribuzione codici</div>';
+  h+='<div class="pma-wall-colors">';
+  PMA_COLOR_ORDER.forEach(k=>{
+    const c=PMA_COLORS[k];
+    const n=byColor[k];
+    const pct=total?Math.round(n/total*100):0;
+    h+='<div class="pma-wall-cc'+(n===0?' empty':'')+'" style="--c:'+c.hex+'">';
+    h+='<div class="cc-chip"></div>';
+    h+='<div class="cc-num">'+n+'</div>';
+    h+='<div class="cc-lbl">'+c.label+'</div>';
+    h+='<div class="cc-pct">'+pct+'%</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+
+  if(total===0){
+    h+='<div class="pma-wall-empty" style="margin-top:12px">PMA vuota — nessun paziente presente</div>';
+  }
+
+  el.innerHTML=h;
+}
+
+/* =========================================================
    RENDER MASTER
    ========================================================= */
 function renderAll(){
   renderKPI();
+  renderPMAWall();  
   renderTeamsPanel();
   renderMissionsPanel();
   renderTicker();
