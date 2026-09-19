@@ -107,7 +107,7 @@ padding:2px 8px;border-radius:20px;margin-left:auto}
 .field{margin-bottom:11px}
 .field label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;
 color:var(--muted);margin-bottom:6px;font-weight:700}
-input[type=text],input[type=tel],input[type=password],input[type=datetime-local],select,textarea{
+input[type=text],input[type=tel],input[type=password],input[type=datetime-local],input[type=number],select,textarea{
 width:100%;background:#1e1e1e;border:1px solid #383838;color:var(--txt);
 padding:9px 11px;border-radius:var(--radius-xs);outline:none;font-size:13px}
 input:focus,select:focus,textarea:focus{border-color:var(--accent)}
@@ -296,24 +296,73 @@ font-size:11px;font-weight:900;border:2px solid #1a1a1a}
 100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,255,255,0)}}
 @keyframes pending-pulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 0 rgba(255,157,0,.7)}
 50%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 0 12px rgba(255,157,0,0)}}
-.team-pin{width:40px;height:40px;border-radius:50%;background:#1e1e1e;position:relative;
-border:3px solid var(--c);display:flex;align-items:center;justify-content:center;font-size:17px;
-box-shadow:0 4px 14px rgba(0,0,0,.65)}
-.team-pin.sos{animation:sosPulse 1s infinite}
-@keyframes sosPulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.65),0 0 0 0 rgba(239,83,80,.8)}
-50%{box-shadow:0 4px 14px rgba(0,0,0,.65),0 0 0 20px rgba(239,83,80,0)}}
-.tp-badge{position:absolute;top:-9px;right:-13px;font-size:9.5px;font-weight:800;
-padding:2px 5px;border-radius:20px;color:#fff;border:1.5px solid #1a1a1a}
-.tp-crew{position:absolute;bottom:-7px;left:-7px;width:18px;height:18px;border-radius:50%;
-display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;border:2px solid #1a1a1a}
-.poi-pin{width:30px;height:30px;border-radius:9px 9px 9px 3px;transform:rotate(-45deg);
-display:flex;align-items:center;justify-content:center;background:var(--c);
-border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 10px rgba(0,0,0,.6)}
-.poi-pin span{transform:rotate(45deg);font-size:13px}
-.draft-pin{width:22px;height:22px;border-radius:50%;border:3px dashed var(--accent);background:rgba(255,167,38,.2)}
-.zone-vertex{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #e68a00;cursor:move;box-shadow:0 2px 6px rgba(0,0,0,.5)}
-.zone-vertex.first{background:#2fa84f;border-color:#fff;animation:vertexPulse 1.4s infinite}
-@keyframes vertexPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,168,79,.7)}50%{box-shadow:0 0 0 8px rgba(47,168,79,0)}}
+
+/* ===== PMA marker ===== */
+.mk-pma{width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(135deg,#e53935,#b71c1c);color:#fff;
+  border:3px solid #fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 0 rgba(229,57,53,.6);
+  animation:pmaPulse 2.4s infinite}
+@keyframes pmaPulse{0%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 0 rgba(229,57,53,.55)}
+  70%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 16px rgba(229,57,53,0)}
+  100%{box-shadow:0 6px 20px rgba(0,0,0,.7),0 0 0 0 rgba(229,57,53,0)}}
+.mk-pma .ico{font-size:22px;line-height:1}
+.mk-pma .lbl{font-size:8.5px;font-weight:900;letter-spacing:.8px;line-height:1;margin-top:-2px}
+
+/* ===== PMA hint bar ===== */
+.pma-hint-bar{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:1000;
+  background:linear-gradient(180deg,#c62828,#8e0000);color:#fff;
+  padding:11px 18px;border-radius:12px;font-weight:800;font-size:13px;
+  display:flex;align-items:center;gap:12px;box-shadow:0 8px 28px rgba(198,40,40,.65);
+  animation:zbPulse 1.8s infinite}
+.pma-hint-bar button{background:rgba(0,0,0,.25);border:none;color:#fff;padding:7px 13px;
+  border-radius:8px;font-weight:800;cursor:pointer;font-size:12px}
+
+/* ===== PMA panel ===== */
+.pma-panel{background:#252525;border:1px solid #333;border-radius:12px;
+  padding:14px;margin-bottom:10px}
+.pma-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pma-kpi-card{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:10px;
+  padding:10px 8px;text-align:center}
+.pma-kpi-v{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.pma-kpi-l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-top:5px}
+.pma-kpi-s{font-size:10px;color:var(--txt2);font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;opacity:.75}
+.pma-kpi-card.total .pma-kpi-v{color:var(--accent)}
+.pma-kpi-card.waiting .pma-kpi-v{color:#f59e0b}
+.pma-kpi-card.treating .pma-kpi-v{color:#3b82f6}
+.pma-kpi-card.discharged .pma-kpi-v{color:#10b981}
+.pma-colors-mini{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.pma-cc{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:8px;
+  padding:8px 4px;text-align:center;position:relative;overflow:hidden}
+.pma-cc .cc-chip{width:100%;height:3px;border-radius:3px;background:var(--c);margin-bottom:6px}
+.pma-cc .cc-num{font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.pma-cc .cc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:2px}
+.pma-cc .cc-pct{font-size:10px;color:var(--txt2);font-weight:700;font-variant-numeric:tabular-nums}
+.pma-patient-list{max-height:280px;overflow-y:auto;border-radius:8px;background:#1e1e1e;border:1px solid #2a2a30}
+.pma-patient-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border-bottom:1px solid #2a2a30;cursor:pointer;font-size:12px}
+.pma-patient-row:last-child{border-bottom:none}
+.pma-patient-row:hover{background:#252525}
+.pma-patient-code{font-size:13px;font-weight:900;padding:3px 9px;border-radius:7px;flex-shrink:0}
+.pma-patient-state{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.pma-patient-state.waiting{background:rgba(245,158,11,.15);color:#fcd34d}
+.pma-patient-state.in_cura{background:rgba(59,130,246,.18);color:#93c5fd}
+.pma-patient-state.dimesso{background:rgba(16,185,129,.15);color:#6ee7b7}
+.pma-patient-id{flex:1;min-width:0;font-family:monospace;font-size:12px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pma-patient-time{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700}
+.pma-clinic-btn{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);
+  color:#c4b5fd;font-weight:800;font-size:10.5px;padding:5px 9px;border-radius:7px;cursor:pointer;flex-shrink:0}
+.pma-clinic-btn:hover{background:rgba(139,92,246,.28)}
+.pma-clinic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.pma-clinic-cell{background:#1e1e1e;border-radius:8px;padding:10px 12px}
+.pma-clinic-cell .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;margin-bottom:3px}
+.pma-clinic-cell .val{font-size:14px;font-weight:800}
+.pma-vitals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+.pma-vital{background:#1e1e1e;border-radius:8px;padding:8px 6px;text-align:center}
+.pma-vital .lbl{font-size:9.5px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:3px}
+.pma-vital .val{font-size:14px;font-weight:800;color:#fff}
+.pma-empty-mini{padding:24px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
+
 .leaflet-popup-content-wrapper{background:#2a2a2a;color:var(--txt);border-radius:12px;
 box-shadow:var(--shadow-lg);border:1px solid #444}
 .leaflet-popup-tip{background:#2a2a2a;border:1px solid #444}
@@ -576,51 +625,6 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
 .op-log-item .op-time{color:var(--muted);flex-shrink:0;width:80px;font-variant-numeric:tabular-nums}
 .op-log-item .op-name{font-weight:800;flex-shrink:0;min-width:70px}
 
-/* ===== PMA PANEL ===== */
-.pma-panel{background:#252525;border:1px solid #333;border-radius:12px;
-  padding:14px;margin-bottom:10px}
-.pma-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.pma-kpi-card{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:10px;
-  padding:10px 8px;text-align:center}
-.pma-kpi-v{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.pma-kpi-l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:800;margin-top:5px}
-.pma-kpi-s{font-size:10px;color:var(--txt2);font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums;opacity:.75}
-.pma-kpi-card.total .pma-kpi-v{color:var(--accent)}
-.pma-kpi-card.waiting .pma-kpi-v{color:#f59e0b}
-.pma-kpi-card.treating .pma-kpi-v{color:#3b82f6}
-.pma-kpi-card.discharged .pma-kpi-v{color:#10b981}
-.pma-colors-mini{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
-.pma-cc{background:#2d2d2d;border:1px solid #3a3a3a;border-radius:8px;
-  padding:8px 4px;text-align:center;position:relative;overflow:hidden}
-.pma-cc .cc-chip{width:100%;height:3px;border-radius:3px;background:var(--c);margin-bottom:6px}
-.pma-cc .cc-num{font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
-.pma-cc .cc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;margin-top:2px}
-.pma-cc .cc-pct{font-size:10px;color:var(--txt2);font-weight:700;font-variant-numeric:tabular-nums}
-.pma-patient-list{max-height:280px;overflow-y:auto;border-radius:8px;background:#1e1e1e;border:1px solid #2a2a30}
-.pma-patient-row{display:flex;align-items:center;gap:9px;padding:9px 11px;border-bottom:1px solid #2a2a30;cursor:pointer;font-size:12px}
-.pma-patient-row:last-child{border-bottom:none}
-.pma-patient-row:hover{background:#252525}
-.pma-patient-code{font-size:13px;font-weight:900;padding:3px 9px;border-radius:7px;flex-shrink:0}
-.pma-patient-state{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
-.pma-patient-state.waiting{background:rgba(245,158,11,.15);color:#fcd34d}
-.pma-patient-state.in_cura{background:rgba(59,130,246,.18);color:#93c5fd}
-.pma-patient-state.dimesso{background:rgba(16,185,129,.15);color:#6ee7b7}
-.pma-patient-id{flex:1;min-width:0;font-family:monospace;font-size:12px;font-weight:700;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pma-patient-time{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700}
-.pma-clinic-btn{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4);
-  color:#c4b5fd;font-weight:800;font-size:10.5px;padding:5px 9px;border-radius:7px;cursor:pointer;flex-shrink:0}
-.pma-clinic-btn:hover{background:rgba(139,92,246,.28)}
-.pma-clinic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.pma-clinic-cell{background:#1e1e1e;border-radius:8px;padding:10px 12px}
-.pma-clinic-cell .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:800;margin-bottom:3px}
-.pma-clinic-cell .val{font-size:14px;font-weight:800}
-.pma-vitals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
-.pma-vital{background:#1e1e1e;border-radius:8px;padding:8px 6px;text-align:center}
-.pma-vital .lbl{font-size:9.5px;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:3px}
-.pma-vital .val{font-size:14px;font-weight:800;color:#fff}
-.pma-empty-mini{padding:24px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
-
 @media print{
   body{background:#fff;color:#000}
   .topbar,.sidebar,.map-wrap,.modal,.toast,.sos-banner{display:none !important}
@@ -652,9 +656,8 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
   </div>
   <button class="btn-export" id="exportBtn">📥 CSV</button>
   <button class="btn-export" id="handoverBtn">📤 Handover</button>
-  <button class="btn-export" id="configBtn">⚙️</button>
-  
   <button class="btn-export" id="pmaTopBtn" title="Apri pagina PMA">🏥 PMA</button>
+  <button class="btn-export" id="configBtn">⚙️</button>
   <button class="btn-export" id="opBtn" title="Operatore corrente">👤 <span id="opNameLbl">—</span></button>
   <span class="clock" id="clock"></span>
   <button class="btn ghost mini" id="resetBtn">↺</button>
@@ -808,7 +811,6 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
           </div>
         </div>
       </div>
-
     </aside>
 
     <div class="map-wrap">
@@ -831,6 +833,11 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
         <button class="zb-undo" id="zoneBannerUndo" disabled>↶ Indietro</button>
         <button class="zb-save" id="zoneBannerSave" disabled>💾 Salva</button>
         <button class="zb-cancel" id="zoneBannerCancel">✕ Annulla (ESC)</button>
+      </div>
+
+      <div id="pmaHintBar" class="pma-hint-bar hidden">
+        🏥 <span>Posizionamento PMA — clicca sulla mappa</span>
+        <button id="pmaHintCancel">✕ Annulla</button>
       </div>
 
       <div class="map-overlays" id="mapOverlays"></div>
@@ -937,7 +944,6 @@ border:1px solid rgba(255,167,38,.25);padding:9px 11px;border-radius:8px;margin-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -950,6 +956,7 @@ const BACKUP_PREFIX='sge_backup_';
 const IDB_NAME='sge_db';
 const IDB_STORE='backups';
 const NOTIF_TEMPLATES=['Paziente incosciente','Ustione grave','Trauma da caduta','Sospetto infarto','Difficoltà respiratoria','Emorragia attiva','Ferita da taglio','Intossicazione','Crisi epilettica','Accesso difficoltoso'];
+
 /* =========================================================
    MULTI-OPERATORE — Identità + Presenza
    ========================================================= */
@@ -979,7 +986,6 @@ function heartbeatOp(){
     id:opIdentity.id,name:opIdentity.name,color:opIdentity.color,
     joinedAt:opIdentity.joinedAt||Date.now(),lastSeen:Date.now()
   };
-  /* cleanup stale > 45s */
   const cutoff=Date.now()-45000;
   Object.keys(S._operators).forEach(k=>{
     if(!S._operators[k]||S._operators[k].lastSeen<cutoff) delete S._operators[k];
@@ -1000,6 +1006,7 @@ function renderOpsOnline(){
   }).join('');
   el.title=ops.map(o=>o.name).join(', ')+' online';
 }
+
 const COLORS={
   R:{key:'R',label:'Rosso',hex:'#e53935',fg:'#ffffff',sev:5},
   G:{key:'G',label:'Giallo',hex:'#f2c200',fg:'#2a2200',sev:4},
@@ -1030,24 +1037,22 @@ const CREW_TYPES={
   india:{key:'india',label:'India',short:'I',color:'#06b6d4'},
   mike:{key:'mike',label:'Mike',short:'M',color:'#f59e0b'}
 };
-const POI_CATS = {
-  soccorso:{label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
-  ospedale:{label:'Ospedali',         icon:'🏥',color:'#e53935'},
-  chiusura:{label:'Strade chiuse',     icon:'⛔',color:'#ff7043'},
-  centrale:{label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
-  info:    {label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'},
-  /* Forze dell'ordine e personale */
-  polizia:{label:'Polizia / Carabinieri',icon:'🚓',color:'#3b82f6'},
-  vigili_fuoco:{label:'Vigili del fuoco',icon:'🚒',color:'#dc2626'},
-  steward:{label:'Steward / Sicurezza',icon:'🦺',color:'#eab308'},
-  personale:{label:'Personale / Volontari',icon:'👥',color:'#10b981'},
-  /* Strutture fisiche */
-  palco:{label:'Palco / Area evento',icon:'🎭',color:'#a855f7'},
-  bar:{label:'Bar / Chiosco',icon:'🍺',color:'#f97316'},
-  bagni:{label:'Bagni / Servizi',icon:'🚻',color:'#06b6d4'},
-  ingresso:{label:'Ingresso / Uscita',icon:'🚪',color:'#84cc16'},
-  parcheggio:{label:'Parcheggio',icon:'🅿️',color:'#64748b'},
-  area:{label:'Area generica',icon:'📦',color:'#6b7280'}
+const POI_CATS={
+  soccorso:{key:'soccorso',label:'Punti di soccorso',icon:'⛑️',color:'#00c2a8'},
+  ospedale:{key:'ospedale',label:'Ospedali',icon:'🏥',color:'#e53935'},
+  chiusura:{key:'chiusura',label:'Strade chiuse',icon:'⛔',color:'#ff7043'},
+  centrale:{key:'centrale',label:'Centrale operativa',icon:'🏢',color:'#7c8cff'},
+  info:{key:'info',label:'Altre informazioni',icon:'ℹ️',color:'#9aa7b8'},
+  polizia:{key:'polizia',label:'Polizia / Carabinieri',icon:'🚓',color:'#3b82f6'},
+  vigili_fuoco:{key:'vigili_fuoco',label:'Vigili del fuoco',icon:'🚒',color:'#dc2626'},
+  steward:{key:'steward',label:'Steward / Sicurezza',icon:'🦺',color:'#eab308'},
+  personale:{key:'personale',label:'Personale / Volontari',icon:'👥',color:'#10b981'},
+  palco:{key:'palco',label:'Palco / Area evento',icon:'🎭',color:'#a855f7'},
+  bar:{key:'bar',label:'Bar / Chiosco',icon:'🍺',color:'#f97316'},
+  bagni:{key:'bagni',label:'Bagni / Servizi',icon:'🚻',color:'#06b6d4'},
+  ingresso:{key:'ingresso',label:'Ingresso / Uscita',icon:'🚪',color:'#84cc16'},
+  parcheggio:{key:'parcheggio',label:'Parcheggio',icon:'🅿️',color:'#64748b'},
+  area:{key:'area',label:'Area generica',icon:'📦',color:'#6b7280'}
 };
 const MISSION_STATES=[
   {key:'Partenza',icon:'🚔',color:'#3d9bff',short:'Partenza'},
@@ -1096,6 +1101,21 @@ const DEFAULT_BROKERS=[
   {url:'wss://broker.emqx.io:8084/mqtt',user:'',pass:'',label:'EMQX (pubblico)'}
 ];
 
+/* ===== PMA constants (una sola dichiarazione) ===== */
+const PMA_COLORS={
+  R:{label:'Rosso',hex:'#e53935',fg:'#fff'},
+  G:{label:'Giallo',hex:'#f2c200',fg:'#2a2200'},
+  V:{label:'Verde',hex:'#2fa84f',fg:'#fff'},
+  B:{label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a'},
+  N:{label:'Nero',hex:'#1c1c1c',fg:'#fff'}
+};
+const PMA_COLOR_ORDER=['R','G','V','B','N'];
+const PMA_STATES={
+  waiting:{label:'In attesa',icon:'🕐'},
+  in_cura:{label:'In cura',icon:'🩺'},
+  dimesso:{label:'Dimesso',icon:'✅'}
+};
+
 /* =========================================================
    UTILS
    ========================================================= */
@@ -1103,6 +1123,7 @@ function uid(p){ return (p||'id')+'-'+Math.random().toString(36).slice(2,8)+Date
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function stateShort(s){ const m=MISSION_STATE_MAP[s]; return m?m.short:s; }
 function stateIcon(s){ const m=MISSION_STATE_MAP[s]; return m?m.icon:''; }
+function stateLabel(s){ return s==='waiting'?'In attesa':(s==='in_cura'?'In cura':(s==='dimesso'?'Dimesso':s)); }
 function parseCode(raw){const src=String(raw==null?'':raw).toUpperCase();let env=null,pat=null,color=null;for(let i=0;i<src.length;i++){const ch=src[i];if(!env&&ENV[ch]){env=ch;continue}if(!pat&&PAT[ch]){pat=ch;continue}if(!color&&COLORS[ch]){color=ch;continue}}return {env,pat,color,label:(env||'')+(pat||'')+(color||''),valid:!!color};}
 function describeCode(code){const p=parseCode(code);const out=[];if(p.env)out.push(ENV[p.env].split('—')[0].trim());if(p.pat)out.push(PAT[p.pat]);if(p.color)out.push('Cod. '+COLORS[p.color].label);return out.join(' · ');}
 function fmtTime(ts){if(!ts)return'—';return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}
@@ -1143,7 +1164,6 @@ function chatUnreadFor(teamId){
 function totalChatUnread(){ let n=0; S.teams.forEach(t=>{n+=chatUnreadFor(t.id);}); return n; }
 function totalNotifUnread(){ return (S.notifications||[]).filter(n=>!n.read).length; }
 function ackStatus(t){ if(!t.mission) return null; const tg=S.targets.find(x=>x.id===t.mission.targetId); if(!tg||!tg.ack) return {state:'sent',label:'📤 Inviata',color:'#ffcc80'}; return {state:'ack',label:'✅ '+fmtTime(tg.ack.ts),color:'#81c784'}; }
-/* Verifica se target ha dati paziente utili */
 function hasPatientData(tg){
   if(!tg || !tg.patient) return false;
   const p=tg.patient;
@@ -1158,7 +1178,6 @@ function patientSummaryText(tg){
   if(Array.isArray(p.chief) && p.chief.length) bits.push('Motivo: '+p.chief.join(', '));
   return bits.join(' · ');
 }
-/* Trova ospedale più vicino */
 function nearestHospital(lat,lng){
   const hospitals=(S.pois||[]).filter(p=>p.cat==='ospedale');
   if(!hospitals.length) return null;
@@ -1291,6 +1310,7 @@ function defaultState(){
     broadcast:[],notifications:[],chatRead:{},
     sos:null,log:[{ts:now,text:'Sistema inizializzato'}],
     handover:null,
+    pma:{password:'',name:'PMA',lat:null,lng:null,patients:[]},
     config:{
       brokers:DEFAULT_BROKERS.slice(),
       activeBrokerIdx:0,
@@ -1321,17 +1341,6 @@ try{
     if(!Array.isArray(t.track)) t.track=[];
     if(t.activeFrom===undefined) t.activeFrom=null;
     if(t.activeTo===undefined) t.activeTo=null;
-    /* PMA */
-    if(!S.pma)S.pma={password:'',patients:[]};
-    if(typeof S.pma.password!=='string')S.pma.password='';
-    if(!Array.isArray(S.pma.patients))S.pma.patients=[];
-    S.pma.patients.forEach(p=>{
-      if(!PMA_COLORS[p.code])p.code='V';
-      if(!PMA_STATES[p.state])p.state='waiting';
-      if(!p.arrivedAt)p.arrivedAt=Date.now();
-      if(!p.clinical)p.clinical={};
-      if(!p.clinical.vitals)p.clinical.vitals={pa:'',fc:'',spo2:'',temp:'',gcs:''};
-});
   });
   S.targets.forEach(tg=>{
     if(!tg.status) tg.status=(tg.teamIds&&tg.teamIds.length)||tg.teamId?'aperto':'in_attesa';
@@ -1346,6 +1355,13 @@ try{
       delete tg.chat;
     }
   });
+  /* ===== PMA ===== */
+  if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+  if(typeof S.pma.password!=='string') S.pma.password='';
+  if(typeof S.pma.name!=='string') S.pma.name='PMA';
+  if(S.pma.lat===undefined) S.pma.lat=null;
+  if(S.pma.lng===undefined) S.pma.lng=null;
+  if(!Array.isArray(S.pma.patients)) S.pma.patients=[];
 }catch(e){ S=defaultState(); }
 
 /* =========================================================
@@ -1421,10 +1437,7 @@ async function handleIncomingMessage(payload){
     if(!S.config.encryptKey){ console.warn('[SYNC] messaggio cifrato ma nessuna chiave'); return; }
     try{ text = await decryptText(text, S.config.encryptKey); }catch(e){ console.warn('[SYNC] decrypt failed', e.message); return; }
   }
-  try{ applyRemoteState(JSON.parse(text)); 
-    if(!S.pma)S.pma={password:'',patients:[]};
-if(!Array.isArray(S.pma.patients))S.pma.patients=[];
-  }catch(e){}
+  try{ applyRemoteState(JSON.parse(text)); }catch(e){}
 }
 
 async function publishState(){
@@ -1452,7 +1465,6 @@ async function publishState(){
 }
 function save(){ publishState(); }
 
-
 function applyRemoteState(incoming){
   if(!incoming || !incoming._rev) return;
   if(incoming._rev<=_lastRev) return;
@@ -1478,6 +1490,10 @@ function applyRemoteState(incoming){
       if(!Array.isArray(t.photos)) t.photos=[];
       if(!Array.isArray(t.track)) t.track=[];
     });
+    /* PMA */
+    if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+    if(typeof S.pma.name!=='string') S.pma.name='PMA';
+    if(!Array.isArray(S.pma.patients)) S.pma.patients=[];
     S.targets.forEach(tg=>{
       if(!Array.isArray(tg.teamIds)){ tg.teamIds=tg.teamId?[tg.teamId]:[]; delete tg.teamId; }
       if(!Array.isArray(tg.photos)) tg.photos=[];
@@ -1493,7 +1509,7 @@ function applyRemoteState(incoming){
       showSosBanner(S.sos);
     }
     render();
-        renderOpsOnline();
+    renderOpsOnline();
   } finally { _skipPublish=false; }
   updateSolEqBadge();
 }
@@ -1507,7 +1523,6 @@ function generateNotificationsFromDiff(prev, next){
       return;
     }
     if(old.status!==ntg.status && ntg.status==='chiuso') events.push({type:'close',teamId:null,targetId:ntg.id,text:'Target '+ntg.code+' chiuso',sub:ntg.address||''});
-    /* Cambio dati paziente */
     if(ntg.patient && ntg.patient.ts && (!old.patient || old.patient.ts !== ntg.patient.ts)){
       const who = ntg.patient.by ? ntg.patient.by+': ' : '';
       const summary = [];
@@ -1613,7 +1628,6 @@ function initAudio(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||win
 function enableAudio(){ initAudio(); if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); audioEnabled=true; }
 document.addEventListener('click',()=>{ if(!audioEnabled) enableAudio(); },{once:true});
 
-/* Helper: nota tonale */
 function solTone(freq, start, duration, type, gainPeak){
   if(!audioCtx) return;
   try{
@@ -1628,7 +1642,6 @@ function solTone(freq, start, duration, type, gainPeak){
     osc.start(t0); osc.stop(t0+duration+0.05);
   }catch(e){}
 }
-/* Helper: buzz quadra (per SOS) */
 function solBuzz(freq, start, duration, gainPeak){
   if(!audioCtx) return;
   try{
@@ -1644,19 +1657,15 @@ function solBuzz(freq, start, duration, gainPeak){
     osc.start(t0); osc.stop(t0+duration+0.02);
   }catch(e){}
 }
-/* === SUONO #2 del demo: SOS ===
-   buzz 1000 Hz e 500 Hz alternati, 5 cicli da 0.22s ciascuno
-   Molto insistente, tipo sirena d'allarme. */
 function playSOSAlert(){
   if(!audioCtx) return;
   try{
     for(let i=0;i<5;i++){
-      solBuzz(1000, i*0.22,        0.12, 0.4);   // bip alto
-      solBuzz(500,  i*0.22 + 0.11, 0.12, 0.4);   // bip basso
+      solBuzz(1000, i*0.22, 0.12, 0.4);
+      solBuzz(500,  i*0.22 + 0.11, 0.12, 0.4);
     }
-    /* Aggiungo un secondo passaggio per renderlo più "urgente" (ripetuto) */
     for(let i=0;i<3;i++){
-      solBuzz(1200, 1.15 + i*0.22,        0.12, 0.42);
+      solBuzz(1200, 1.15 + i*0.22, 0.12, 0.42);
       solBuzz(600,  1.15 + i*0.22 + 0.11, 0.12, 0.42);
     }
   }catch(e){}
@@ -1666,32 +1675,16 @@ function playSound(type){
   if(!audioEnabled) return;
   initAudio(); if(!audioCtx) return;
   try{
-    const now=audioCtx.currentTime;
     if(type==='mission'){
       solTone(880, 0, 0.15, 'sine', 0.25);
       solTone(660, 0.14, 0.15, 'sine', 0.25);
       solTone(880, 0.28, 0.18, 'sine', 0.25);
     }
-    else if(type==='sos'){
-      /* SOS → SUONO #2 del demo */
-      playSOSAlert();
-    }
-    else if(type==='ack'){
-      solTone(600, 0, 0.09, 'sine', 0.15);
-      solTone(900, 0.09, 0.12, 'sine', 0.15);
-    }
-    else if(type==='state'){
-      solTone(500, 0, 0.15, 'sine', 0.12);
-      solTone(700, 0.15, 0.12, 'sine', 0.12);
-    }
-    else if(type==='close'){
-      solTone(700, 0, 0.09, 'sine', 0.15);
-      solTone(500, 0.08, 0.13, 'sine', 0.15);
-    }
-    else if(type==='msg'){
-      solTone(750, 0, 0.08, 'sine', 0.1);
-      solTone(1000, 0.07, 0.1, 'sine', 0.1);
-    }
+    else if(type==='sos'){ playSOSAlert(); }
+    else if(type==='ack'){ solTone(600, 0, 0.09, 'sine', 0.15); solTone(900, 0.09, 0.12, 'sine', 0.15); }
+    else if(type==='state'){ solTone(500, 0, 0.15, 'sine', 0.12); solTone(700, 0.15, 0.12, 'sine', 0.12); }
+    else if(type==='close'){ solTone(700, 0, 0.09, 'sine', 0.15); solTone(500, 0.08, 0.13, 'sine', 0.15); }
+    else if(type==='msg'){ solTone(750, 0, 0.08, 'sine', 0.1); solTone(1000, 0.07, 0.1, 'sine', 0.1); }
   }catch(e){}
 }
 
@@ -1711,6 +1704,7 @@ let zoneDrawing=false;
 let zonePoints=[];
 let currentModalTab='info';
 let trackingTeamId=null;
+let pmaPositioning=false;
 
 /* =========================================================
    MAP
@@ -1742,6 +1736,19 @@ function onTileError(){
     }
   }
 }
+
+function startPMAPositioning(){
+  pmaPositioning=true;
+  const bar=document.getElementById('pmaHintBar');
+  if(bar) bar.classList.remove('hidden');
+  toast('🏥 Clicca sulla mappa per posizionare il PMA');
+}
+function cancelPMAPositioning(){
+  pmaPositioning=false;
+  const bar=document.getElementById('pmaHintBar');
+  if(bar) bar.classList.add('hidden');
+}
+
 function initMap(){
   if(typeof L==='undefined'){ document.getElementById('map').innerHTML='<div class="map-fallback">⚠️ Mappa non disponibile.</div>'; return; }
   map=L.map('map',{zoomControl:true}).setView([S.center.lat,S.center.lng],15);
@@ -1758,6 +1765,15 @@ function initMap(){
   groups.tracks=L.layerGroup().addTo(map);
   groups.zoneDraft=L.layerGroup().addTo(map);
   map.on('click',e=>{
+    if(pmaPositioning){
+      if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+      S.pma.lat=+e.latlng.lat.toFixed(6);
+      S.pma.lng=+e.latlng.lng.toFixed(6);
+      cancelPMAPositioning();
+      save(); render();
+      toast('🏥 Posizione PMA aggiornata');
+      return;
+    }
     if(zoneDrawing){
       zonePoints.push([e.latlng.lat,e.latlng.lng]);
       renderZoneDraft();
@@ -1835,6 +1851,7 @@ function cancelZoneDrawing(){
   updateZoneBanner();
   toast('✕ Disegno zona annullato');
 }
+
 function targetIcon(tg){
   const pending=tg.status==='in_attesa', closed=tg.status==='chiuso';
   if(pending) return L.divIcon({className:'',html:'<div class="mk-pin pending"><span class="mk-badge">⏳</span></div>',iconSize:[42,42],iconAnchor:[21,21],popupAnchor:[0,-24]});
@@ -1854,6 +1871,7 @@ function teamIcon(t){
   return L.divIcon({className:'',html:'<div class="team-pin'+sosCls+'" style="--c:'+col+'">'+type.icon+badge+crewTag+'</div>',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-23]});
 }
 function poiIcon(p){ const c=POI_CATS[p.cat]||POI_CATS.info; return L.divIcon({className:'',html:'<div class="poi-pin" style="--c:'+c.color+'"><span>'+c.icon+'</span></div>',iconSize:[30,30],iconAnchor:[15,24],popupAnchor:[0,-24]}); }
+
 function patientBlockHTML(tg){
   if(!hasPatientData(tg)) return '';
   const p=tg.patient;
@@ -1882,7 +1900,6 @@ function targetPopup(tg){
   const times=computeTimes(tg);
   if(times.t0 && times.t1) h+='<div class="pp-row"><span>⏱️ T0→T1</span><b>'+fmtDur(times.t1-times.t0)+'</b></div>';
   if(times.t1 && times.t2) h+='<div class="pp-row"><span>⏱️ T1→T2</span><b>'+fmtDur(times.t2-times.t1)+'</b></div>';
-  /* Scheda paziente */
   h+=patientBlockHTML(tg);
   const teams=targetTeams(tg);
   if(teams.length){
@@ -1950,10 +1967,26 @@ function drawSelectionLines(){
   });
   L.circleMarker([tg.lat,tg.lng],{radius:5,color:tgColor,fillColor:'#1a1a1a',fillOpacity:1,weight:2}).addTo(groups.links);
 }
+
 function renderMap(){
   if(!map) return;
   groups.targets.clearLayers(); groups.teams.clearLayers(); groups.pois.clearLayers();
   groups.links.clearLayers(); groups.zones.clearLayers(); groups.tracks.clearLayers();
+
+  /* PMA marker */
+  if(S.pma && S.pma.lat!=null && S.pma.lng!=null){
+    const open=(S.pma.patients||[]).filter(p=>p.state==='waiting'||p.state==='in_cura').length;
+    const pmaIcon=L.divIcon({className:'',
+      html:'<div class="mk-pma"><span class="ico">🏥</span><span class="lbl">PMA</span></div>',
+      iconSize:[54,54],iconAnchor:[27,27],popupAnchor:[0,-30]});
+    const mk=L.marker([S.pma.lat,S.pma.lng],{icon:pmaIcon,zIndexOffset:850,sgeType:'pma'});
+    mk.bindPopup('<div class="pp-title">🏥 '+esc(S.pma.name||'PMA')+'</div>'+
+      '<div class="pp-row"><span>Pazienti presenti</span><b>'+open+'</b></div>'+
+      '<div class="pp-row"><span>Coord.</span><b>'+S.pma.lat.toFixed(5)+', '+S.pma.lng.toFixed(5)+'</b></div>',
+      {maxWidth:280});
+    mk.addTo(groups.pois);
+  }
+
   const matchColor=code=>{ if(!filterColor) return true; return parseCode(code).color===filterColor; };
   const matchQuick=tg=>{ if(quickFilter==='all') return true; if(quickFilter==='open') return tg.status==='aperto'; if(quickFilter==='pending') return tg.status==='in_attesa'; if(quickFilter==='closed') return tg.status==='chiuso'; return true; };
   if(layerVis.targets){
@@ -2248,25 +2281,16 @@ function renderAdminList(){
   });
 }
 
-/* QR login: genera e mostra QR code per la squadra */
+/* QR login squadra (robusto) */
 function showTeamQR(teamId){
   const t=S.teams.find(x=>x.id===teamId); if(!t) return;
-  /* Costruisci URL equipaggio.html con parametri (stessa cartella) */
-  let baseUrl;
-  const path = location.pathname;
-  const file = path.split('/').pop().toLowerCase();
-  if(file === 'sol.html' || file === 'wall.html' || file === 'equipaggio.html'){
-    baseUrl = location.origin + path.substring(0, path.length - file.length) + 'equipaggio.html';
-  } else {
-    baseUrl = location.origin + path.replace(/[^/]*$/,'') + 'equipaggio.html';
-  }
+  const file = location.pathname.split('/').pop().toLowerCase();
+  const baseUrl = location.origin + location.pathname.substring(0, location.pathname.length - file.length) + 'equipaggio.html';
   const url = new URL(baseUrl);
   url.searchParams.set('room', SESSION_ROOM);
   url.searchParams.set('team', t.id);
   if(t.password) url.searchParams.set('pwd', t.password);
   const qrUrl = url.toString();
-
-  /* Generazione QR via API esterna (img) — robusto, nessuna dipendenza JS */
   const qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=12&data='+encodeURIComponent(qrUrl);
 
   let h='<div class="qr-wrap">';
@@ -2299,7 +2323,6 @@ function showTeamQR(teamId){
     }catch(e){ toast('⚠️ Errore download (offline?)'); }
   };
 }
-
 
 function renderPoiList(){
   const el=document.getElementById('poiList');
@@ -2418,37 +2441,21 @@ function renderLegend(){
 }
 
 /* =========================================================
-   PMA — Vista in SOL
+   PMA — Vista in SOL (con admin)
    ========================================================= */
-const PMA_COLORS={
-  R:{label:'Rosso',hex:'#e53935',fg:'#fff'},
-  G:{label:'Giallo',hex:'#f2c200',fg:'#2a2200'},
-  V:{label:'Verde',hex:'#2fa84f',fg:'#fff'},
-  B:{label:'Bianco',hex:'#f2f2f2',fg:'#1a1a1a'},
-  N:{label:'Nero',hex:'#1c1c1c',fg:'#fff'}
-};
-const PMA_COLOR_ORDER=['R','G','V','B','N'];
-const PMA_STATES={
-  waiting:{label:'In attesa',icon:'🕐'},
-  in_cura:{label:'In cura',icon:'🩺'},
-  dimesso:{label:'Dimesso',icon:'✅'}
-};
-
 function renderPMA(){
   const el=document.getElementById('pmaContainer');
-  if(!el)return;
-  if(!S.pma)S.pma={password:'',patients:[]};
-  if(!Array.isArray(S.pma.patients))S.pma.patients=[];
-  const pats=S.pma.patients;
+  if(!el) return;
+  if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+  const pats=S.pma.patients||[];
   const waiting=pats.filter(p=>p.state==='waiting');
   const inCura=pats.filter(p=>p.state==='in_cura');
   const open=waiting.concat(inCura);
-  const today=new Date();today.setHours(0,0,0,0);
+  const today=new Date(); today.setHours(0,0,0,0);
   const dimToday=pats.filter(p=>p.state==='dimesso'&&p.closedAt&&p.closedAt>=today.getTime());
 
-  /* Aggiorna badge accordion */
   const badge=document.getElementById('pmaBadge');
-  if(badge)badge.textContent=open.length;
+  if(badge) badge.textContent=open.length;
 
   const byColor={};
   PMA_COLOR_ORDER.forEach(k=>{byColor[k]={total:0,waiting:0,in_cura:0};});
@@ -2461,7 +2468,14 @@ function renderPMA(){
   });
 
   let h='';
-  /* KPI */
+
+  h+='<div style="display:flex;align-items:center;gap:8px;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:10px;padding:10px 12px;margin-bottom:12px">';
+  h+='<span style="font-size:20px">🏥</span>';
+  h+='<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(S.pma.name||'PMA')+'</div>';
+  h+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+(S.pma.lat!=null?('📍 '+S.pma.lat.toFixed(4)+', '+S.pma.lng.toFixed(4)):'📍 non posizionato')+'</div></div>';
+  h+='<button class="btn mini" id="pmaAdminBtn" title="Gestione PMA">⚙</button>';
+  h+='</div>';
+
   h+='<div class="pma-kpi-row">';
   h+='<div class="pma-kpi-card total"><div class="pma-kpi-v">'+open.length+'</div><div class="pma-kpi-l">Presenti</div><div class="pma-kpi-s">adesso</div></div>';
   h+='<div class="pma-kpi-card waiting"><div class="pma-kpi-v">'+waiting.length+'</div><div class="pma-kpi-l">In attesa</div><div class="pma-kpi-s">'+(open.length?Math.round(waiting.length/open.length*100):0)+'%</div></div>';
@@ -2469,7 +2483,6 @@ function renderPMA(){
   h+='<div class="pma-kpi-card discharged"><div class="pma-kpi-v">'+dimToday.length+'</div><div class="pma-kpi-l">Dimessi oggi</div><div class="pma-kpi-s">storico '+pats.length+'</div></div>';
   h+='</div>';
 
-  /* Colors with % */
   h+='<div class="pma-colors-mini">';
   PMA_COLOR_ORDER.forEach(k=>{
     const c=PMA_COLORS[k];
@@ -2484,7 +2497,6 @@ function renderPMA(){
   });
   h+='</div>';
 
-  /* Patient list (open only + recent discharged) */
   const list=open.slice().sort((a,b)=>{
     const sa=a.state==='waiting'?0:1,sb=b.state==='waiting'?0:1;
     if(sa!==sb)return sa-sb;
@@ -2501,13 +2513,13 @@ function renderPMA(){
       const c=PMA_COLORS[p.code]||PMA_COLORS.V;
       const st=PMA_STATES[p.state]||PMA_STATES.waiting;
       const cl=p.clinical||{};
-      const hasClinic=!!(cl.name||cl.surname||cl.complaint||cl.notes||cl.allergies||cl.vitals&&(cl.vitals.pa||cl.vitals.fc));
+      const hasClinic=!!(cl.age!=null||cl.complaint||cl.notes||cl.allergies||(cl.vitals&&(cl.vitals.pa||cl.vitals.fc)));
       h+='<div class="pma-patient-row" data-pid="'+p.id+'">';
       h+='<span class="pma-patient-code" style="background:'+c.hex+';color:'+c.fg+'">'+p.code+'</span>';
       h+='<span class="pma-patient-state '+p.state+'">'+st.icon+' '+st.label+'</span>';
       h+='<span class="pma-patient-id">'+(hasClinic?'🩺 ':'')+p.id.slice(-5).toUpperCase()+'</span>';
       h+='<span class="pma-patient-time">'+elapsed(p.arrivedAt)+'</span>';
-      h+='<button class="pma-clinic-btn" data-clinic="'+p.id+'" title="Apri cartella clinica">📋</button>';
+      h+='<button class="pma-clinic-btn" data-clinic="'+p.id+'" title="Cartella clinica">📋</button>';
       h+='</div>';
     });
     h+='</div>';
@@ -2515,12 +2527,10 @@ function renderPMA(){
 
   el.innerHTML=h;
 
-  /* Bind */
+  const admBtn=document.getElementById('pmaAdminBtn');
+  if(admBtn) admBtn.onclick=openPMAAdmin;
   el.querySelectorAll('.pma-clinic-btn').forEach(b=>{
-    b.onclick=(e)=>{
-      e.stopPropagation();
-      openPMAClinic(b.getAttribute('data-clinic'));
-    };
+    b.onclick=(e)=>{ e.stopPropagation(); openPMAClinic(b.getAttribute('data-clinic')); };
   });
   el.querySelectorAll('.pma-patient-row').forEach(row=>{
     row.onclick=()=>openPMAClinic(row.getAttribute('data-pid'));
@@ -2531,26 +2541,24 @@ function openPMAClinic(id){
   if(!S.pma||!Array.isArray(S.pma.patients))return;
   const p=S.pma.patients.find(x=>x.id===id);
   if(!p)return;
-  if(!confirm('⚠️ DATI SENSIBILI\n\nStai per aprire la cartella clinica del paziente.\nQuesta informazione è protetta e visibile solo al personale autorizzato.\n\nProcedere?'))return;
+  if(!confirm('⚠️ DATI CLINICI SENSIBILI\n\nStai per aprire la cartella clinica del paziente.\nVisibile solo al personale autorizzato.\n\nProcedere?'))return;
 
   const c=PMA_COLORS[p.code]||PMA_COLORS.V;
   const st=PMA_STATES[p.state]||PMA_STATES.waiting;
   const cl=p.clinical||{};
   const v=cl.vitals||{};
-  const age=cl.birthYear?((new Date()).getFullYear()-cl.birthYear):null;
 
   let h='';
-  h+='<div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.5;color:#c4b5fd">🔒 <b>Dati protetti</b> — visibile solo a SOL e PMA. Non registrare, non fotografare.</div>';
-  h+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">';
+  h+='<div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.5;color:#c4b5fd">🔒 <b>Dati clinici protetti</b> — per privacy non sono disponibili nome e cognome. Solo età, parametri vitali, stato e note sono condivisi dalla postazione PMA.</div>';
+
+  h+='<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">';
   h+='<span style="font-size:18px;font-weight:900;padding:6px 14px;border-radius:10px;background:'+c.hex+';color:'+c.fg+'">'+p.code+'</span>';
   h+='<span class="pma-patient-state '+p.state+'" style="font-size:11px;padding:4px 10px">'+st.icon+' '+st.label+'</span>';
   h+='<span style="margin-left:auto;font-size:12px;color:var(--muted);font-weight:700">ID '+p.id.slice(-5).toUpperCase()+' · '+elapsed(p.arrivedAt)+'</span>';
   h+='</div>';
 
   h+='<div class="pma-clinic-grid">';
-  h+='<div class="pma-clinic-cell"><div class="lbl">Cognome</div><div class="val">'+esc(cl.surname||'—')+'</div></div>';
-  h+='<div class="pma-clinic-cell"><div class="lbl">Nome</div><div class="val">'+esc(cl.name||'—')+'</div></div>';
-  h+='<div class="pma-clinic-cell"><div class="lbl">Età</div><div class="val">'+(age?('~'+age+' anni'+(cl.birthYear?' ('+cl.birthYear+')':'')):'—')+'</div></div>';
+  h+='<div class="pma-clinic-cell"><div class="lbl">Età</div><div class="val">'+(cl.age!=null?('~'+cl.age+' anni'):'—')+'</div></div>';
   h+='<div class="pma-clinic-cell"><div class="lbl">Sesso</div><div class="val">'+esc(cl.sex||'—')+'</div></div>';
   h+='</div>';
 
@@ -2583,6 +2591,90 @@ function openPMAClinic(id){
   openModal('📋 Cartella clinica — '+p.code+' · ID '+p.id.slice(-5).toUpperCase(),h);
 }
 
+function openPMAAdmin(){
+  if(!S.pma) S.pma={password:'',name:'PMA',lat:null,lng:null,patients:[]};
+  let h='';
+  h+='<div class="info" style="margin:0 0 14px">⚙️ <b>Gestione PMA</b> — configurazione riservata alla Centrale Operativa.</div>';
+  h+='<div class="field"><label>Nome PMA</label><input type="text" id="pmaNameInp" value="'+esc(S.pma.name||'PMA')+'" placeholder="es. PMA Nord — Palco A"></div>';
+  h+='<div class="field"><label>🔒 Password di accesso PMA</label>';
+  h+='<div class="pwd-row"><input type="password" id="pmaPwdInp" value="'+esc(S.pma.password||'')+'" placeholder="vuoto = nessuna"><button type="button" class="pwd-toggle" id="pmaPwdToggle">👁️</button></div>';
+  h+='<div class="pwd-hint">Se impostata, chi apre la pagina PMA dovrà inserire questa password. Comunicala solo al personale sanitario autorizzato.</div></div>';
+  h+='<div class="field"><label>📍 Posizione sulla mappa</label>';
+  h+='<div class="info" style="margin:0 0 8px">'+(S.pma.lat!=null?('Attuale: <b>'+S.pma.lat.toFixed(5)+', '+S.pma.lng.toFixed(5)+'</b>'):'<b>Non posizionato</b>')+'</div>';
+  h+='<button class="btn block" id="pmaPosBtn">📍 Posiziona cliccando sulla mappa</button>';
+  if(S.pma.lat!=null) h+='<button class="btn danger block" id="pmaPosClearBtn" style="margin-top:8px">🗑 Rimuovi posizione</button>';
+  h+='</div>';
+  h+='<div class="field"><label>📱 QR di accesso PMA</label>';
+  h+='<button class="btn primary block" id="pmaQRBtn">📱 Mostra QR Login PMA</button>';
+  h+='<div class="pwd-hint">Genera un QR che apre direttamente la pagina PMA con la password precompilata (solo se hai impostato una password).</div></div>';
+  h+='<div class="field"><label>🚀 Apri pagina PMA</label>';
+  h+='<button class="btn block" id="pmaOpenFromAdmin">🖥️ Apri pagina PMA in nuova finestra</button></div>';
+  h+='<div class="row" style="margin-top:16px"><button class="btn ghost" id="pmaAdminCancel">Annulla</button><button class="btn primary" id="pmaAdminSave">✓ Salva</button></div>';
+
+  openModal('⚙️ Gestione PMA',h);
+
+  const pwdInp=document.getElementById('pmaPwdInp');
+  document.getElementById('pmaPwdToggle').onclick=()=>{
+    pwdInp.type=pwdInp.type==='password'?'text':'password';
+    document.getElementById('pmaPwdToggle').textContent=pwdInp.type==='password'?'👁️':'🙈';
+  };
+  document.getElementById('pmaAdminCancel').onclick=closeModal;
+  document.getElementById('pmaOpenFromAdmin').onclick=()=>{
+    const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
+    window.open(url,'_blank');
+  };
+  document.getElementById('pmaPosBtn').onclick=()=>{
+    closeModal();
+    switchView('sala');
+    startPMAPositioning();
+  };
+  const clearBtn=document.getElementById('pmaPosClearBtn');
+  if(clearBtn) clearBtn.onclick=()=>{
+    if(!confirm('Rimuovere la posizione del PMA dalla mappa?')) return;
+    S.pma.lat=null; S.pma.lng=null;
+    save(); render(); closeModal();
+    toast('📍 Posizione PMA rimossa');
+  };
+  document.getElementById('pmaQRBtn').onclick=()=>showPMAQR();
+  document.getElementById('pmaAdminSave').onclick=()=>{
+    S.pma.name=document.getElementById('pmaNameInp').value.trim()||'PMA';
+    S.pma.password=pwdInp.value||'';
+    save(); render(); closeModal();
+    toast('✓ Configurazione PMA salvata');
+  };
+}
+
+function showPMAQR(){
+  if(!S.pma) return;
+  const file=location.pathname.split('/').pop().toLowerCase();
+  const base=location.origin+location.pathname.substring(0,location.pathname.length-file.length)+'PMA.html';
+  const url=new URL(base);
+  url.searchParams.set('room', SESSION_ROOM);
+  if(S.pma.password) url.searchParams.set('pwd', S.pma.password);
+  const qrUrl=url.toString();
+  const qrApiUrl='https://api.qrserver.com/v1/create-qr-code/?size=380x380&margin=14&data='+encodeURIComponent(qrUrl);
+
+  let h='<div style="text-align:center">';
+  h+='<div style="font-size:13px;color:var(--muted);margin-bottom:12px">Inquadra con il tablet/PC della postazione PMA</div>';
+  h+='<img src="'+qrApiUrl+'" crossorigin="anonymous" style="background:#fff;padding:12px;border-radius:12px;width:340px;height:340px;max-width:100%">';
+  h+='<div style="font-family:monospace;font-size:10.5px;color:var(--muted);word-break:break-all;background:#1e1e1e;padding:10px;border-radius:8px;margin-top:12px;text-align:left">'+esc(qrUrl)+'</div>';
+  h+='<div class="row" style="margin-top:12px"><button class="btn ghost" id="pmaQrCopy">📋 Copia link</button><button class="btn primary" id="pmaQrDl">⬇️ Scarica PNG</button></div>';
+  h+='<div class="warn" style="text-align:left;margin-top:12px">⚠️ '+(S.pma.password?'Il link contiene la password PMA in chiaro.':'Non hai impostato una password: chi ottiene il link entra direttamente.')+'</div>';
+  h+='</div>';
+  openModal('📱 QR Login — '+(S.pma.name||'PMA'), h);
+
+  document.getElementById('pmaQrCopy').onclick=()=>{
+    navigator.clipboard.writeText(qrUrl).then(()=>toast('📋 Link copiato')).catch(()=>prompt('Copia:',qrUrl));
+  };
+  document.getElementById('pmaQrDl').onclick=async ()=>{
+    try{
+      const r=await fetch(qrApiUrl); const b=await r.blob();
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b); a.download='sge_pma_qr.png'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    }catch(e){ toast('⚠️ Errore download'); }
+  };
+}
 
 /* =========================================================
    TAB BADGES
@@ -2849,7 +2941,6 @@ function generateHandover(){
     lines.push('     Attivo da '+elapsed(tg.activatedAt)+' · Squadre: '+teams);
     const t=computeTimes(tg);
     if(t.t1&&t.t2) lines.push('     Tempo sul posto: '+fmtDur(t.t2-t.t1));
-    /* Scheda paziente */
     if(hasPatientData(tg)){
       const p=tg.patient;
       lines.push('     🩺 PAZIENTE:');
@@ -2879,6 +2970,56 @@ function generateHandover(){
   if(!bcs.length) lines.push('   Nessuno.');
   else bcs.slice(-3).forEach(b=>lines.push('   · '+fmtDateTime(b.ts)+' — '+b.text));
   lines.push('');
+
+  /* ===== PMA ===== */
+  lines.push('🏥 PMA — POSTAZIONE MEDICA AVANZATA');
+  if(!S.pma || !S.pma.patients || !S.pma.patients.length){
+    lines.push('   Nessun paziente registrato.');
+  } else {
+    const pma=S.pma;
+    const pats=pma.patients;
+    const waiting=pats.filter(p=>p.state==='waiting');
+    const inCura=pats.filter(p=>p.state==='in_cura');
+    const today=new Date(); today.setHours(0,0,0,0);
+    const dimToday=pats.filter(p=>p.state==='dimesso'&&p.closedAt&&p.closedAt>=today.getTime());
+    lines.push('   Nome postazione: '+(pma.name||'PMA'));
+    if(pma.lat!=null) lines.push('   Posizione: '+pma.lat.toFixed(5)+', '+pma.lng.toFixed(5));
+    lines.push('   Presenti adesso: '+(waiting.length+inCura.length)+'  (in attesa: '+waiting.length+' · in cura: '+inCura.length+')');
+    lines.push('   Dimessi oggi: '+dimToday.length+'  ·  Storico totale: '+pats.length);
+
+    const byC={R:0,G:0,V:0,B:0,N:0};
+    waiting.concat(inCura).forEach(p=>{ if(byC[p.code]!=null) byC[p.code]++; });
+    const open=waiting.length+inCura.length;
+    lines.push('   Codici presenti:  R:'+byC.R+'  G:'+byC.G+'  V:'+byC.V+'  B:'+byC.B+'  N:'+byC.N+(open?'  ('+byC.R+'/'+open+' rosso)':''));
+
+    if(open){
+      lines.push('');
+      lines.push('   Pazienti in carico (dati clinici protetti):');
+      waiting.concat(inCura).sort((a,b)=>(a.arrivedAt||0)-(b.arrivedAt||0)).forEach(p=>{
+        const cl=p.clinical||{};
+        const v=cl.vitals||{};
+        const bits=[];
+        if(cl.age!=null) bits.push(cl.age+'a');
+        if(cl.sex) bits.push(cl.sex);
+        if(cl.complaint) bits.push('motivo: '+cl.complaint);
+        if(cl.allergies) bits.push('allergie: '+cl.allergies);
+        const vit=[];
+        if(v.pa) vit.push('PA '+v.pa);
+        if(v.fc) vit.push('FC '+v.fc);
+        if(v.spo2) vit.push('SpO2 '+v.spo2+'%');
+        if(v.temp) vit.push('T '+v.temp);
+        if(v.gcs) vit.push('GCS '+v.gcs);
+        if(vit.length) bits.push('('+vit.join(', ')+')');
+        const stateIcon=p.state==='waiting'?'🕐':'🩺';
+        lines.push('      · '+p.code+' '+p.id.slice(-5).toUpperCase()+' '+stateIcon+' '+stateLabel(p.state)+
+                   ' · presente da '+elapsed(p.arrivedAt));
+        if(bits.length) lines.push('        '+bits.join(' · '));
+        if(cl.notes) lines.push('        Note: '+cl.notes.replace(/\s+/g,' ').slice(0,200));
+      });
+    }
+  }
+  lines.push('');
+
   lines.push('═══════════════════════════════════════');
   lines.push('  Note aggiuntive:');
   lines.push('  ____________________________________');
@@ -3091,7 +3232,6 @@ function renderTeamModal(id){
       const eta=etaText(t,tg); if(eta) h+='<div class="info" style="margin-bottom:10px">🚗 Distanza: <b>'+eta+'</b></div>';
       if(tg&&tg.teamIds&&tg.teamIds.length>1){ const others=tg.teamIds.filter(x=>x!==t.id).map(x=>S.teams.find(s=>s.id===x)).filter(Boolean); h+='<div class="info" style="margin-bottom:10px">🚑 Sul target anche: <b>'+esc(others.map(o=>o.name).join(', '))+'</b></div>'; }
       const ack=ackStatus(t); if(ack) h+='<div class="info" style="margin-bottom:10px">Conferma: <b style="color:'+ack.color+'">'+ack.label+'</b></div>';
-      /* Scheda paziente */
       if(tg && hasPatientData(tg)){
         const p=tg.patient;
         h+='<div class="patient-view"><h4>🩺 Scheda paziente'+(p.ts?' · '+fmtTime(p.ts):'')+(p.by?' · da '+esc(p.by):'')+'</h4>';
@@ -3389,7 +3529,7 @@ searchInput.addEventListener('input',()=>renderSearchResults(searchInput.value))
 searchModal.addEventListener('click',e=>{ if(e.target===searchModal) hideSearch(); });
 
 /* =========================================================
-   EXPORT CSV — include scheda paziente
+   EXPORT CSV
    ========================================================= */
 function exportCSV(){
   const rows=[['Codice','Ambiente','Patologia','Colore','Indirizzo','Stato','Attivazione','Assegnazione','Chiusura','Squadre','Cod. Rientro','Note','Conferma','T0','T1','T2','T3','Pt_Età','Pt_Sesso','Pt_AVPU','Pt_Motivo','Pt_Note','Pt_By','Pt_TS']];
@@ -3566,7 +3706,6 @@ function startZoneDrawing(){
   updateZoneBanner();
   toast('📍 Clicca sulla mappa per aggiungere vertici · doppio click o Salva per chiudere');
 }
-
 function saveZone(){
   if(zonePoints.length<3){ alert('Servono almeno 3 punti per creare una zona.'); return; }
   const nameInp=document.getElementById('zoneName');
@@ -3656,12 +3795,6 @@ document.getElementById('addTeamBtn').onclick=()=>editTeam(null);
 document.getElementById('exportBtn').onclick=exportCSV;
 document.getElementById('handoverBtn').onclick=openHandoverModal;
 document.getElementById('configBtn').onclick=openConfigModal;
-
-/* 🏥 Apri pagina PMA in nuova scheda */
-document.getElementById('pmaTopBtn').onclick=()=>{
-  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
-  window.open(url,'_blank');
-};
 document.getElementById('printReportBtn').onclick=printReport;
 document.getElementById('refreshDashBtn').onclick=renderDashboard;
 document.getElementById('zoneStartBtn').onclick=startZoneDrawing;
@@ -3717,6 +3850,7 @@ document.getElementById('broadcastSendBtn').onclick=()=>{
 };
 document.getElementById('broadcastInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('broadcastSendBtn').click(); } });
 
+/* PMA bindings */
 document.getElementById('pmaOpenBtn').onclick=()=>{
   const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
   window.open(url,'_blank');
@@ -3725,6 +3859,11 @@ document.getElementById('pmaRefreshBtn').onclick=()=>{
   const v=localStorage.getItem(KEY);
   if(v){ try{applyRemoteState(JSON.parse(v));}catch(e){} }
   renderPMA();
+};
+document.getElementById('pmaHintCancel').onclick=cancelPMAPositioning;
+document.getElementById('pmaTopBtn').onclick=()=>{
+  const url=location.origin+location.pathname.replace(/[^/]*$/,'')+'PMA.html?room='+SESSION_ROOM;
+  window.open(url,'_blank');
 };
 
 /* =========================================================
@@ -3735,6 +3874,7 @@ document.addEventListener('keydown',e=>{
   const isInput=tag==='input'||tag==='textarea'||tag==='select';
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); showSearch(); return; }
   if(e.key==='Escape'){
+    if(pmaPositioning){ e.preventDefault(); cancelPMAPositioning(); return; }
     if(zoneDrawing){ e.preventDefault(); cancelZoneDrawing(); return; }
     if(!searchModal.classList.contains('hidden')){ hideSearch(); return; }
     return;
@@ -3822,7 +3962,9 @@ window.SGE={
   },
   focusTarget:function(id){ const tg=S.targets.find(x=>x.id===id); if(tg&&map){ map.flyTo([tg.lat,tg.lng],18,{duration:.6}); setTimeout(()=>{ const mk=findTargetMarker(id); if(mk) mk.openPopup(); },700); } },
   focusTeam:function(id){ const t=S.teams.find(x=>x.id===id); if(t&&map){ map.flyTo([t.lat,t.lng],18,{duration:.6}); setTimeout(()=>{ if(groups.teams){ let mk=null; groups.teams.eachLayer(l=>{ if(l.options && l.options.sgeId===id) mk=l; }); if(mk) mk.openPopup(); } },700); } },
-  showTeamQR: showTeamQR
+  showTeamQR: showTeamQR,
+  showPMAAdmin: openPMAAdmin,
+  showPMAQR: showPMAQR
 };
 
 /* =========================================================
@@ -3830,7 +3972,7 @@ window.SGE={
    ========================================================= */
 function tickClock(){ const d=new Date(); document.getElementById('clock').textContent=d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})+'  '+d.toLocaleTimeString('it-IT'); }
 tickClock(); setInterval(tickClock,1000);
-setInterval(()=>{ if(document.getElementById('view-sala').classList.contains('hidden')) return; if(modal.classList.contains('hidden')) { renderOpsList(); renderBoard(); } },30000);
+setInterval(()=>{ if(document.getElementById('view-sala').classList.contains('hidden')) return; if(modal.classList.contains('hidden')) { renderOpsList(); renderBoard(); renderPMA(); } },30000);
 
 /* =========================================================
    RENDER MASTER + INIT
@@ -3874,6 +4016,7 @@ updateSolEqBadge();
 updateTabBadges();
 
 if('Notification' in window && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); }
+
 /* ===== MULTI-OPERATORE INIT ===== */
 ensureOpIdentity();
 (function bindOpBtn(){
